@@ -5,6 +5,7 @@ import { ReactNode, useRef, useState } from 'react'
 import List from '@mui/material/List'
 import Box, { BoxProps } from '@mui/material/Box'
 import { styled, useTheme } from '@mui/material/styles'
+import AddIcon from '@mui/icons-material/Add'
 
 // ** Third Party Components
 import PerfectScrollbar from 'react-perfect-scrollbar'
@@ -20,6 +21,7 @@ import VerticalNavHeader from './VerticalNavHeader'
 
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
+import { Button } from '@mui/material'
 
 interface Props {
   hidden: boolean
@@ -113,6 +115,14 @@ const Navigation = (props: Props) => {
           )} 95%,${hexToRGBA(theme.palette.background.default, 0.05)})`
         }}
       />
+      <Button
+        sx={{ margin: '30px' }}
+        variant='outlined'
+        startIcon={<AddIcon />}
+        onClick={() => alert('Navigate to Create Page')}
+      >
+        Create
+      </Button>
       <Box sx={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
         {/* @ts-ignore */}
         <ScrollWrapper
