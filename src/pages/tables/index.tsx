@@ -13,9 +13,68 @@ import TableCustomized from 'src/views/tables/TableCustomized'
 import TableCollapsible from 'src/views/tables/TableCollapsible'
 import TableStickyHeader from 'src/views/tables/TableStickyHeader'
 
+import ReactDataSheet from 'react-datasheet'
+import 'react-datasheet/lib/react-datasheet.css'
+import { Button } from '@mui/material'
+
 const MUITable = () => {
+  const grid = [
+    [
+      {
+        value: 'Excel Row'
+      },
+      {
+        value: 'Value 1'
+      },
+      {
+        value: 'Value 2'
+      },
+      {
+        value: 'Value 3',
+        component: <button onClick={() => console.log('clicked')}>Rendered</button>
+      },
+      {
+        value: 65,
+        component: (
+          <Button
+            variant='text'
+            onMouseEnter={() => {
+              const img = document.getElementById('anImage')
+              img?.setAttribute(
+                'src',
+                'https://media.istockphoto.com/id/486242045/vector/sample-red-3d-realistic-paper-speech-bubble-isolated-on-white.jpg?s=612x612&w=0&k=20&c=H7a_5jtJvmrr_VtdvHpb4C8D4BLue9Hr1IlTvtG_Khw='
+              )
+            }}
+            onMouseLeave={() => {
+              const img = document.getElementById('anImage')
+              img?.setAttribute('src', '')
+            }}
+          >
+            Hover this cell to show attachment preview
+          </Button>
+        )
+      }
+    ]
+  ]
+
   return (
     <Grid container spacing={6}>
+      <Grid item xs={12}>
+        <Typography variant='h5'>
+          <Link href='https://mui.com/components/tables/' target='_blank'>
+            React-DataSheet
+          </Link>
+        </Typography>
+      </Grid>
+      <Grid item xs={12} style={{ marginLeft: '50px' }}>
+        <ReactDataSheet
+          data={grid}
+          valueRenderer={cell => {
+            return cell.value === 65 ? cell.component : cell.value
+          }}
+        />
+      </Grid>
+      <img id='anImage' style={{ position: 'fixed', top: '100px', right: '100px' }} />
       <Grid item xs={12}>
         <Typography variant='h5'>
           <Link href='https://mui.com/components/tables/' target='_blank'>
