@@ -137,7 +137,7 @@ const CreateSupportPackage = () => {
               <Grid item xs={12} sm={4}>
                 <TextField fullWidth type='number' label='Support Number' placeholder='R32938' />
               </Grid>
-              <Grid item xs={12} sm={2}>
+              <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePickerWrapper>
                     <DatePicker
@@ -145,12 +145,12 @@ const CreateSupportPackage = () => {
                       inputFormat='MM/DD/YYYY'
                       value={values.date}
                       onChange={handleChange}
-                      renderInput={params => <TextField {...params} />}
+                      renderInput={params => <TextField fullWidth {...params} />}
                     />
                   </DatePickerWrapper>
                 </LocalizationProvider>
               </Grid>
-              <Grid item xs={12} sm={10}>
+              <Grid item xs={12} sm={8}>
                 <FormControl fullWidth>
                   <Autocomplete
                     multiple

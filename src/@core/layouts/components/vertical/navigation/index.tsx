@@ -122,7 +122,7 @@ const Navigation = (props: Props) => {
         sx={{ margin: '30px' }}
         variant='outlined'
         startIcon={<AddIcon />}
-        onClick={() => router.push('next-clerk/support-package/create')}
+        onClick={() => router.push('/next-clerk/support-package/create')}
       >
         Create
       </Button>

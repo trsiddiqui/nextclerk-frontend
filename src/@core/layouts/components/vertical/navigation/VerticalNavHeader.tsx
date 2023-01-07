@@ -10,6 +10,7 @@ import { styled } from '@mui/material/styles'
 
 // ** Type Import
 import { Settings } from 'src/@core/context/settingsContext'
+import { useSettings } from 'src/@core/hooks/useSettings'
 
 interface Props {
   hidden: boolean
@@ -33,12 +34,14 @@ const StyledLink = styled('a')({
   display: 'flex',
   alignItems: 'center',
   textDecoration: 'none',
-  marginTop: 10
+  marginTop: 30
 })
 
 const VerticalNavHeader = (props: Props) => {
   // ** Props
   const { verticalNavMenuBranding: userVerticalNavMenuBranding } = props
+
+  const { settings } = useSettings()
 
   return (
     <MenuHeaderWrapper className='nav-header' sx={{ pl: 6 }}>
@@ -47,7 +50,11 @@ const VerticalNavHeader = (props: Props) => {
       ) : (
         <Link href='/' passHref>
           <StyledLink>
-            <img src='/images/logos/nextclerk.png' style={{ width: '100%' }} alt='Next Clerk' />
+            {settings.mode === 'light' ? (
+              <img src='/images/logos/nextclerk.png' style={{ width: '100%' }} alt='Next Clerk' />
+            ) : (
+              <img src='/images/logos/nextclerk-inverted.png' style={{ width: '100%' }} alt='Next Clerk' />
+            )}
           </StyledLink>
         </Link>
       )}
