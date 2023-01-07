@@ -18,13 +18,10 @@ import {
   Autocomplete,
   Avatar,
   Box,
-  Chip,
   FormControlLabel,
   IconButton,
   InputAdornment,
   Link,
-  MenuItem,
-  Select,
   Switch,
   Tab,
   Tabs,
@@ -36,17 +33,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
 import SendIcon from '@mui/icons-material/Send'
-import AttachFileIcon from '@mui/icons-material/AttachFile'
-import DownloadIcon from '@mui/icons-material/Download'
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-import GridOnIcon from '@mui/icons-material/GridOn'
 
 interface State {
   name: string
   allCategories: { label: string; id: string }[]
   date: Dayjs | null
   tab: number
-  commentsSortedBy: string
 }
 
 interface TabPanelProps {
@@ -99,8 +91,7 @@ const CreateSupportPackage = () => {
       }
     ],
     date: dayjs(),
-    tab: 0,
-    commentsSortedBy: 'dateAsc'
+    tab: 0
   })
 
   // Handle Password
@@ -138,14 +129,14 @@ const CreateSupportPackage = () => {
                   label='Support Name'
                   placeholder='Name of Support Package'
                   onChange={handleStateChange('name')}
-                  variant='filled'
+                  variant='standard'
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <TextField fullWidth label='Support Period' placeholder='Q1 2022' variant='filled' />
+                <TextField fullWidth label='Support Period' placeholder='Q1 2022' variant='standard' />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <TextField fullWidth type='number' label='Support Number' placeholder='R32938' variant='filled' />
+                <TextField fullWidth type='number' label='Support Number' placeholder='R32938' variant='standard' />
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -155,7 +146,7 @@ const CreateSupportPackage = () => {
                       inputFormat='MM/DD/YYYY'
                       value={values.date}
                       onChange={handleChange}
-                      renderInput={params => <TextField variant='filled' fullWidth {...params} />}
+                      renderInput={params => <TextField variant='standard' fullWidth {...params} />}
                     />
                   </DatePickerWrapper>
                 </LocalizationProvider>
@@ -169,7 +160,7 @@ const CreateSupportPackage = () => {
                     getOptionLabel={option => option.label}
                     filterSelectedOptions
                     renderInput={params => (
-                      <TextField variant='filled' {...params} label='Select Tag(s)' placeholder='Tag(s)' />
+                      <TextField variant='standard' {...params} label='Select Tag(s)' placeholder='Tag(s)' />
                     )}
                   />
                 </FormControl>
@@ -181,7 +172,7 @@ const CreateSupportPackage = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField
-                  variant='filled'
+                  variant='standard'
                   fullWidth
                   label='Journal Number'
                   placeholder='Name of Support Package'
@@ -189,7 +180,7 @@ const CreateSupportPackage = () => {
                 />
               </Grid>
               <Grid item xs={12} sm={8}>
-                <TextField variant='filled' fullWidth label='Labels' placeholder='Assign Labels' />
+                <TextField variant='standard' fullWidth label='Labels' placeholder='Assign Labels' />
               </Grid>
               <Grid item xs={12}>
                 <Typography variant='body2' sx={{ fontWeight: 600 }}>
@@ -246,15 +237,11 @@ const CreateSupportPackage = () => {
                       id='outlined-multiline-flexible'
                       label='Comments'
                       multiline
-                      variant='filled'
+                      variant='standard'
                       maxRows={4}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position='end'>
-                            <IconButton color='primary'>
-                              <AttachFileIcon />
-                            </IconButton>
-
                             <IconButton edge='end' color='primary'>
                               <SendIcon />
                             </IconButton>
@@ -266,22 +253,7 @@ const CreateSupportPackage = () => {
                 </Card>
               </Grid>
               <Card style={{ padding: '40px 20px' }}>
-                <Grid container justifyContent='flex-end' spacing={3} xs={12} sm={12}>
-                  <Select
-                    labelId='demo-simple-select-label'
-                    id='demo-simple-select'
-                    value={values.commentsSortedBy}
-                    label='Sort By'
-                    placeholder='Sort By'
-                    onChange={event => {
-                      setValues({ ...values, commentsSortedBy: event.target.value })
-                    }}
-                  >
-                    <MenuItem value={'dateAsc'}>Earliest First</MenuItem>
-                    <MenuItem value={'dateDesc'}>Latest First</MenuItem>
-                  </Select>
-                </Grid>
-                <Grid container spacing={2}>
+                <Grid container wrap='nowrap' spacing={2}>
                   <Grid item>
                     <Avatar alt='Remy Sharp'>RS</Avatar>
                   </Grid>
@@ -295,35 +267,7 @@ const CreateSupportPackage = () => {
                       Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi
                       vehicula urna, nec feugiat quam lectus vitae ex.{' '}
                     </p>
-                    <p style={{ textAlign: 'left', color: 'gray' }}>
-                      12th December, 2022 1:23PM
-                      <Chip
-                        label='Attachment1'
-                        color='primary'
-                        avatar={
-                          <Avatar color='secondary'>
-                            <PictureAsPdfIcon />
-                          </Avatar>
-                        }
-                        onClick={() => alert('Download This')}
-                        onDelete={() => alert('Download This')}
-                        deleteIcon={<DownloadIcon />}
-                        sx={{ marginLeft: 2 }}
-                      />
-                      <Chip
-                        label='Attachment2'
-                        color='primary'
-                        avatar={
-                          <Avatar color='secondary'>
-                            <GridOnIcon />
-                          </Avatar>
-                        }
-                        onClick={() => alert('Download This')}
-                        onDelete={() => alert('Download This')}
-                        deleteIcon={<DownloadIcon />}
-                        sx={{ marginLeft: 2 }}
-                      />
-                    </p>
+                    <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
                   </Grid>
                 </Grid>
                 <Divider variant='fullWidth' style={{ margin: '30px 0' }} />
