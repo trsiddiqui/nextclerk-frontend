@@ -44,16 +44,20 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 import DownloadIcon from '@mui/icons-material/Download'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import LinkIcon from '@mui/icons-material/Link'
+import TableCollapsible from 'src/views/tables/TableCollapsible'
+import TableCustomized from 'src/views/tables/TableCustomized'
 
 const modalStyle = {
   position: 'absolute' as const,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+
+  // width: 400,
   bgcolor: 'background.paper',
   boxShadow: 24,
-  p: 4,
+
+  // p: 4,
   borderRadius: '5px'
 }
 
@@ -386,27 +390,41 @@ const CreateSupportPackage = () => {
         aria-describedby='modal-modal-personnel'
       >
         <Box sx={modalStyle}>
-          <Typography id='modal-modal-personnel' variant='h6' component='h2'>
-            Select a Personnel
-          </Typography>
-          <Typography id='modal-modal-personnel' sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-          </Typography>
+          <Card>
+            <CardHeader title='Select a Personnel' sx={{ textAlign: 'center' }}></CardHeader>
+            <CardContent>
+              <TableCustomized />
+            </CardContent>
+            <CardActions>
+              <Grid container justifyContent='flex-end'>
+                <Button size='large' type='submit' variant='contained' onClick={handlePersonnelModalClose}>
+                  Close
+                </Button>
+              </Grid>
+            </CardActions>
+          </Card>
         </Box>
       </Modal>
       <Modal
         open={journalModalOpen}
         onClose={handleJournalModalClose}
-        aria-labelledby='modal-modal-personnel'
-        aria-describedby='modal-modal-personnel'
+        aria-labelledby='modal-modal-journal'
+        aria-describedby='modal-modal-journal'
       >
         <Box sx={modalStyle}>
-          <Typography id='modal-modal-personnel' variant='h6' component='h2'>
-            Select a Journal Entry
-          </Typography>
-          <Typography id='modal-modal-personnel' sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-          </Typography>
+          <Card>
+            <CardHeader title='Select a Journal Entry' sx={{ textAlign: 'center' }}></CardHeader>
+            <CardContent>
+              <TableCollapsible />
+            </CardContent>
+            <CardActions>
+              <Grid container justifyContent='flex-end'>
+                <Button size='large' type='submit' variant='contained' onClick={handleJournalModalClose}>
+                  Close
+                </Button>
+              </Grid>
+            </CardActions>
+          </Card>
         </Box>
       </Modal>
     </Grid>

@@ -9,7 +9,6 @@ import Collapse from '@mui/material/Collapse'
 import TableRow from '@mui/material/TableRow'
 import TableHead from '@mui/material/TableHead'
 import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import TableContainer from '@mui/material/TableContainer'
@@ -17,6 +16,7 @@ import TableContainer from '@mui/material/TableContainer'
 // ** Icons Imports
 import ChevronUp from 'mdi-material-ui/ChevronUp'
 import ChevronDown from 'mdi-material-ui/ChevronDown'
+import { Link, styled, TableCell, tableCellClasses, TableCellProps } from '@mui/material'
 
 const createData = (name: string, calories: number, fat: number, carbs: number, protein: number, price: number) => {
   return {
@@ -41,6 +41,16 @@ const createData = (name: string, calories: number, fat: number, carbs: number, 
   }
 }
 
+const StyledTableCell = styled(TableCell)<TableCellProps>(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    color: theme.palette.common.white,
+    backgroundColor: theme.palette.common.black
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14
+  }
+}))
+
 const Row = (props: { row: ReturnType<typeof createData> }) => {
   // ** Props
   const { row } = props
@@ -51,51 +61,56 @@ const Row = (props: { row: ReturnType<typeof createData> }) => {
   return (
     <Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell>
+        <StyledTableCell>
+          <Link href='#'>Select</Link>
+        </StyledTableCell>
+        <StyledTableCell component='th' scope='row'>
+          {row.name}
+        </StyledTableCell>
+        <StyledTableCell align='right'>{row.calories}</StyledTableCell>
+        <StyledTableCell align='right'>{row.fat}</StyledTableCell>
+        <StyledTableCell align='right'>{row.carbs}</StyledTableCell>
+        <StyledTableCell align='right'>{row.protein}</StyledTableCell>
+        <StyledTableCell>
           <IconButton aria-label='expand row' size='small' onClick={() => setOpen(!open)}>
             {open ? <ChevronUp /> : <ChevronDown />}
           </IconButton>
-        </TableCell>
-        <TableCell component='th' scope='row'>
-          {row.name}
-        </TableCell>
-        <TableCell align='right'>{row.calories}</TableCell>
-        <TableCell align='right'>{row.fat}</TableCell>
-        <TableCell align='right'>{row.carbs}</TableCell>
-        <TableCell align='right'>{row.protein}</TableCell>
+        </StyledTableCell>
       </TableRow>
       <TableRow>
-        <TableCell colSpan={6} sx={{ py: '0 !important' }}>
-          <Collapse in={open} timeout='auto' unmountOnExit>
+        <StyledTableCell colSpan={7} sx={{ py: '0 !important' }}>
+          <Collapse in={open} timeout='auto' unmountOnExit radioGroup='abc'>
             <Box sx={{ m: 2 }}>
               <Typography variant='h6' gutterBottom component='div'>
-                History
+                Line Items
               </Typography>
               <Table size='small' aria-label='purchases'>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell align='right'>Amount</TableCell>
-                    <TableCell align='right'>Total price ($)</TableCell>
+                    <StyledTableCell>Date</StyledTableCell>
+                    <StyledTableCell>Customer</StyledTableCell>
+                    <StyledTableCell align='right'>Amount</StyledTableCell>
+                    <StyledTableCell align='right'>Total price ($)</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {row.history.map(historyRow => (
                     <TableRow key={historyRow.date}>
-                      <TableCell component='th' scope='row'>
+                      <StyledTableCell component='th' scope='row'>
                         {historyRow.date}
-                      </TableCell>
-                      <TableCell>{historyRow.customerId}</TableCell>
-                      <TableCell align='right'>{historyRow.amount}</TableCell>
-                      <TableCell align='right'>{Math.round(historyRow.amount * row.price * 100) / 100}</TableCell>
+                      </StyledTableCell>
+                      <StyledTableCell>{historyRow.customerId}</StyledTableCell>
+                      <StyledTableCell align='right'>{historyRow.amount}</StyledTableCell>
+                      <StyledTableCell align='right'>
+                        {Math.round(historyRow.amount * row.price * 100) / 100}
+                      </StyledTableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </Box>
           </Collapse>
-        </TableCell>
+        </StyledTableCell>
       </TableRow>
     </Fragment>
   )
@@ -115,12 +130,13 @@ const TableCollapsible = () => {
       <Table aria-label='collapsible table'>
         <TableHead>
           <TableRow>
-            <TableCell />
-            <TableCell>Dessert (100g serving)</TableCell>
-            <TableCell align='right'>Calories</TableCell>
-            <TableCell align='right'>Fat (g)</TableCell>
-            <TableCell align='right'>Carbs (g)</TableCell>
-            <TableCell align='right'>Protein (g)</TableCell>
+            <StyledTableCell />
+            <StyledTableCell>Dessert (100g serving)</StyledTableCell>
+            <StyledTableCell align='right'>Calories</StyledTableCell>
+            <StyledTableCell align='right'>Fat (g)</StyledTableCell>
+            <StyledTableCell align='right'>Carbs (g)</StyledTableCell>
+            <StyledTableCell align='right'>Protein (g)</StyledTableCell>
+            <StyledTableCell />
           </TableRow>
         </TableHead>
         <TableBody>

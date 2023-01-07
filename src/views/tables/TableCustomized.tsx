@@ -7,6 +7,7 @@ import TableBody from '@mui/material/TableBody'
 import TableContainer from '@mui/material/TableContainer'
 import TableRow, { TableRowProps } from '@mui/material/TableRow'
 import TableCell, { TableCellProps, tableCellClasses } from '@mui/material/TableCell'
+import { Link } from '@mui/material'
 
 const StyledTableCell = styled(TableCell)<TableCellProps>(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -47,6 +48,7 @@ const TableCustomized = () => {
       <Table sx={{ minWidth: 700 }} aria-label='customized table'>
         <TableHead>
           <TableRow>
+            <StyledTableCell></StyledTableCell>
             <StyledTableCell>Dessert (100g serving)</StyledTableCell>
             <StyledTableCell align='right'>Calories</StyledTableCell>
             <StyledTableCell align='right'>Fat (g)</StyledTableCell>
@@ -57,6 +59,9 @@ const TableCustomized = () => {
         <TableBody>
           {rows.map(row => (
             <StyledTableRow key={row.name}>
+              <StyledTableCell component='th' scope='row'>
+                <Link href='#'>Select</Link>
+              </StyledTableCell>
               <StyledTableCell component='th' scope='row'>
                 {row.name}
               </StyledTableCell>
