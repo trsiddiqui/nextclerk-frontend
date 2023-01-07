@@ -21,7 +21,7 @@ class CustomDocument extends Document {
             rel='stylesheet'
             href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
           />
-          <link rel='shortcut icon' href='/images/favicon.png' />
+          <link rel='shortcut icon' href='images/favicon.png' />
           <link rel='apple-touch-icon' sizes='57x57' href='/apple-icon-57x57.png' />
           <link rel='apple-touch-icon' sizes='60x60' href='/apple-icon-60x60.png' />
           <link rel='apple-touch-icon' sizes='72x72' href='/apple-icon-72x72.png' />
