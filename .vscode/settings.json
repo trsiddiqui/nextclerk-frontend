@@ -33,7 +33,10 @@
   "npm.packageManager": "yarn",
   // Extension: cSpell
   "cSpell.words": [
-    "Customizer"
+    "Customizer",
+    "datepicker",
+    "nextclerk",
+    "Swipeable"
   ],
   "search-node-modules.path": "full-version/node_modules",
   "markdown.extension.toc.updateOnSave": false

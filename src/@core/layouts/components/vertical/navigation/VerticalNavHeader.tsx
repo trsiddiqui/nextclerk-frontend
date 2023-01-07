@@ -32,7 +32,8 @@ const MenuHeaderWrapper = styled(Box)<BoxProps>(({ theme }) => ({
 const StyledLink = styled('a')({
   display: 'flex',
   alignItems: 'center',
-  textDecoration: 'none'
+  textDecoration: 'none',
+  marginTop: 10
 })
 
 const VerticalNavHeader = (props: Props) => {
@@ -45,7 +46,9 @@ const VerticalNavHeader = (props: Props) => {
         userVerticalNavMenuBranding(props)
       ) : (
         <Link href='/' passHref>
-          <StyledLink>NextClerk Logo</StyledLink>
+          <StyledLink>
+            <img src='/images/logos/nextclerk.png' style={{ width: '100%' }} alt='Next Clerk' />
+          </StyledLink>
         </Link>
       )}
     </MenuHeaderWrapper>
