@@ -3,6 +3,9 @@
 import Table from 'mdi-material-ui/Table'
 import CubeOutline from 'mdi-material-ui/CubeOutline'
 import HomeOutline from 'mdi-material-ui/HomeOutline'
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
+import InboxIcon from '@mui/icons-material/Inbox'
+import LocalLibraryIcon from '@mui/icons-material/LocalLibrary'
 
 // import FormatLetterCase from 'mdi-material-ui/FormatLetterCase'
 // import AccountCogOutline from 'mdi-material-ui/AccountCogOutline'
@@ -74,6 +77,21 @@ const navigation = (): VerticalNavItemsType => {
     {
       icon: CubeOutline,
       title: 'Form Layouts',
+      path: '/form-layouts'
+    },
+    {
+      icon: FormatListBulletedIcon,
+      title: 'Journal Log Sheet',
+      path: '/form-layouts'
+    },
+    {
+      icon: InboxIcon,
+      title: 'Inbox',
+      path: '/form-layouts'
+    },
+    {
+      icon: LocalLibraryIcon,
+      title: 'Library',
       path: '/form-layouts'
     }
   ]

@@ -119,7 +119,7 @@ const Navigation = (props: Props) => {
         }}
       />
       <Button
-        sx={{ margin: '40px 0px 10px 10px' }}
+        sx={{ margin: '40px 10px 10px 10px' }}
         variant='outlined'
         startIcon={<AddIcon />}
         onClick={() => router.push('/support-package/create')}

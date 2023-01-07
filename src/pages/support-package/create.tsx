@@ -231,11 +231,11 @@ const CreateSupportPackage = () => {
                   Select Participant(s)
                 </Link>
               </Grid>
-              <Grid item xs={12}>
-                <Divider sx={{ margin: 0 }} />
-              </Grid>
             </Grid>
           </CardContent>
+          <Grid item xs={12}>
+            <Divider sx={{ margin: 0 }} />
+          </Grid>
           <CardActions>
             <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
               Save
@@ -271,7 +271,7 @@ const CreateSupportPackage = () => {
             </Tabs>
             <TabPanel value={values.tab} index={0} dir={theme.direction}>
               <Grid item xs={12} sm={12}>
-                <Card>
+                <Card variant='outlined'>
                   <CardHeader title='Add Your Comments'></CardHeader>
                   <CardContent>
                     <TextField
@@ -298,79 +298,77 @@ const CreateSupportPackage = () => {
                   </CardContent>
                 </Card>
               </Grid>
-              <Card style={{ padding: '40px 20px' }}>
-                <Grid item justifyContent='flex-end' xs={12} sm={12}>
-                  <FormControl variant='standard' sx={{ m: 1, minWidth: 120 }}>
-                    <InputLabel id='demo-simple-select-filled-label'>Sort By</InputLabel>
-                    <Select
-                      labelId='demo-simple-select-label'
-                      id='demo-simple-select'
-                      value={values.commentsSortedBy}
-                      onChange={event => {
-                        setValues({ ...values, commentsSortedBy: event.target.value })
-                      }}
-                    >
-                      <MenuItem value={'dateAsc'}>Earliest First</MenuItem>
-                      <MenuItem value={'dateDesc'}>Latest First</MenuItem>
-                    </Select>
-                  </FormControl>
+              <Grid item justifyContent='flex-end' xs={12} sm={12}>
+                <FormControl variant='standard' sx={{ m: 1, minWidth: 120, margin: 5 }}>
+                  <InputLabel id='demo-simple-select-filled-label'>Sort By</InputLabel>
+                  <Select
+                    labelId='demo-simple-select-label'
+                    id='demo-simple-select'
+                    value={values.commentsSortedBy}
+                    onChange={event => {
+                      setValues({ ...values, commentsSortedBy: event.target.value })
+                    }}
+                  >
+                    <MenuItem value={'dateAsc'}>Earliest First</MenuItem>
+                    <MenuItem value={'dateDesc'}>Latest First</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid container spacing={2}>
+                <Grid item>
+                  <Avatar alt='Remy Sharp'>RS</Avatar>
                 </Grid>
-                <Grid container spacing={2}>
-                  <Grid item>
-                    <Avatar alt='Remy Sharp'>RS</Avatar>
-                  </Grid>
-                  <Grid justifyContent='left' item xs zeroMinWidth>
-                    <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                    <p style={{ textAlign: 'left' }}>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                      bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                      tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
-                      ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
-                      Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi
-                      vehicula urna, nec feugiat quam lectus vitae ex.{' '}
-                    </p>
-                    <p style={{ textAlign: 'left', color: 'gray' }}>
-                      12th December, 2022 1:23PM
-                      <Chip
-                        label='Attachment1'
-                        color='primary'
-                        avatar={<Avatar color='secondary'>PDF</Avatar>}
-                        onClick={() => alert('Download This')}
-                        onDelete={() => alert('Download This')}
-                        deleteIcon={<DownloadIcon />}
-                        sx={{ marginLeft: 2 }}
-                      />
-                      <Chip
-                        label='Attachment2'
-                        color='primary'
-                        avatar={<Avatar color='secondary'>XLS</Avatar>}
-                        onClick={() => alert('Download This')}
-                        onDelete={() => alert('Download This')}
-                        deleteIcon={<DownloadIcon />}
-                        sx={{ marginLeft: 2 }}
-                      />
-                    </p>
-                  </Grid>
+                <Grid justifyContent='left' item xs zeroMinWidth>
+                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                  <p style={{ textAlign: 'left' }}>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
+                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
+                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
+                    urna, nec feugiat quam lectus vitae ex.{' '}
+                  </p>
+                  <p style={{ textAlign: 'left', color: 'gray' }}>
+                    12th December, 2022 1:23PM
+                    <Chip
+                      label='Attachment1'
+                      color='primary'
+                      avatar={<Avatar color='secondary'>PDF</Avatar>}
+                      onClick={() => alert('Download This')}
+                      onDelete={() => alert('Download This')}
+                      deleteIcon={<DownloadIcon />}
+                      sx={{ marginLeft: 2 }}
+                    />
+                    <Chip
+                      label='Attachment2'
+                      color='primary'
+                      avatar={<Avatar color='secondary'>XLS</Avatar>}
+                      onClick={() => alert('Download This')}
+                      onDelete={() => alert('Download This')}
+                      deleteIcon={<DownloadIcon />}
+                      sx={{ marginLeft: 2 }}
+                    />
+                  </p>
                 </Grid>
-                <Divider variant='fullWidth' style={{ margin: '30px 0' }} />
-                <Grid container wrap='nowrap' spacing={2}>
-                  <Grid item>
-                    <Avatar alt='Remy Sharp'>RS</Avatar>
-                  </Grid>
-                  <Grid justifyContent='left' item xs zeroMinWidth>
-                    <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                    <p style={{ textAlign: 'left' }}>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                      bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                      tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
-                      ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
-                      Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi
-                      vehicula urna, nec feugiat quam lectus vitae ex.{' '}
-                    </p>
-                    <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
-                  </Grid>
+              </Grid>
+              <Divider variant='fullWidth' style={{ margin: '30px 0' }} />
+              <Grid container wrap='nowrap' spacing={2}>
+                <Grid item>
+                  <Avatar alt='Remy Sharp'>RS</Avatar>
                 </Grid>
-              </Card>
+                <Grid justifyContent='left' item xs zeroMinWidth>
+                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                  <p style={{ textAlign: 'left' }}>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
+                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
+                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
+                    urna, nec feugiat quam lectus vitae ex.{' '}
+                  </p>
+                  <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
+                </Grid>
+              </Grid>
             </TabPanel>
             <TabPanel value={values.tab} index={1} dir={theme.direction}>
               <Grid item xs={12} sm={12}>

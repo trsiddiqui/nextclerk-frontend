@@ -11,11 +11,12 @@ import Menu from 'mdi-material-ui/Menu'
 import { Settings } from 'src/@core/context/settingsContext'
 
 // ** Components
-import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
+// import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
 import NotificationDropdown from 'src/@core/layouts/components/shared-components/NotificationDropdown'
-import { Button, Grid, InputAdornment, TextField } from '@mui/material'
+import { Avatar, Grid, InputAdornment, TextField, Typography } from '@mui/material'
 import { Magnify } from 'mdi-material-ui'
+import BusinessIcon from '@mui/icons-material/Business'
 
 interface Props {
   hidden: boolean
@@ -26,7 +27,12 @@ interface Props {
 
 const AppBarContent = (props: Props) => {
   // ** Props
-  const { hidden, settings, saveSettings, toggleNavVisibility } = props
+  const {
+    hidden,
+
+    // settings, saveSettings,
+    toggleNavVisibility
+  } = props
 
   // ** Hook
   const hiddenSm = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
@@ -36,11 +42,11 @@ const AppBarContent = (props: Props) => {
       sx={{
         width: '100%',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'right',
         justifyContent: 'space-between'
       }}
     >
-      <Box className='actions-left' sx={{ mr: 2, display: 'flex', alignItems: 'center', width: '100%' }}>
+      <Box className='actions-left' sx={{ mr: 2, display: 'flex', alignItems: 'right', width: '100%' }}>
         {hidden ? (
           <IconButton
             color='inherit'
@@ -50,26 +56,37 @@ const AppBarContent = (props: Props) => {
             <Menu />
           </IconButton>
         ) : null}
-        <Grid container justifyContent='flex-end'>
-          <TextField
-            size='small'
-            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4 } }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <Magnify fontSize='small' />
-                </InputAdornment>
-              )
-            }}
-            placeholder='Search'
-          />
-          <Button variant='text' onClick={() => alert('Advance')}>
+        <Grid container spacing={2}>
+          <Grid item justifyContent='flex-end' xs={10} sm={10}>
+            <TextField
+              fullWidth
+              size='small'
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1 } }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <Magnify fontSize='small' />
+                  </InputAdornment>
+                )
+              }}
+              placeholder='Search'
+            />
+          </Grid>
+          {/* <Button variant='text' onClick={() => alert('Advance')}>
             Advance
-          </Button>
+          </Button> */}
+          <Grid item xs={2} sm={2} display='flex' justifyContent='flex-end'>
+            <Avatar>
+              <BusinessIcon />
+            </Avatar>
+            <Typography sx={{ margin: '1px 5px' }} variant='body2'>
+              Working Group LLC
+            </Typography>
+          </Grid>
         </Grid>
       </Box>
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
-        <ModeToggler settings={settings} saveSettings={saveSettings} />
+        {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
         <NotificationDropdown />
         <UserDropdown />
       </Box>
