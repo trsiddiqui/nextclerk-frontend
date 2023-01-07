@@ -277,7 +277,7 @@ const CreateSupportPackage = () => {
                 </Card>
               </Grid>
               <Card style={{ padding: '40px 20px' }}>
-                <Grid container justifyContent='flex-end' spacing={3} xs={12} sm={12}>
+                <Grid item justifyContent='flex-end' xs={12} sm={12}>
                   <FormControl variant='standard' sx={{ m: 1, minWidth: 120 }}>
                     <InputLabel id='demo-simple-select-filled-label'>Sort By</InputLabel>
                     <Select
