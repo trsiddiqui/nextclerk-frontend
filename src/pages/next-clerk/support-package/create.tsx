@@ -22,6 +22,7 @@ import {
   FormControlLabel,
   IconButton,
   InputAdornment,
+  InputLabel,
   Link,
   MenuItem,
   Select,
@@ -38,8 +39,6 @@ import { DatePicker } from '@mui/lab'
 import SendIcon from '@mui/icons-material/Send'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import DownloadIcon from '@mui/icons-material/Download'
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-import GridOnIcon from '@mui/icons-material/GridOn'
 
 interface State {
   name: string
@@ -246,7 +245,7 @@ const CreateSupportPackage = () => {
                       id='outlined-multiline-flexible'
                       label='Comments'
                       multiline
-                      variant='filled'
+                      variant='standard'
                       maxRows={4}
                       InputProps={{
                         endAdornment: (
@@ -267,19 +266,20 @@ const CreateSupportPackage = () => {
               </Grid>
               <Card style={{ padding: '40px 20px' }}>
                 <Grid container justifyContent='flex-end' spacing={3} xs={12} sm={12}>
-                  <Select
-                    labelId='demo-simple-select-label'
-                    id='demo-simple-select'
-                    value={values.commentsSortedBy}
-                    label='Sort By'
-                    placeholder='Sort By'
-                    onChange={event => {
-                      setValues({ ...values, commentsSortedBy: event.target.value })
-                    }}
-                  >
-                    <MenuItem value={'dateAsc'}>Earliest First</MenuItem>
-                    <MenuItem value={'dateDesc'}>Latest First</MenuItem>
-                  </Select>
+                  <FormControl variant='standard' sx={{ m: 1, minWidth: 120 }}>
+                    <InputLabel id='demo-simple-select-filled-label'>Sort By</InputLabel>
+                    <Select
+                      labelId='demo-simple-select-label'
+                      id='demo-simple-select'
+                      value={values.commentsSortedBy}
+                      onChange={event => {
+                        setValues({ ...values, commentsSortedBy: event.target.value })
+                      }}
+                    >
+                      <MenuItem value={'dateAsc'}>Earliest First</MenuItem>
+                      <MenuItem value={'dateDesc'}>Latest First</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
                 <Grid container spacing={2}>
                   <Grid item>
@@ -300,11 +300,7 @@ const CreateSupportPackage = () => {
                       <Chip
                         label='Attachment1'
                         color='primary'
-                        avatar={
-                          <Avatar color='secondary'>
-                            <PictureAsPdfIcon />
-                          </Avatar>
-                        }
+                        avatar={<Avatar color='secondary'>PDF</Avatar>}
                         onClick={() => alert('Download This')}
                         onDelete={() => alert('Download This')}
                         deleteIcon={<DownloadIcon />}
@@ -313,11 +309,7 @@ const CreateSupportPackage = () => {
                       <Chip
                         label='Attachment2'
                         color='primary'
-                        avatar={
-                          <Avatar color='secondary'>
-                            <GridOnIcon />
-                          </Avatar>
-                        }
+                        avatar={<Avatar color='secondary'>XLS</Avatar>}
                         onClick={() => alert('Download This')}
                         onDelete={() => alert('Download This')}
                         deleteIcon={<DownloadIcon />}
