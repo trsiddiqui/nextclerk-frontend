@@ -250,7 +250,7 @@ const CreateSupportPackage = () => {
       <Grid item xs={12}></Grid>
       <Card>
         <Grid item xs={12} sm={12}>
-          <Box sx={{ position: 'fixed', mt: 3, height: 320, right: 10, top: '36%' }}>
+          <Box sx={{ position: 'fixed', mt: 3, height: 320, right: 30, top: '46%' }}>
             <SpeedDial ariaLabel='SpeedDial playground example' icon={<AttachFileIcon />} direction='down'>
               <SpeedDialAction key={'Excel'} icon={<GridOnIcon />} tooltipTitle='Create Excel File' />
               <SpeedDialAction key={'Sheet'} icon={<GridOnIcon />} tooltipTitle='Create Google Sheet' />
@@ -298,7 +298,7 @@ const CreateSupportPackage = () => {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item justifyContent='flex-end' xs={12} sm={12}>
+              <Grid container justifyContent='flex-end' xs={12} sm={12}>
                 <FormControl variant='standard' sx={{ m: 1, minWidth: 120, margin: 5 }}>
                   <InputLabel id='demo-simple-select-filled-label'>Sort By</InputLabel>
                   <Select
@@ -314,7 +314,7 @@ const CreateSupportPackage = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid container spacing={2}>
+              <Grid container spacing={2} sx={{ marginTop: -12 }}>
                 <Grid item>
                   <Avatar alt='Remy Sharp'>RS</Avatar>
                 </Grid>
