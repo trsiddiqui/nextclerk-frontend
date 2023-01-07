@@ -107,10 +107,6 @@ const CreateSupportPackage = () => {
     setValues({ ...values, tab: newValue })
   }
 
-  const handleTabChangeIndex = (index: number) => {
-    setValues({ ...values, tab: index })
-  }
-
   return (
     <Grid container spacing={5}>
       <Card>
