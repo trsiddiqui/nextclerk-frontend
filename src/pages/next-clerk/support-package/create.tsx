@@ -26,6 +26,8 @@ import {
   Link,
   MenuItem,
   Select,
+  SpeedDial,
+  SpeedDialAction,
   Switch,
   Tab,
   Tabs,
@@ -39,6 +41,8 @@ import { DatePicker } from '@mui/lab'
 import SendIcon from '@mui/icons-material/Send'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import DownloadIcon from '@mui/icons-material/Download'
+import GridOnIcon from '@mui/icons-material/GridOn'
+import LinkIcon from '@mui/icons-material/Link'
 
 interface State {
   name: string
@@ -212,7 +216,7 @@ const CreateSupportPackage = () => {
           </CardContent>
           <CardActions>
             <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
-              Submit
+              Save
             </Button>
             <Button size='large' color='secondary' variant='outlined'>
               Cancel
@@ -224,6 +228,14 @@ const CreateSupportPackage = () => {
       <Grid item xs={12}></Grid>
       <Card>
         <Grid item xs={12} sm={12}>
+          <Box sx={{ position: 'fixed', mt: 3, height: 320, right: 10, top: '36%' }}>
+            <SpeedDial ariaLabel='SpeedDial playground example' icon={<AttachFileIcon />} direction='down'>
+              <SpeedDialAction key={'Excel'} icon={<GridOnIcon />} tooltipTitle='Create Excel File' />
+              <SpeedDialAction key={'Sheet'} icon={<GridOnIcon />} tooltipTitle='Create Google Sheet' />
+              <SpeedDialAction key={'Attach'} icon={<AttachFileIcon />} tooltipTitle='Attach' />
+              <SpeedDialAction key={'Link'} icon={<LinkIcon />} tooltipTitle='Link' />
+            </SpeedDial>
+          </Box>
           <Box>
             <Tabs
               value={values.tab}
