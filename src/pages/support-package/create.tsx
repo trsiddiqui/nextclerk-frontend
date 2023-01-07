@@ -173,7 +173,7 @@ const CreateSupportPackage = () => {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePickerWrapper>
                     <DatePicker
-                      label='Date desktop'
+                      label='Support Date'
                       inputFormat='MM/DD/YYYY'
                       value={values.date}
                       onChange={handleChange}
@@ -191,7 +191,7 @@ const CreateSupportPackage = () => {
                     getOptionLabel={option => option.label}
                     filterSelectedOptions
                     renderInput={params => (
-                      <TextField variant='filled' {...params} label='Select Tag(s)' placeholder='Tag(s)' />
+                      <TextField variant='filled' {...params} label='Support Category' placeholder='Support Category' />
                     )}
                   />
                 </FormControl>
