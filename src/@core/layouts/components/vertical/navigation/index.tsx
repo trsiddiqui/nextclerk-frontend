@@ -1,5 +1,6 @@
 // ** React Import
 import { ReactNode, useRef, useState } from 'react'
+import { useRouter } from 'next/router'
 
 // ** MUI Import
 import List from '@mui/material/List'
@@ -103,6 +104,8 @@ const Navigation = (props: Props) => {
 
   const ScrollWrapper = hidden ? Box : PerfectScrollbar
 
+  const router = useRouter()
+
   return (
     <Drawer {...props}>
       <VerticalNavHeader {...props} />
@@ -119,7 +122,7 @@ const Navigation = (props: Props) => {
         sx={{ margin: '30px' }}
         variant='outlined'
         startIcon={<AddIcon />}
-        onClick={() => alert('Navigate to Create Page')}
+        onClick={() => router.push('next-clerk/support-package/create')}
       >
         Create
       </Button>
