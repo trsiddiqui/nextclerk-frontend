@@ -14,7 +14,7 @@ import { Settings } from 'src/@core/context/settingsContext'
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
 import NotificationDropdown from 'src/@core/layouts/components/shared-components/NotificationDropdown'
-import { Button, InputAdornment, TextField } from '@mui/material'
+import { Button, Grid, InputAdornment, TextField } from '@mui/material'
 import { Magnify } from 'mdi-material-ui'
 
 interface Props {
@@ -50,22 +50,23 @@ const AppBarContent = (props: Props) => {
             <Menu />
           </IconButton>
         ) : null}
-        <TextField
-          size='small'
-          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4 } }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position='start'>
-                <Magnify fontSize='small' />
-              </InputAdornment>
-            )
-          }}
-          placeholder='Search'
-          fullWidth
-        />
-        <Button variant='text' onClick={() => alert('Advance')}>
-          Advance
-        </Button>
+        <Grid container justifyContent='flex-end'>
+          <TextField
+            size='small'
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4 } }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Magnify fontSize='small' />
+                </InputAdornment>
+              )
+            }}
+            placeholder='Search'
+          />
+          <Button variant='text' onClick={() => alert('Advance')}>
+            Advance
+          </Button>
+        </Grid>
       </Box>
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
         <ModeToggler settings={settings} saveSettings={saveSettings} />
