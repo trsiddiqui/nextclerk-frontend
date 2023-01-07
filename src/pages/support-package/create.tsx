@@ -25,6 +25,7 @@ import {
   InputLabel,
   Link,
   MenuItem,
+  Modal,
   Select,
   SpeedDial,
   SpeedDialAction,
@@ -43,6 +44,18 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 import DownloadIcon from '@mui/icons-material/Download'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import LinkIcon from '@mui/icons-material/Link'
+
+const modalStyle = {
+  position: 'absolute' as const,
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+  borderRadius: '5px'
+}
 
 interface State {
   name: string
@@ -105,6 +118,12 @@ const CreateSupportPackage = () => {
     tab: 0,
     commentsSortedBy: 'dateAsc'
   })
+  const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
+  const [journalModalOpen, setJournalModalOpen] = React.useState(false)
+  const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
+  const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
+  const handleJournalModalOpen = () => setJournalModalOpen(true)
+  const handleJournalModalClose = () => setJournalModalOpen(false)
 
   // Handle Password
   const handleStateChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
@@ -126,14 +145,14 @@ const CreateSupportPackage = () => {
           <CardHeader title='Create a Supporting Package' titleTypographyProps={{ variant: 'h6' }}></CardHeader>
           <Divider sx={{ margin: 0 }} />
           <CardContent>
-            <Grid container spacing={5}>
-              <Grid item xs={12} sm={8} sx={{ marginTop: 1 }}>
+            <Grid item xs={12} sm={12} sx={{ marginTop: -2 }} textAlign='right'>
+              <FormControlLabel control={<Switch defaultChecked />} label='Confidential' />
+            </Grid>
+            <Grid container spacing={5} sx={{ marginTop: -13 }}>
+              <Grid item xs={12} sm={12} sx={{ marginTop: 1 }}>
                 <Typography variant='body2' sx={{ fontWeight: 600 }}>
                   1. Package Details
                 </Typography>
-              </Grid>
-              <Grid item xs={12} sm={4} textAlign='right'>
-                <FormControlLabel control={<Switch defaultChecked />} label='Confidential' />
               </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField
@@ -179,7 +198,10 @@ const CreateSupportPackage = () => {
               </Grid>
               <Grid item xs={12}>
                 <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                  2. Link to a Journal &nbsp;&nbsp;<Link>Link</Link>
+                  2. Link to a Journal &nbsp;&nbsp;
+                  <Link component='button' variant='body2' onClick={handleJournalModalOpen}>
+                    Link
+                  </Link>
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -200,12 +222,12 @@ const CreateSupportPackage = () => {
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <Link component='button' variant='body2'>
+                <Link component='button' variant='body2' onClick={handlePersonnelModalOpen}>
                   Select an Approver
                 </Link>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <Link component='button' variant='body2'>
+                <Link component='button' variant='body2' onClick={handlePersonnelModalOpen}>
                   Select Participant(s)
                 </Link>
               </Grid>
@@ -359,6 +381,36 @@ const CreateSupportPackage = () => {
         </Grid>
         <Divider sx={{ margin: 0 }} />
       </Card>
+      <Modal
+        open={personnelModalOpen}
+        onClose={handlePersonnelModalClose}
+        aria-labelledby='modal-modal-personnel'
+        aria-describedby='modal-modal-personnel'
+      >
+        <Box sx={modalStyle}>
+          <Typography id='modal-modal-personnel' variant='h6' component='h2'>
+            Select a Personnel
+          </Typography>
+          <Typography id='modal-modal-personnel' sx={{ mt: 2 }}>
+            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+          </Typography>
+        </Box>
+      </Modal>
+      <Modal
+        open={journalModalOpen}
+        onClose={handleJournalModalClose}
+        aria-labelledby='modal-modal-personnel'
+        aria-describedby='modal-modal-personnel'
+      >
+        <Box sx={modalStyle}>
+          <Typography id='modal-modal-personnel' variant='h6' component='h2'>
+            Select a Journal Entry
+          </Typography>
+          <Typography id='modal-modal-personnel' sx={{ mt: 2 }}>
+            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+          </Typography>
+        </Box>
+      </Modal>
     </Grid>
   )
 }
