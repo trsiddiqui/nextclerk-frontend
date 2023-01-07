@@ -51,9 +51,19 @@ const VerticalNavHeader = (props: Props) => {
         <Link href='/' passHref>
           <StyledLink>
             {settings.mode === 'light' ? (
-              <img src='/images/logos/nextclerk.png' style={{ width: '100%' }} alt='Next Clerk' />
+              <img
+                src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/nextclerk.png`}
+                style={{ width: '100%' }}
+                alt='Next Clerk'
+              />
             ) : (
-              <img src='/images/logos/nextclerk-inverted.png' style={{ width: '100%' }} alt='Next Clerk' />
+              <img
+                src={`${
+                  process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                }/images/logos/nextclerk-inverted.png`}
+                style={{ width: '100%' }}
+                alt='Next Clerk'
+              />
             )}
           </StyledLink>
         </Link>

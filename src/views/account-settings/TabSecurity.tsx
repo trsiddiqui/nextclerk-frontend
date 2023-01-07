@@ -163,7 +163,12 @@ const TabSecurity = () => {
             xs={12}
             sx={{ display: 'flex', marginTop: [7.5, 2.5], alignItems: 'center', justifyContent: 'center' }}
           >
-            <img width={183} alt='avatar' height={256} src='/images/pages/pose-m-1.png' />
+            <img
+              width={183}
+              alt='avatar'
+              height={256}
+              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/pose-m-1.png`}
+            />
           </Grid>
         </Grid>
       </CardContent>

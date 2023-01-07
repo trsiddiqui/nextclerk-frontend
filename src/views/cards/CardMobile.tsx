@@ -53,7 +53,14 @@ const CardMobile = () => {
       <Grid container spacing={6}>
         <StyledGrid item md={5} xs={12}>
           <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img width={137} height={176} alt='Apple iPhone 11 Pro' src='/images/cards/iPhone-11-pro.png' />
+            <img
+              width={137}
+              height={176}
+              alt='Apple iPhone 11 Pro'
+              src={`${
+                process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+              }/images/cards/iPhone-11-pro.png`}
+            />
           </CardContent>
         </StyledGrid>
         <Grid

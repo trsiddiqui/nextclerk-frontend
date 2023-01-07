@@ -7,7 +7,10 @@ import CardContent from '@mui/material/CardContent'
 const CardImgTop = () => {
   return (
     <Card>
-      <CardMedia sx={{ height: '14.5625rem' }} image='/images/cards/glass-house.png' />
+      <CardMedia
+        sx={{ height: '14.5625rem' }}
+        image={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/cards/glass-house.png`}
+      />
       <CardContent>
         <Typography variant='h6' sx={{ marginBottom: 2 }}>
           Influencing The Influencer

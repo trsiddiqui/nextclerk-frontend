@@ -1,10 +1,6 @@
 const path = require('path')
 
-const isProd = process.env.NODE_ENV === 'production'
-
 module.exports = {
-  basePath: '/nextclerk-frontend',
-  assetPrefix: isProd ? '/nextclerk-frontend' : '',
   trailingSlash: true,
   reactStrictMode: false,
   experimental: {

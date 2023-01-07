@@ -25,7 +25,7 @@ const Trophy = () => {
   // ** Hook
   const theme = useTheme()
 
-  const imageSrc = theme.palette.mode === 'light' ? 'triangle-light.png' : 'triangle-dark.png'
+  const imageSrc = theme.palette.mode === 'light' ? `triangle-light.png` : `triangle-dark.png`
 
   return (
     <Card sx={{ position: 'relative' }}>
@@ -40,8 +40,14 @@ const Trophy = () => {
         <Button size='small' variant='contained'>
           View Sales
         </Button>
-        <TriangleImg alt='triangle background' src={`/images/misc/${imageSrc}`} />
-        <TrophyImg alt='trophy' src='/images/misc/trophy.png' />
+        <TriangleImg
+          alt='triangle background'
+          src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/misc/${imageSrc}`}
+        />
+        <TrophyImg
+          alt='trophy'
+          src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/misc/trophy.png`}
+        />
       </CardContent>
     </Card>
   )
