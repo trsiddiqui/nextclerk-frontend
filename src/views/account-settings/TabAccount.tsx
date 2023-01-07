@@ -48,7 +48,9 @@ const ResetButtonStyled = styled(Button)<ButtonProps>(({ theme }) => ({
 const TabAccount = () => {
   // ** State
   const [openAlert, setOpenAlert] = useState<boolean>(true)
-  const [imgSrc, setImgSrc] = useState<string>({`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/1.png`})
+  const [imgSrc, setImgSrc] = useState<string>(
+    `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/1.png`
+  )
 
   const onChange = (file: ChangeEvent) => {
     const reader = new FileReader()
@@ -78,7 +80,15 @@ const TabAccount = () => {
                     id='account-settings-upload-image'
                   />
                 </ButtonStyled>
-                <ResetButtonStyled color='error' variant='outlined' onClick={() => setImgSrc({`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/1.png`})}>
+                <ResetButtonStyled
+                  color='error'
+                  variant='outlined'
+                  onClick={() =>
+                    setImgSrc(
+                      `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/1.png`
+                    )
+                  }
+                >
                   Reset
                 </ResetButtonStyled>
                 <Typography variant='body2' sx={{ marginTop: 5 }}>
