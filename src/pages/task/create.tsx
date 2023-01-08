@@ -191,7 +191,7 @@ const CreateTask = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <Link component='button' variant='body2' onClick={handlePersonnelModalOpen}>
-                  Select an Approver
+                  Select an Assigne
                 </Link>
               </Grid>
               <Grid item xs={12} sm={4}>
