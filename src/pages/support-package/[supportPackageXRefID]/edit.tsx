@@ -68,7 +68,7 @@ function TabPanel(props: TabPanelProps) {
   )
 }
 
-const CreateSupportPackage = () => {
+const EditSupportPackage = () => {
   const theme = useTheme()
   const [values, setValues] = useState<State>({
     name: '',
@@ -303,4 +303,4 @@ const CreateSupportPackage = () => {
   )
 }
 
-export default CreateSupportPackage
+export default EditSupportPackage

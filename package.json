@@ -42,9 +42,9 @@
     "themeselection"
   ],
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 9001",
+    "start": "next start -p 9001",
     "build": "next build",
-    "start": "next start",
     "export": "next export",
     "lint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
