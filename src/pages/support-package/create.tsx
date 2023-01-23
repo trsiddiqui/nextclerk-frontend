@@ -20,13 +20,8 @@ import {
   Box,
   Chip,
   FormControlLabel,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  Link,
-  MenuItem,
+  FormLabel,
   Modal,
-  Select,
   SpeedDial,
   SpeedDialAction,
   Switch,
@@ -39,9 +34,7 @@ import dayjs, { Dayjs } from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
-import SendIcon from '@mui/icons-material/Send'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
-import DownloadIcon from '@mui/icons-material/Download'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import LinkIcon from '@mui/icons-material/Link'
 import TableCollapsible from 'src/views/tables/TableCollapsible'
@@ -124,9 +117,11 @@ const CreateSupportPackage = () => {
   })
   const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
-  const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
+
+  // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
-  const handleJournalModalOpen = () => setJournalModalOpen(true)
+
+  // const handleJournalModalOpen = () => setJournalModalOpen(true)
   const handleJournalModalClose = () => setJournalModalOpen(false)
 
   // Handle Password
@@ -153,25 +148,42 @@ const CreateSupportPackage = () => {
               <FormControlLabel control={<Switch defaultChecked />} label='Confidential' />
             </Grid>
             <Grid container spacing={5} sx={{ marginTop: -13 }}>
-              <Grid item xs={12} sm={12} sx={{ marginTop: 1 }}>
+              {/* <Grid item xs={12} sm={12} sx={{ marginTop: 1 }}>
                 <Typography variant='body2' sx={{ fontWeight: 600 }}>
                   1. Package Details
                 </Typography>
-              </Grid>
-              <Grid item xs={12} sm={4}>
+              </Grid> */}
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label='Support Name'
-                  placeholder='Name of Support Package'
+                  label='Support Title'
+                  placeholder='Title of Support Package'
                   onChange={handleStateChange('name')}
                   variant='filled'
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField fullWidth label='Support Period' placeholder='Q1 2022' variant='filled' />
-              </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField fullWidth type='number' label='Support Number' placeholder='R32938' variant='filled' />
+              </Grid>
+              {/* <Grid item xs={12} sm={4}>
+                <TextField fullWidth label='Support Period' placeholder='Q1 2022' variant='filled' />
+              </Grid> */}
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <Autocomplete
+                    multiple
+                    id='tags-outlined'
+                    options={values.allCategories}
+                    getOptionLabel={option => option.label}
+                    filterSelectedOptions
+                    renderInput={params => (
+                      <TextField variant='filled' {...params} label='Support Category' placeholder='Support Category' />
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField variant='filled' fullWidth label='Journal Number' placeholder='Name of Support Package' />
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -186,68 +198,77 @@ const CreateSupportPackage = () => {
                   </DatePickerWrapper>
                 </LocalizationProvider>
               </Grid>
-              <Grid item xs={12} sm={8}>
-                <FormControl fullWidth>
-                  <Autocomplete
-                    multiple
-                    id='tags-outlined'
-                    options={values.allCategories}
-                    getOptionLabel={option => option.label}
-                    filterSelectedOptions
-                    renderInput={params => (
-                      <TextField variant='filled' {...params} label='Support Category' placeholder='Support Category' />
-                    )}
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <Typography variant='body2' sx={{ fontWeight: 600 }}>
                   2. Link to a Journal &nbsp;&nbsp;
                   <Link component='button' variant='body2' onClick={handleJournalModalOpen}>
                     Link
                   </Link>
                 </Typography>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  variant='filled'
-                  fullWidth
-                  label='Journal Number'
-                  placeholder='Name of Support Package'
-                  disabled
+              </Grid> */}
+              <Grid item xs={12} sm={2}>
+                <FormLabel sx={{ marginLeft: 12 }}>Approver</FormLabel>
+                <Chip
+                  avatar={<Avatar alt='Mike Champ'>MC</Avatar>}
+                  label='Mike Champ'
+                  variant='outlined'
+                  onDelete={() => {
+                    alert('delete action')
+                  }}
+                  sx={{ marginLeft: 3 }}
                 />
+                {/* <Link component='button' variant='body2' sx={{ marginTop: 4 }} onClick={handlePersonnelModalOpen}>
+                  Select
+                </Link> */}
               </Grid>
-              <Grid item xs={12} sm={8}>
+              <Grid item xs={12} sm={6}>
+                <TextField variant='filled' fullWidth label='Participants' placeholder='Search for Participants' />
+                {/* <Link component='button' variant='body2' sx={{ marginTop: 4 }} onClick={handlePersonnelModalOpen}>
+                  Select
+                </Link> */}
+              </Grid>
+              <Grid item xs={12} sm={6}>
                 <TextField variant='filled' fullWidth label='Labels' placeholder='Assign Labels' />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6} sx={{ marginTop: -3 }}>
+                <Chip
+                  avatar={<Avatar alt='Remy Sharp'>RS</Avatar>}
+                  label='Remy Sharp'
+                  variant='outlined'
+                  onDelete={() => {
+                    alert('delete action')
+                  }}
+                  sx={{ marginLeft: 3 }}
+                />
+                <Chip
+                  avatar={<Avatar alt='Mike Champ'>MC</Avatar>}
+                  label='Mike Champ'
+                  variant='outlined'
+                  onDelete={() => {
+                    alert('delete action')
+                  }}
+                  sx={{ marginLeft: 3 }}
+                />
+              </Grid>
+
+              {/* <Grid item xs={12}>
                 <Typography variant='body2' sx={{ fontWeight: 600 }}>
                   3. Personnel
                 </Typography>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <Link component='button' variant='body2' onClick={handlePersonnelModalOpen}>
-                  Select an Approver
-                </Link>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <Link component='button' variant='body2' onClick={handlePersonnelModalOpen}>
-                  Select Participant(s)
-                </Link>
-              </Grid>
+              </Grid> */}
             </Grid>
           </CardContent>
           <Grid item xs={12}>
             <Divider sx={{ margin: 0 }} />
           </Grid>
-          <CardActions>
+          {/* <CardActions>
             <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
               Save
             </Button>
             <Button size='large' color='secondary' variant='outlined'>
               Cancel
             </Button>
-          </CardActions>
+          </CardActions> */}
         </form>
       </Card>
 
@@ -270,37 +291,51 @@ const CreateSupportPackage = () => {
               aria-label='full width tabs example'
               sx={{ margin: '10px 200px' }}
             >
-              <Tab label='Communication' />
-              <Tab label='Journal' />
+              <Tab label='Support' />
+              <Tab label='Comments' />
+              <Tab label='Journal Entry' />
             </Tabs>
             <TabPanel value={values.tab} index={0} dir={theme.direction}>
-              <Grid item xs={12} sm={12}>
-                <Card variant='outlined'>
-                  <CardHeader title='Add Your Comments'></CardHeader>
-                  <CardContent>
-                    <TextField
-                      fullWidth
-                      id='outlined-multiline-flexible'
-                      label='Comments'
-                      multiline
-                      variant='standard'
-                      maxRows={4}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position='end'>
-                            <IconButton color='primary'>
-                              <AttachFileIcon />
-                            </IconButton>
+              <Box
+                sx={{
+                  width: 1,
+                  p: 1,
+                  bgcolor: theme => (theme.palette.mode === 'dark' ? '#101010' : 'grey.100'),
+                  color: theme => (theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800'),
+                  border: '1px solid',
+                  borderColor: theme => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300'),
+                  borderRadius: 2,
+                  fontSize: '0.875rem',
+                  fontWeight: '700',
+                  textAlign: 'center'
+                }}
+              >
+                Width 1
+              </Box>
+            </TabPanel>
+            <TabPanel value={values.tab} index={1} dir={theme.direction}>
+              {/* <Grid container wrap='nowrap' item xs={12} sm={12} sx={{ padding: '0 3rem' }}>
+                <TextField
+                  fullWidth
+                  id='outlined-multiline-flexible'
+                  label='Comments'
+                  multiline
+                  variant='standard'
+                  maxRows={4}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton color='primary'>
+                          <AttachFileIcon />
+                        </IconButton>
 
-                            <IconButton edge='end' color='primary'>
-                              <SendIcon />
-                            </IconButton>
-                          </InputAdornment>
-                        )
-                      }}
-                    />
-                  </CardContent>
-                </Card>
+                        <IconButton edge='end' color='primary'>
+                          <SendIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                />
               </Grid>
               <Grid container justifyContent='flex-end' xs={12} sm={12}>
                 <FormControl variant='standard' sx={{ m: 1, minWidth: 120, margin: 5 }}>
@@ -355,7 +390,7 @@ const CreateSupportPackage = () => {
                   </p>
                 </Grid>
               </Grid>
-              <Divider variant='fullWidth' style={{ margin: '30px 0' }} />
+              <Divider variant='fullWidth' style={{ margin: '30px 0' }} /> */}
               <Grid container wrap='nowrap' spacing={2}>
                 <Grid item>
                   <Avatar alt='Remy Sharp'>RS</Avatar>
@@ -374,7 +409,7 @@ const CreateSupportPackage = () => {
                 </Grid>
               </Grid>
             </TabPanel>
-            <TabPanel value={values.tab} index={1} dir={theme.direction}>
+            <TabPanel value={values.tab} index={2} dir={theme.direction}>
               <Grid item xs={12} sm={12}>
                 TO DO
               </Grid>
