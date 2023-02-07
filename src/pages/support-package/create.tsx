@@ -1,5 +1,7 @@
 // ** React Imports
 import React, { ChangeEvent, useState } from 'react'
+import { ReactGrid, Row, Column, Id, MenuOption, SelectionMode, CellLocation } from '@silevis/reactgrid'
+import '@silevis/reactgrid/styles.css'
 
 // ** MUI Imports
 import Card from '@mui/material/Card'
@@ -137,8 +139,699 @@ const CreateSupportPackage = () => {
     setValues({ ...values, tab: newValue })
   }
 
+  const data = {
+    creator: 'Unknown',
+    lastModifiedBy: 'Taha Rehman',
+    created: '2023-01-21T17:54:11.000Z',
+    modified: '2023-02-07T03:47:19.000Z',
+    properties: { date1904: false },
+    worksheets: [
+      {
+        id: 1,
+        name: 'Sheet1',
+        dataValidations: {},
+        properties: { defaultRowHeight: 15, dyDescent: 0, outlineLevelRow: 0, outlineLevelCol: 0 },
+        state: 'visible',
+        pageSetup: {
+          fitToPage: false,
+          margins: { left: 0.7, right: 0.7, top: 0.75, bottom: 0.75, header: 0.3, footer: 0.3 }
+        },
+        headerFooter: null,
+        rowBreaks: [],
+        views: [
+          {
+            workbookViewId: 0,
+            rightToLeft: false,
+            state: 'normal',
+            showRuler: true,
+            showRowColHeaders: true,
+            showGridLines: true,
+            zoomScale: 100,
+            zoomScaleNormal: 100
+          }
+        ],
+        media: [],
+        tables: [],
+        conditionalFormattings: [],
+        rows: [
+          {
+            cells: [
+              { address: 'A1', value: 'A1 Value', type: 3, style: {} },
+              { address: 'B1', value: 'B1 Value', type: 3, style: {} }
+            ],
+            number: 1,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A2', value: 'A2 Value', type: 3, style: {} },
+              { address: 'B2', value: 'B2 Value', type: 3, style: {} }
+            ],
+            number: 2,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A3', value: 'A1 Value', type: 3, style: {} },
+              {
+                address: 'B3',
+                value: 'B3 Value',
+                type: 3,
+                comment: {
+                  note: {
+                    margins: { insetmode: 'auto', inset: [null, 0.13, 0.25, 0.25] },
+                    protection: { locked: 'True', lockText: 'True' },
+                    editAs: 'absolute',
+                    texts: [],
+                    anchor: '2, 15, 1, 10, 4, 31, 5, 9'
+                  },
+                  type: 'note'
+                },
+                style: {}
+              }
+            ],
+            number: 3,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A4', value: 'A2 Value', type: 3, style: {} },
+              {
+                address: 'B4',
+                value: 'B4 Value',
+                type: 3,
+                style: {
+                  font: { bold: true, size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
+                  border: {},
+                  fill: { type: 'pattern', pattern: 'none' }
+                }
+              }
+            ],
+            number: 4,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A5', value: 'A1 Value', type: 3, style: {} },
+              { address: 'B5', value: 'B1 Value', type: 3, style: {} }
+            ],
+            number: 5,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              {
+                address: 'A6',
+                value: 'A2 Value',
+                type: 3,
+                style: {
+                  font: { underline: true, size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
+                  border: {},
+                  fill: { type: 'pattern', pattern: 'none' }
+                }
+              },
+              { address: 'B6', value: 'B2 Value', type: 3, style: {} }
+            ],
+            number: 6,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A7', value: 'A1 Value', type: 3, style: {} },
+              { address: 'B7', value: 'B3 Value', type: 3, style: {} }
+            ],
+            number: 7,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A8', value: 'A2 Value', type: 3, style: {} },
+              { address: 'B8', value: 'B4 Value', type: 3, style: {} }
+            ],
+            number: 8,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              {
+                address: 'A9',
+                value: 'A1 Value',
+                type: 3,
+                style: {
+                  font: { size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
+                  border: {},
+                  fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' }, bgColor: { indexed: 64 } }
+                }
+              },
+              { address: 'B9', value: 'B1 Value', type: 3, style: {} }
+            ],
+            number: 9,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A10', value: 'A2 Value', type: 3, style: {} },
+              { address: 'B10', value: 'B2 Value', type: 3, style: {} }
+            ],
+            number: 10,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A11', value: 'A1 Value', type: 3, style: {} },
+              {
+                address: 'B11',
+                value: 'B3 Value',
+                type: 3,
+                style: {
+                  font: { size: 11, color: { argb: 'FFFF0000' }, name: 'Calibri', family: 2, scheme: 'minor' },
+                  border: {},
+                  fill: { type: 'pattern', pattern: 'none' }
+                }
+              }
+            ],
+            number: 11,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A12', value: 'A2 Value', type: 3, style: {} },
+              { address: 'B12', value: 'B4 Value', type: 3, style: {} }
+            ],
+            number: 12,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A13', value: 'A1 Value', type: 3, style: {} },
+              { address: 'B13', value: 'B1 Value', type: 3, style: {} }
+            ],
+            number: 13,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A14', value: 'A2 Value', type: 3, style: {} },
+              { address: 'B14', value: 'B2 Value', type: 3, style: {} }
+            ],
+            number: 14,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          }
+        ],
+        dimensions: { model: { top: 1, left: 1, bottom: 14, right: 2 } },
+        merges: []
+      }
+    ],
+    sheets: [
+      {
+        id: 1,
+        name: 'Sheet1',
+        dataValidations: {},
+        properties: { defaultRowHeight: 15, dyDescent: 0, outlineLevelRow: 0, outlineLevelCol: 0 },
+        state: 'visible',
+        pageSetup: {
+          fitToPage: false,
+          margins: { left: 0.7, right: 0.7, top: 0.75, bottom: 0.75, header: 0.3, footer: 0.3 }
+        },
+        headerFooter: null,
+        rowBreaks: [],
+        views: [
+          {
+            workbookViewId: 0,
+            rightToLeft: false,
+            state: 'normal',
+            showRuler: true,
+            showRowColHeaders: true,
+            showGridLines: true,
+            zoomScale: 100,
+            zoomScaleNormal: 100
+          }
+        ],
+        media: [],
+        tables: [],
+        conditionalFormattings: [],
+        rows: [
+          {
+            cells: [
+              { address: 'A1', value: 'A1 Value', type: 3, style: {} },
+              { address: 'B1', value: 'B1 Value', type: 3, style: {} }
+            ],
+            number: 1,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A2', value: 'A2 Value', type: 3, style: {} },
+              { address: 'B2', value: 'B2 Value', type: 3, style: {} }
+            ],
+            number: 2,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A3', value: 'A1 Value', type: 3, style: {} },
+              {
+                address: 'B3',
+                value: 'B3 Value',
+                type: 3,
+                comment: {
+                  note: {
+                    margins: { insetmode: 'auto', inset: [null, 0.13, 0.25, 0.25] },
+                    protection: { locked: 'True', lockText: 'True' },
+                    editAs: 'absolute',
+                    texts: [],
+                    anchor: '2, 15, 1, 10, 4, 31, 5, 9'
+                  },
+                  type: 'note'
+                },
+                style: {}
+              }
+            ],
+            number: 3,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A4', value: 'A2 Value', type: 3, style: {} },
+              {
+                address: 'B4',
+                value: 'B4 Value',
+                type: 3,
+                style: {
+                  font: { bold: true, size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
+                  border: {},
+                  fill: { type: 'pattern', pattern: 'none' }
+                }
+              }
+            ],
+            number: 4,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A5', value: 'A1 Value', type: 3, style: {} },
+              { address: 'B5', value: 'B1 Value', type: 3, style: {} }
+            ],
+            number: 5,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              {
+                address: 'A6',
+                value: 'A2 Value',
+                type: 3,
+                style: {
+                  font: { underline: true, size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
+                  border: {},
+                  fill: { type: 'pattern', pattern: 'none' }
+                }
+              },
+              { address: 'B6', value: 'B2 Value', type: 3, style: {} }
+            ],
+            number: 6,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A7', value: 'A1 Value', type: 3, style: {} },
+              { address: 'B7', value: 'B3 Value', type: 3, style: {} }
+            ],
+            number: 7,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A8', value: 'A2 Value', type: 3, style: {} },
+              { address: 'B8', value: 'B4 Value', type: 3, style: {} }
+            ],
+            number: 8,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              {
+                address: 'A9',
+                value: 'A1 Value',
+                type: 3,
+                style: {
+                  font: { size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
+                  border: {},
+                  fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' }, bgColor: { indexed: 64 } }
+                }
+              },
+              { address: 'B9', value: 'B1 Value', type: 3, style: {} }
+            ],
+            number: 9,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A10', value: 'A2 Value', type: 3, style: {} },
+              { address: 'B10', value: 'B2 Value', type: 3, style: {} }
+            ],
+            number: 10,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A11', value: 'A1 Value', type: 3, style: {} },
+              {
+                address: 'B11',
+                value: 'B3 Value',
+                type: 3,
+                style: {
+                  font: { size: 11, color: { argb: 'FFFF0000' }, name: 'Calibri', family: 2, scheme: 'minor' },
+                  border: {},
+                  fill: { type: 'pattern', pattern: 'none' }
+                }
+              }
+            ],
+            number: 11,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A12', value: 'A2 Value', type: 3, style: {} },
+              { address: 'B12', value: 'B4 Value', type: 3, style: {} }
+            ],
+            number: 12,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A13', value: 'A1 Value', type: 3, style: {} },
+              { address: 'B13', value: 'B1 Value', type: 3, style: {} }
+            ],
+            number: 13,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          },
+          {
+            cells: [
+              { address: 'A14', value: 'A2 Value', type: 3, style: {} },
+              { address: 'B14', value: 'B2 Value', type: 3, style: {} }
+            ],
+            number: 14,
+            min: 1,
+            max: 2,
+            style: {},
+            hidden: false,
+            outlineLevel: 0,
+            collapsed: false
+          }
+        ],
+        dimensions: { model: { top: 1, left: 1, bottom: 14, right: 2 } },
+        merges: []
+      }
+    ],
+    definedNames: [],
+    views: [{ x: 240, y: 105, width: 14805, height: 8010, visibility: 'visible' }],
+    company: '',
+    manager: '',
+    title: '',
+    subject: '',
+    keywords: '',
+    category: '',
+    description: '',
+    revision: 0,
+    contentStatus: '',
+    themes: { theme1: '\r\n' },
+    media: [],
+    calcProperties: {}
+  }
+
+  // const rows: Row[] = [
+  //   {
+  //     rowId: 'header',
+  //     cells: [
+  //       {
+  //         type: 'header',
+  //         text: 'Name',
+  //         nonEditable: true,
+  //         style: {
+  //           border: {
+  //             top: { color: 'red', width: '1px', style: 'solid' },
+  //             bottom: { color: 'red', width: '1px', style: 'solid' }
+  //           }
+  //         }
+  //       },
+  //       { type: 'header', text: 'Surname', nonEditable: true }
+  //     ]
+  //   },
+  //   {
+  //     rowId: '1',
+  //     cells: [
+  //       { type: 'text', text: 'asd', nonEditable: true },
+  //       { type: 'text', text: 'afsafas', nonEditable: true }
+  //     ]
+  //   },
+  //   {
+  //     rowId: '2',
+  //     cells: [
+  //       { type: 'text', text: 'sdg', nonEditable: true },
+  //       {
+  //         type: 'text',
+  //         text: '32523',
+  //         nonEditable: true,
+  //         style: {
+  //           border: {
+  //             top: { color: 'green', width: '2px', style: 'dotted' },
+  //             bottom: { color: 'green', width: '2px', style: 'dotted' }
+  //           }
+  //         }
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     rowId: '3',
+  //     cells: [
+  //       { type: 'text', text: 'dva4', nonEditable: true },
+  //       {
+  //         type: 'text',
+  //         text: 'sdgshwe',
+  //         nonEditable: true,
+  //         style: {
+  //           border: {
+  //             top: { color: 'red', width: '1px', style: 'solid' },
+  //             bottom: { color: 'red', width: '1px', style: 'solid' }
+  //           }
+  //         }
+  //       }
+  //     ]
+  //   }
+  // ]
+
+  const gridColumns: Column[] = [{ columnId: '', width: 20 }]
+  let gridRows: Row[] = []
+  let index = 1
+  for (const row of data.worksheets[0].rows) {
+    const gridRow: Row = { rowId: row.number, cells: [{ type: 'number', value: index++ }] }
+    for (const cell of row.cells) {
+      const cellAddress = cell.address.replace(/[0-9]/g, '')
+      if (!gridColumns.some(x => x.columnId === cellAddress)) {
+        gridColumns.push({
+          columnId: cellAddress,
+          resizable: true
+        })
+      }
+      gridRow.cells.push({
+        type: 'text',
+        text: cell.value,
+        nonEditable: true
+      })
+    }
+    gridRows.push(gridRow)
+  }
+  const headerRow: Row = {
+    rowId: 0,
+    cells: gridColumns.map(column => ({ type: 'text', text: column.columnId.toString() }))
+  }
+  gridRows = [headerRow, ...gridRows]
+
+  // const columns: Column[] = [
+  //   { columnId: 'name', width: 150, resizable: true, reorderable: true },
+  //   { columnId: 'surname', width: 150, resizable: true, reorderable: true }
+  // ]
+
+  const simpleHandleContextMenu = (
+    selectedRowIds: Id[],
+    selectedColIds: Id[],
+    selectionMode: SelectionMode,
+    menuOptions: MenuOption[]
+  ): MenuOption[] => {
+    return menuOptions.concat(
+      {
+        id: 'add-comment',
+        label: 'Add Comment',
+        handler(
+          selectedRowIds: Id[],
+          selectedColIds: Id[],
+          selectionMode: SelectionMode,
+          selectedRanges: CellLocation[][]
+        ) {
+          console.log('add_comment')
+        }
+      },
+      {
+        id: 'attach-file',
+        label: 'Attach File',
+        handler(
+          selectedRowIds: Id[],
+          selectedColIds: Id[],
+          selectionMode: SelectionMode,
+          selectedRanges: CellLocation[][]
+        ) {
+          console.log('attach_file')
+        }
+      }
+    )
+  }
+
   return (
     <Grid container spacing={5}>
+      <ReactGrid
+        rows={gridRows}
+        columns={gridColumns}
+        enableRangeSelection
+        enableRowSelection
+        enableColumnSelection
+        onContextMenu={simpleHandleContextMenu}
+      />
       <Card>
         <form onSubmit={e => e.preventDefault()}>
           <CardHeader title='Create a Supporting Package' titleTypographyProps={{ variant: 'h6' }}></CardHeader>
