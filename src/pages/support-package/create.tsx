@@ -1,6 +1,6 @@
 // ** React Imports
 import React, { ChangeEvent, useState } from 'react'
-import { ReactGrid, Row, Column, Id, MenuOption, SelectionMode, CellLocation } from '@silevis/reactgrid'
+import { ReactGrid, Row, Column, Id, MenuOption, SelectionMode } from '@silevis/reactgrid'
 import '@silevis/reactgrid/styles.css'
 
 // ** MUI Imports
@@ -24,8 +24,6 @@ import {
   FormControlLabel,
   FormLabel,
   Modal,
-  SpeedDial,
-  SpeedDialAction,
   Switch,
   Tab,
   Tabs,
@@ -36,9 +34,6 @@ import dayjs, { Dayjs } from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
-import AttachFileIcon from '@mui/icons-material/AttachFile'
-import GridOnIcon from '@mui/icons-material/GridOn'
-import LinkIcon from '@mui/icons-material/Link'
 import TableCollapsible from 'src/views/tables/TableCollapsible'
 import TableCustomized from 'src/views/tables/TableCustomized'
 
@@ -798,24 +793,22 @@ const CreateSupportPackage = () => {
       {
         id: 'add-comment',
         label: 'Add Comment',
-        handler(
-          selectedRowIds: Id[],
-          selectedColIds: Id[],
-          selectionMode: SelectionMode,
-          selectedRanges: CellLocation[][]
-        ) {
+        handler() // selectedRowIds: Id[],
+        // selectedColIds: Id[],
+        // selectionMode: SelectionMode,
+        // selectedRanges: CellLocation[][]
+        {
           console.log('add_comment')
         }
       },
       {
         id: 'attach-file',
         label: 'Attach File',
-        handler(
-          selectedRowIds: Id[],
-          selectedColIds: Id[],
-          selectionMode: SelectionMode,
-          selectedRanges: CellLocation[][]
-        ) {
+        handler() // selectedRowIds: Id[],
+        // selectedColIds: Id[],
+        // selectionMode: SelectionMode,
+        // selectedRanges: CellLocation[][]
+        {
           console.log('attach_file')
         }
       }
@@ -824,14 +817,6 @@ const CreateSupportPackage = () => {
 
   return (
     <Grid container spacing={5}>
-      <ReactGrid
-        rows={gridRows}
-        columns={gridColumns}
-        enableRangeSelection
-        enableRowSelection
-        enableColumnSelection
-        onContextMenu={simpleHandleContextMenu}
-      />
       <Card>
         <form onSubmit={e => e.preventDefault()}>
           <CardHeader title='Create a Supporting Package' titleTypographyProps={{ variant: 'h6' }}></CardHeader>
@@ -841,11 +826,11 @@ const CreateSupportPackage = () => {
               <FormControlLabel control={<Switch defaultChecked />} label='Confidential' />
             </Grid>
             <Grid container spacing={5} sx={{ marginTop: -13 }}>
-              {/* <Grid item xs={12} sm={12} sx={{ marginTop: 1 }}>
+              <Grid item xs={12} sm={12} sx={{ marginTop: 1 }}>
                 <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                  1. Package Details
+                  Package Details
                 </Typography>
-              </Grid> */}
+              </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -967,47 +952,32 @@ const CreateSupportPackage = () => {
 
       <Grid item xs={12}></Grid>
       <Card>
-        <Grid item xs={12} sm={12}>
-          <Box sx={{ position: 'fixed', mt: 3, height: 320, right: 30, top: '46%' }}>
-            <SpeedDial ariaLabel='SpeedDial playground example' icon={<AttachFileIcon />} direction='down'>
-              <SpeedDialAction key={'Excel'} icon={<GridOnIcon />} tooltipTitle='Create Excel File' />
-              <SpeedDialAction key={'Sheet'} icon={<GridOnIcon />} tooltipTitle='Create Google Sheet' />
-              <SpeedDialAction key={'Attach'} icon={<AttachFileIcon />} tooltipTitle='Attach' />
-              <SpeedDialAction key={'Link'} icon={<LinkIcon />} tooltipTitle='Link' />
-            </SpeedDial>
-          </Box>
-          <Box>
-            <Tabs
-              value={values.tab}
-              onChange={handleTabChange}
-              variant='fullWidth'
-              aria-label='full width tabs example'
-              sx={{ margin: '10px 200px' }}
-            >
-              <Tab label='Support' />
-              <Tab label='Comments' />
-              <Tab label='Journal Entry' />
-            </Tabs>
-            <TabPanel value={values.tab} index={0} dir={theme.direction}>
-              <Box
-                sx={{
-                  width: 1,
-                  p: 1,
-                  bgcolor: theme => (theme.palette.mode === 'dark' ? '#101010' : 'grey.100'),
-                  color: theme => (theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800'),
-                  border: '1px solid',
-                  borderColor: theme => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300'),
-                  borderRadius: 2,
-                  fontSize: '0.875rem',
-                  fontWeight: '700',
-                  textAlign: 'center'
-                }}
-              >
-                Width 1
-              </Box>
-            </TabPanel>
-            <TabPanel value={values.tab} index={1} dir={theme.direction}>
-              {/* <Grid container wrap='nowrap' item xs={12} sm={12} sx={{ padding: '0 3rem' }}>
+        <Box>
+          <Tabs
+            value={values.tab}
+            onChange={handleTabChange}
+            variant='fullWidth'
+            aria-label='full width tabs example'
+            sx={{ margin: '10px 200px' }}
+          >
+            <Tab label='Support' />
+            <Tab label='Comments' />
+            <Tab label='Journal Entry' />
+          </Tabs>
+          <TabPanel value={values.tab} index={0} dir={theme.direction}>
+            <Grid container wrap='nowrap' xs={12} sm={12} md={12}>
+              <ReactGrid
+                rows={gridRows}
+                columns={gridColumns}
+                enableRangeSelection
+                enableRowSelection
+                enableColumnSelection
+                onContextMenu={simpleHandleContextMenu}
+              />
+            </Grid>
+          </TabPanel>
+          <TabPanel value={values.tab} index={1} dir={theme.direction}>
+            {/* <Grid container wrap='nowrap' item xs={12} sm={12} sx={{ padding: '0 3rem' }}>
                 <TextField
                   fullWidth
                   id='outlined-multiline-flexible'
@@ -1084,31 +1054,30 @@ const CreateSupportPackage = () => {
                 </Grid>
               </Grid>
               <Divider variant='fullWidth' style={{ margin: '30px 0' }} /> */}
-              <Grid container wrap='nowrap' spacing={2}>
-                <Grid item>
-                  <Avatar alt='Remy Sharp'>RS</Avatar>
-                </Grid>
-                <Grid justifyContent='left' item xs zeroMinWidth>
-                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                  <p style={{ textAlign: 'left' }}>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
-                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
-                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
-                    urna, nec feugiat quam lectus vitae ex.{' '}
-                  </p>
-                  <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
-                </Grid>
+            <Grid container wrap='nowrap' spacing={2}>
+              <Grid item>
+                <Avatar alt='Remy Sharp'>RS</Avatar>
               </Grid>
-            </TabPanel>
-            <TabPanel value={values.tab} index={2} dir={theme.direction}>
-              <Grid item xs={12} sm={12}>
-                TO DO
+              <Grid justifyContent='left' item xs zeroMinWidth>
+                <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                <p style={{ textAlign: 'left' }}>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                  bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                  tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a ligula
+                  nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus. Pellentesque et
+                  neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula urna, nec feugiat
+                  quam lectus vitae ex.{' '}
+                </p>
+                <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
               </Grid>
-            </TabPanel>
-          </Box>
-        </Grid>
+            </Grid>
+          </TabPanel>
+          <TabPanel value={values.tab} index={2} dir={theme.direction}>
+            <Grid item xs={12} sm={12}>
+              TO DO
+            </Grid>
+          </TabPanel>
+        </Box>
         <Divider sx={{ margin: 0 }} />
       </Card>
       <Modal
