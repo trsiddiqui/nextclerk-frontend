@@ -1,5 +1,5 @@
 // ** React Imports
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useRef, useState } from 'react'
 import {
   ReactGrid,
   Row,
@@ -26,7 +26,7 @@ import CardContent from '@mui/material/CardContent'
 import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
 
-// ** Icons Imports
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   Autocomplete,
   Avatar,
@@ -40,7 +40,9 @@ import {
   Tab,
   Tabs,
   Link,
-  useTheme
+  useTheme,
+  Menu,
+  MenuItem
 } from '@mui/material'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import dayjs, { Dayjs } from 'dayjs'
@@ -129,6 +131,15 @@ const CreateSupportPackage = () => {
   const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
   const [sheetIndex, setSheetIndex] = React.useState(0)
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [focussedCell, setFocussedCell] = React.useState('')
+  const saveMenuOpen = Boolean(anchorEl)
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
 
   const [attachments] = React.useState([
     {
@@ -138,6 +149,8 @@ const CreateSupportPackage = () => {
       name: 'JanuaryReports.pdf'
     }
   ])
+
+  const reactGrid = useRef<ReactGrid>(null)
 
   // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
@@ -160,10 +173,11 @@ const CreateSupportPackage = () => {
 
   const sheets = []
   for (const excelSheet of importedExcelJs) {
-    const gridColumns: Column[] = excelSheet.columns.map(col => ({
+    const gridColumns: Column[] = excelSheet.columns.map((col, index) => ({
       columnId: col.address,
       resizable: true,
-      width: parseInt(((col.width ?? 20) * 10).toString())
+      width: parseInt(((col.width ?? 20) * 10).toString()),
+      key: index
 
       // width: col.width ? col.width * 2 : undefined
     }))
@@ -177,9 +191,11 @@ const CreateSupportPackage = () => {
     let gridRows: Row[] = excelSheet.rows.map((row, index) => ({
       height: row.height,
       rowId: index,
-      cells: row.cells.map(cell => {
+      key: index,
+      cells: row.cells.map((cell, index) => {
         const sharedProperties = {
           nonEditable: true,
+          key: index,
           style: {
             color: `#${cell.style.font?.color.argb.substring(2)}`,
             background: `#${cell.style.fill?.fgColor.argb.substring(2)}`,
@@ -260,6 +276,7 @@ const CreateSupportPackage = () => {
       cells: gridColumns.map((column, index) => ({
         type: 'text',
         text: column.columnId.toString(),
+        key: index,
         style: {
           background: index > 0 ? `#D3D3D3` : undefined,
           border: {
@@ -430,14 +447,32 @@ const CreateSupportPackage = () => {
           <Grid item xs={12}>
             <Divider sx={{ margin: 0 }} />
           </Grid>
-          {/* <CardActions>
-            <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+          <CardActions>
+            <Button
+              id='basic-button'
+              aria-controls={saveMenuOpen ? 'basic-menu' : undefined}
+              aria-haspopup='true'
+              aria-expanded={saveMenuOpen ? 'true' : undefined}
+              onClick={handleClick}
+              variant='outlined'
+              sx={{ marginLeft: 'auto' }}
+              endIcon={<ExpandMoreIcon />}
+            >
               Save
             </Button>
-            <Button size='large' color='secondary' variant='outlined'>
-              Cancel
-            </Button>
-          </CardActions> */}
+            <Menu
+              id='basic-menu'
+              anchorEl={anchorEl}
+              open={saveMenuOpen}
+              onClose={handleClose}
+              MenuListProps={{
+                'aria-labelledby': 'basic-button'
+              }}
+            >
+              <MenuItem onClick={handleClose}>Save Draft</MenuItem>
+              <MenuItem onClick={handleClose}>Save</MenuItem>
+            </Menu>
+          </CardActions>
         </form>
       </Card>
       <Card>
@@ -455,44 +490,72 @@ const CreateSupportPackage = () => {
           </Tabs>
           <TabPanel value={values.tab} index={0} dir={theme.direction}>
             <Grid container>
-              <Card
-                sx={{
-                  padding: '10px 10px 0px 10px',
-                  border: '1px dotted green',
-                  borderRadius: 2
-                }}
-              >
-                <CardActions sx={{ paddingBottom: 0 }}>
-                  <ButtonGroup variant='outlined' aria-label='outlined button group'>
-                    {sheets.map((sheet, index) => (
-                      <Button
-                        key={index}
-                        sheet-index={index}
-                        variant={sheetIndex === index ? 'contained' : undefined}
-                        onClick={event => {
-                          setSheetIndex(parseInt(event.currentTarget.getAttribute('sheet-index') ?? '0'))
-                        }}
-                      >
-                        {sheet.name}
-                      </Button>
-                    ))}
-                  </ButtonGroup>
-                </CardActions>
-                <CardContent
+              <Grid item xs={12} sm={9}>
+                <Card
                   sx={{
-                    overflow: 'scroll',
-                    paddingTop: 2
+                    padding: '10px 10px 0px 10px',
+                    border: '1px dotted green',
+                    borderRadius: 2
                   }}
                 >
-                  <ReactGrid
-                    rows={sheets[sheetIndex].gridRows}
-                    columns={sheets[sheetIndex].gridColumns}
-                    enableRowSelection
-                    enableColumnSelection
-                    onContextMenu={simpleHandleContextMenu}
-                  />
-                </CardContent>
-              </Card>
+                  <CardActions sx={{ paddingBottom: 0 }}>
+                    <ButtonGroup variant='outlined' aria-label='outlined button group'>
+                      {sheets.map((sheet, index) => (
+                        <Button
+                          key={index}
+                          sheet-index={index}
+                          variant={sheetIndex === index ? 'contained' : undefined}
+                          onClick={event => {
+                            console.log(reactGrid.current?.state.selectedRanges)
+
+                            setSheetIndex(parseInt(event.currentTarget.getAttribute('sheet-index') ?? '0'))
+                          }}
+                        >
+                          {sheet.name}
+                        </Button>
+                      ))}
+                    </ButtonGroup>
+                  </CardActions>
+                  <CardContent
+                    sx={{
+                      overflow: 'scroll',
+                      paddingTop: 2
+                    }}
+                  >
+                    <ReactGrid
+                      ref={reactGrid}
+                      rows={sheets[sheetIndex].gridRows}
+                      columns={sheets[sheetIndex].gridColumns}
+                      enableRowSelection
+                      enableColumnSelection
+                      enableRangeSelection
+                      onContextMenu={simpleHandleContextMenu}
+                      onFocusLocationChanged={location => {
+                        if (location.columnId >= 'A' && location.rowId.toString() >= '0')
+                          setFocussedCell(`${location.columnId}${parseInt(String(location.rowId)) + 1}`)
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              <Grid item xs={12} sm={3} sx={{ pl: 1 }}>
+                {focussedCell}
+                <Grid container wrap='nowrap' spacing={2}>
+                  <Grid item>
+                    <Avatar alt='Remy Sharp'>RS</Avatar>
+                  </Grid>
+                  <Grid justifyContent='left' item xs zeroMinWidth>
+                    <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel&nbsp;12th December, 2022 1:23PM</h4>
+                    <p style={{ textAlign: 'left' }}>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                      bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                      tortor.
+                    </p>
+                  </Grid>
+                </Grid>
+                <Divider />
+              </Grid>
             </Grid>
           </TabPanel>
           <TabPanel value={values.tab} index={1} dir={theme.direction}>

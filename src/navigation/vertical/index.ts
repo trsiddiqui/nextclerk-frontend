@@ -1,12 +1,12 @@
 // ** Icon imports
 // import Login from 'mdi-material-ui/Login'
 import Table from 'mdi-material-ui/Table'
-import CubeOutline from 'mdi-material-ui/CubeOutline'
 import HomeOutline from 'mdi-material-ui/HomeOutline'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
-import InboxIcon from '@mui/icons-material/Inbox'
-import LocalLibraryIcon from '@mui/icons-material/LocalLibrary'
 
+// import InboxIcon from '@mui/icons-material/Inbox'
+// import LocalLibraryIcon from '@mui/icons-material/LocalLibrary'
+// import CubeOutline from 'mdi-material-ui/CubeOutline'
 // import FormatLetterCase from 'mdi-material-ui/FormatLetterCase'
 // import AccountCogOutline from 'mdi-material-ui/AccountCogOutline'
 // import CreditCardOutline from 'mdi-material-ui/CreditCardOutline'
@@ -24,74 +24,20 @@ const navigation = (): VerticalNavItemsType => {
       icon: HomeOutline,
       path: '/'
     },
-
-    // {
-    //   title: 'Account Settings',
-    //   icon: AccountCogOutline,
-    //   path: '/account-settings'
-    // },
-    // {
-    //   sectionTitle: 'Pages'
-    // },
-    // {
-    //   title: 'Login',
-    //   icon: Login,
-    //   path: '/pages/login',
-    //   openInNewTab: true
-    // },
-    // {
-    //   title: 'Register',
-    //   icon: AccountPlusOutline,
-    //   path: '/pages/register',
-    //   openInNewTab: true
-    // },
-    // {
-    //   title: 'Error',
-    //   icon: AlertCircleOutline,
-    //   path: '/pages/error',
-    //   openInNewTab: true
-    // },
-    // {
-    //   sectionTitle: 'User Interface'
-    // },
-    // {
-    //   title: 'Typography',
-    //   icon: FormatLetterCase,
-    //   path: '/typography'
-    // },
-    // {
-    //   title: 'Icons',
-    //   path: '/icons',
-    //   icon: GoogleCirclesExtended
-    // },
-    // {
-    //   title: 'Cards',
-    //   icon: CreditCardOutline,
-    //   path: '/cards'
-    // },
     {
       title: 'Tables',
       icon: Table,
       path: '/tables'
     },
-    {
-      icon: CubeOutline,
-      title: 'Form Layouts',
-      path: '/form-layouts'
-    },
+
+    // {
+    //   icon: CubeOutline,
+    //   title: 'Form Layouts',
+    //   path: '/form-layouts'
+    // },
     {
       icon: FormatListBulletedIcon,
-      title: 'Journal Log Sheet',
-      path: '/form-layouts'
-    },
-    {
-      icon: InboxIcon,
-      title: 'Inbox',
-      path: '/form-layouts'
-    },
-    {
-      icon: LocalLibraryIcon,
-      title: 'Library',
+      title: 'Log Sheet',
       path: '/form-layouts'
     }
   ]

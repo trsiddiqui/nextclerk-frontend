@@ -98,8 +98,12 @@ const VerticalNavLink = ({ item, navVisible, toggleNavVisibility }: Props) => {
             }
           }}
           sx={{
-            pl: 5.5,
-            ...(item.disabled ? { pointerEvents: 'none' } : { cursor: 'pointer' })
+            // pl: 5.5,
+            ...(item.disabled ? { pointerEvents: 'none' } : { cursor: 'pointer' }),
+            display: 'block',
+            textAlign: 'center',
+            marginLeft: '15px',
+            px: '0 !important'
           }}
         >
           <ListItemIcon
@@ -111,9 +115,15 @@ const VerticalNavLink = ({ item, navVisible, toggleNavVisibility }: Props) => {
           >
             <UserIcon icon={IconTag} />
           </ListItemIcon>
-
+          <br />
           <MenuItemTextMetaWrapper>
-            <Typography {...(themeConfig.menuTextTruncate && { noWrap: true })}>{item.title}</Typography>
+            <Typography
+              fontSize={12}
+              {...(themeConfig.menuTextTruncate && { noWrap: true })}
+              sx={{ textAlign: 'center', width: '100%', marginLeft: '-7px' }}
+            >
+              {item.title}
+            </Typography>
             {item.badgeContent ? (
               <Chip
                 label={item.badgeContent}
