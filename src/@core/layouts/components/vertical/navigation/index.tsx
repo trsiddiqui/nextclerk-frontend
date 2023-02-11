@@ -22,7 +22,7 @@ import VerticalNavHeader from './VerticalNavHeader'
 
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
-import { Button } from '@mui/material'
+import { IconButton } from '@mui/material'
 
 interface Props {
   hidden: boolean
@@ -118,14 +118,23 @@ const Navigation = (props: Props) => {
           )} 95%,${hexToRGBA(theme.palette.background.default, 0.05)})`
         }}
       />
-      <Button
+
+      <IconButton
+        sx={{ marginTop: 5, width: 40, marginLeft: 10, background: 'white', border: '1px solid lightgrey' }}
+        color='primary'
+        size='medium'
+        onClick={() => router.push('/support-package/create')}
+      >
+        <AddIcon fontSize='inherit' />
+      </IconButton>
+      {/* <Button
         sx={{ margin: '40px 10px 10px 10px' }}
         variant='outlined'
         startIcon={<AddIcon />}
         onClick={() => router.push('/support-package/create')}
       >
         Create
-      </Button>
+      </Button> */}
       <Box sx={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
         {/* @ts-ignore */}
         <ScrollWrapper

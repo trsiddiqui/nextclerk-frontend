@@ -39,8 +39,9 @@ const MenuNavLink = styled(ListItemButton)<
   ListItemButtonProps & { component?: ElementType; target?: '_blank' | undefined }
 >(({ theme }) => ({
   width: '100%',
-  borderTopRightRadius: 100,
-  borderBottomRightRadius: 100,
+
+  // borderTopRightRadius: 100,
+  // borderBottomRightRadius: 100,
   color: theme.palette.text.primary,
   padding: theme.spacing(2.25, 3.5),
   transition: 'opacity .25s ease-in-out',
@@ -102,7 +103,7 @@ const VerticalNavLink = ({ item, navVisible, toggleNavVisibility }: Props) => {
             ...(item.disabled ? { pointerEvents: 'none' } : { cursor: 'pointer' }),
             display: 'block',
             textAlign: 'center',
-            marginLeft: '15px',
+            marginLeft: '25px',
             px: '0 !important'
           }}
         >
