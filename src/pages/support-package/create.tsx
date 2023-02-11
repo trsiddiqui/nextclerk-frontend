@@ -1,6 +1,17 @@
 // ** React Imports
 import React, { ChangeEvent, useState } from 'react'
-import { ReactGrid, Row, Column, Id, MenuOption, SelectionMode } from '@silevis/reactgrid'
+import {
+  ReactGrid,
+  Row,
+  Column,
+  Id,
+  MenuOption,
+  SelectionMode,
+  TextCell,
+  NumberCell,
+  DateCell,
+  CheckboxCell
+} from '@silevis/reactgrid'
 import '@silevis/reactgrid/styles.css'
 
 // ** MUI Imports
@@ -20,6 +31,7 @@ import {
   Autocomplete,
   Avatar,
   Box,
+  ButtonGroup,
   Chip,
   FormControlLabel,
   FormLabel,
@@ -27,6 +39,7 @@ import {
   Switch,
   Tab,
   Tabs,
+  Link,
   useTheme
 } from '@mui/material'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
@@ -36,12 +49,13 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
 import TableCollapsible from 'src/views/tables/TableCollapsible'
 import TableCustomized from 'src/views/tables/TableCustomized'
+import { importedExcelJs } from './sample-excel-file'
 
 const modalStyle = {
   position: 'absolute' as const,
   top: '50%',
   left: '50%',
-  transform: 'translate(-50%, -50%)',
+  transform: 'translate(-50%,  -50%)',
 
   // width: 400,
   bgcolor: 'background.paper',
@@ -114,6 +128,16 @@ const CreateSupportPackage = () => {
   })
   const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
+  const [sheetIndex, setSheetIndex] = React.useState(0)
+
+  const [attachments] = React.useState([
+    {
+      name: 'JanuaryReceipts.xlsx'
+    },
+    {
+      name: 'JanuaryReports.pdf'
+    }
+  ])
 
   // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
@@ -134,654 +158,127 @@ const CreateSupportPackage = () => {
     setValues({ ...values, tab: newValue })
   }
 
-  const data = {
-    creator: 'Unknown',
-    lastModifiedBy: 'Taha Rehman',
-    created: '2023-01-21T17:54:11.000Z',
-    modified: '2023-02-07T03:47:19.000Z',
-    properties: { date1904: false },
-    worksheets: [
-      {
-        id: 1,
-        name: 'Sheet1',
-        dataValidations: {},
-        properties: { defaultRowHeight: 15, dyDescent: 0, outlineLevelRow: 0, outlineLevelCol: 0 },
-        state: 'visible',
-        pageSetup: {
-          fitToPage: false,
-          margins: { left: 0.7, right: 0.7, top: 0.75, bottom: 0.75, header: 0.3, footer: 0.3 }
-        },
-        headerFooter: null,
-        rowBreaks: [],
-        views: [
-          {
-            workbookViewId: 0,
-            rightToLeft: false,
-            state: 'normal',
-            showRuler: true,
-            showRowColHeaders: true,
-            showGridLines: true,
-            zoomScale: 100,
-            zoomScaleNormal: 100
-          }
-        ],
-        media: [],
-        tables: [],
-        conditionalFormattings: [],
-        rows: [
-          {
-            cells: [
-              { address: 'A1', value: 'A1 Value', type: 3, style: {} },
-              { address: 'B1', value: 'B1 Value', type: 3, style: {} }
-            ],
-            number: 1,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A2', value: 'A2 Value', type: 3, style: {} },
-              { address: 'B2', value: 'B2 Value', type: 3, style: {} }
-            ],
-            number: 2,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A3', value: 'A1 Value', type: 3, style: {} },
-              {
-                address: 'B3',
-                value: 'B3 Value',
-                type: 3,
-                comment: {
-                  note: {
-                    margins: { insetmode: 'auto', inset: [null, 0.13, 0.25, 0.25] },
-                    protection: { locked: 'True', lockText: 'True' },
-                    editAs: 'absolute',
-                    texts: [],
-                    anchor: '2, 15, 1, 10, 4, 31, 5, 9'
-                  },
-                  type: 'note'
-                },
-                style: {}
-              }
-            ],
-            number: 3,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A4', value: 'A2 Value', type: 3, style: {} },
-              {
-                address: 'B4',
-                value: 'B4 Value',
-                type: 3,
-                style: {
-                  font: { bold: true, size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
-                  border: {},
-                  fill: { type: 'pattern', pattern: 'none' }
-                }
-              }
-            ],
-            number: 4,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A5', value: 'A1 Value', type: 3, style: {} },
-              { address: 'B5', value: 'B1 Value', type: 3, style: {} }
-            ],
-            number: 5,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              {
-                address: 'A6',
-                value: 'A2 Value',
-                type: 3,
-                style: {
-                  font: { underline: true, size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
-                  border: {},
-                  fill: { type: 'pattern', pattern: 'none' }
-                }
-              },
-              { address: 'B6', value: 'B2 Value', type: 3, style: {} }
-            ],
-            number: 6,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A7', value: 'A1 Value', type: 3, style: {} },
-              { address: 'B7', value: 'B3 Value', type: 3, style: {} }
-            ],
-            number: 7,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A8', value: 'A2 Value', type: 3, style: {} },
-              { address: 'B8', value: 'B4 Value', type: 3, style: {} }
-            ],
-            number: 8,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              {
-                address: 'A9',
-                value: 'A1 Value',
-                type: 3,
-                style: {
-                  font: { size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
-                  border: {},
-                  fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' }, bgColor: { indexed: 64 } }
-                }
-              },
-              { address: 'B9', value: 'B1 Value', type: 3, style: {} }
-            ],
-            number: 9,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A10', value: 'A2 Value', type: 3, style: {} },
-              { address: 'B10', value: 'B2 Value', type: 3, style: {} }
-            ],
-            number: 10,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A11', value: 'A1 Value', type: 3, style: {} },
-              {
-                address: 'B11',
-                value: 'B3 Value',
-                type: 3,
-                style: {
-                  font: { size: 11, color: { argb: 'FFFF0000' }, name: 'Calibri', family: 2, scheme: 'minor' },
-                  border: {},
-                  fill: { type: 'pattern', pattern: 'none' }
-                }
-              }
-            ],
-            number: 11,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A12', value: 'A2 Value', type: 3, style: {} },
-              { address: 'B12', value: 'B4 Value', type: 3, style: {} }
-            ],
-            number: 12,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A13', value: 'A1 Value', type: 3, style: {} },
-              { address: 'B13', value: 'B1 Value', type: 3, style: {} }
-            ],
-            number: 13,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A14', value: 'A2 Value', type: 3, style: {} },
-              { address: 'B14', value: 'B2 Value', type: 3, style: {} }
-            ],
-            number: 14,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          }
-        ],
-        dimensions: { model: { top: 1, left: 1, bottom: 14, right: 2 } },
-        merges: []
-      }
-    ],
-    sheets: [
-      {
-        id: 1,
-        name: 'Sheet1',
-        dataValidations: {},
-        properties: { defaultRowHeight: 15, dyDescent: 0, outlineLevelRow: 0, outlineLevelCol: 0 },
-        state: 'visible',
-        pageSetup: {
-          fitToPage: false,
-          margins: { left: 0.7, right: 0.7, top: 0.75, bottom: 0.75, header: 0.3, footer: 0.3 }
-        },
-        headerFooter: null,
-        rowBreaks: [],
-        views: [
-          {
-            workbookViewId: 0,
-            rightToLeft: false,
-            state: 'normal',
-            showRuler: true,
-            showRowColHeaders: true,
-            showGridLines: true,
-            zoomScale: 100,
-            zoomScaleNormal: 100
-          }
-        ],
-        media: [],
-        tables: [],
-        conditionalFormattings: [],
-        rows: [
-          {
-            cells: [
-              { address: 'A1', value: 'A1 Value', type: 3, style: {} },
-              { address: 'B1', value: 'B1 Value', type: 3, style: {} }
-            ],
-            number: 1,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A2', value: 'A2 Value', type: 3, style: {} },
-              { address: 'B2', value: 'B2 Value', type: 3, style: {} }
-            ],
-            number: 2,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A3', value: 'A1 Value', type: 3, style: {} },
-              {
-                address: 'B3',
-                value: 'B3 Value',
-                type: 3,
-                comment: {
-                  note: {
-                    margins: { insetmode: 'auto', inset: [null, 0.13, 0.25, 0.25] },
-                    protection: { locked: 'True', lockText: 'True' },
-                    editAs: 'absolute',
-                    texts: [],
-                    anchor: '2, 15, 1, 10, 4, 31, 5, 9'
-                  },
-                  type: 'note'
-                },
-                style: {}
-              }
-            ],
-            number: 3,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A4', value: 'A2 Value', type: 3, style: {} },
-              {
-                address: 'B4',
-                value: 'B4 Value',
-                type: 3,
-                style: {
-                  font: { bold: true, size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
-                  border: {},
-                  fill: { type: 'pattern', pattern: 'none' }
-                }
-              }
-            ],
-            number: 4,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A5', value: 'A1 Value', type: 3, style: {} },
-              { address: 'B5', value: 'B1 Value', type: 3, style: {} }
-            ],
-            number: 5,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              {
-                address: 'A6',
-                value: 'A2 Value',
-                type: 3,
-                style: {
-                  font: { underline: true, size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
-                  border: {},
-                  fill: { type: 'pattern', pattern: 'none' }
-                }
-              },
-              { address: 'B6', value: 'B2 Value', type: 3, style: {} }
-            ],
-            number: 6,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A7', value: 'A1 Value', type: 3, style: {} },
-              { address: 'B7', value: 'B3 Value', type: 3, style: {} }
-            ],
-            number: 7,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A8', value: 'A2 Value', type: 3, style: {} },
-              { address: 'B8', value: 'B4 Value', type: 3, style: {} }
-            ],
-            number: 8,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              {
-                address: 'A9',
-                value: 'A1 Value',
-                type: 3,
-                style: {
-                  font: { size: 11, color: { theme: 1 }, name: 'Calibri', family: 2, scheme: 'minor' },
-                  border: {},
-                  fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' }, bgColor: { indexed: 64 } }
-                }
-              },
-              { address: 'B9', value: 'B1 Value', type: 3, style: {} }
-            ],
-            number: 9,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A10', value: 'A2 Value', type: 3, style: {} },
-              { address: 'B10', value: 'B2 Value', type: 3, style: {} }
-            ],
-            number: 10,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A11', value: 'A1 Value', type: 3, style: {} },
-              {
-                address: 'B11',
-                value: 'B3 Value',
-                type: 3,
-                style: {
-                  font: { size: 11, color: { argb: 'FFFF0000' }, name: 'Calibri', family: 2, scheme: 'minor' },
-                  border: {},
-                  fill: { type: 'pattern', pattern: 'none' }
-                }
-              }
-            ],
-            number: 11,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A12', value: 'A2 Value', type: 3, style: {} },
-              { address: 'B12', value: 'B4 Value', type: 3, style: {} }
-            ],
-            number: 12,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A13', value: 'A1 Value', type: 3, style: {} },
-              { address: 'B13', value: 'B1 Value', type: 3, style: {} }
-            ],
-            number: 13,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          },
-          {
-            cells: [
-              { address: 'A14', value: 'A2 Value', type: 3, style: {} },
-              { address: 'B14', value: 'B2 Value', type: 3, style: {} }
-            ],
-            number: 14,
-            min: 1,
-            max: 2,
-            style: {},
-            hidden: false,
-            outlineLevel: 0,
-            collapsed: false
-          }
-        ],
-        dimensions: { model: { top: 1, left: 1, bottom: 14, right: 2 } },
-        merges: []
-      }
-    ],
-    definedNames: [],
-    views: [{ x: 240, y: 105, width: 14805, height: 8010, visibility: 'visible' }],
-    company: '',
-    manager: '',
-    title: '',
-    subject: '',
-    keywords: '',
-    category: '',
-    description: '',
-    revision: 0,
-    contentStatus: '',
-    themes: { theme1: '\r\n' },
-    media: [],
-    calcProperties: {}
-  }
+  const sheets = []
+  for (const excelSheet of importedExcelJs) {
+    const gridColumns: Column[] = excelSheet.columns.map(col => ({
+      columnId: col.address,
+      resizable: true,
+      width: parseInt(((col.width ?? 20) * 10).toString())
 
-  // const rows: Row[] = [
-  //   {
-  //     rowId: 'header',
-  //     cells: [
-  //       {
-  //         type: 'header',
-  //         text: 'Name',
-  //         nonEditable: true,
-  //         style: {
-  //           border: {
-  //             top: { color: 'red', width: '1px', style: 'solid' },
-  //             bottom: { color: 'red', width: '1px', style: 'solid' }
-  //           }
-  //         }
-  //       },
-  //       { type: 'header', text: 'Surname', nonEditable: true }
-  //     ]
-  //   },
-  //   {
-  //     rowId: '1',
-  //     cells: [
-  //       { type: 'text', text: 'asd', nonEditable: true },
-  //       { type: 'text', text: 'afsafas', nonEditable: true }
-  //     ]
-  //   },
-  //   {
-  //     rowId: '2',
-  //     cells: [
-  //       { type: 'text', text: 'sdg', nonEditable: true },
-  //       {
-  //         type: 'text',
-  //         text: '32523',
-  //         nonEditable: true,
-  //         style: {
-  //           border: {
-  //             top: { color: 'green', width: '2px', style: 'dotted' },
-  //             bottom: { color: 'green', width: '2px', style: 'dotted' }
-  //           }
-  //         }
-  //       }
-  //     ]
-  //   },
-  //   {
-  //     rowId: '3',
-  //     cells: [
-  //       { type: 'text', text: 'dva4', nonEditable: true },
-  //       {
-  //         type: 'text',
-  //         text: 'sdgshwe',
-  //         nonEditable: true,
-  //         style: {
-  //           border: {
-  //             top: { color: 'red', width: '1px', style: 'solid' },
-  //             bottom: { color: 'red', width: '1px', style: 'solid' }
-  //           }
-  //         }
-  //       }
-  //     ]
-  //   }
-  // ]
+      // width: col.width ? col.width * 2 : undefined
+    }))
+    gridColumns.unshift({
+      columnId: '',
+      resizable: false,
+      width: 10
+    })
 
-  const gridColumns: Column[] = [{ columnId: '', width: 20 }]
-  let gridRows: Row[] = []
-  let index = 1
-  for (const row of data.worksheets[0].rows) {
-    const gridRow: Row = { rowId: row.number, cells: [{ type: 'number', value: index++ }] }
-    for (const cell of row.cells) {
-      const cellAddress = cell.address.replace(/[0-9]/g, '')
-      if (!gridColumns.some(x => x.columnId === cellAddress)) {
-        gridColumns.push({
-          columnId: cellAddress,
-          resizable: true
-        })
-      }
-      gridRow.cells.push({
+    // Cell Types: 	Null = 0, Merge = 1, Number = 2, String = 3, Date = 4, Hyperlink = 5, Formula = 6, SharedString = 7, RichText = 8, Boolean = 9, Error = 10
+    let gridRows: Row[] = excelSheet.rows.map((row, index) => ({
+      height: row.height,
+      rowId: index,
+      cells: row.cells.map(cell => {
+        const sharedProperties = {
+          nonEditable: true,
+          style: {
+            color: `#${cell.style.font?.color.argb.substring(2)}`,
+            background: `#${cell.style.fill?.fgColor.argb.substring(2)}`,
+            border: {
+              left: {
+                color: `#${cell.style.border?.left.color.argb.substring(2)}`,
+                style: 'solid', // cell.style.border?.left.style,
+                width: '1px'
+              },
+              top: {
+                color: `#${cell.style.border?.top.color.argb.substring(2)}`,
+                style: 'solid', // cell.style.border?.top.style,
+                width: '1px'
+              },
+              right: {
+                color: `#${cell.style.border?.right.color.argb.substring(2)}`,
+                style: 'solid', // cell.style.border?.right.style,
+                width: '1px'
+              },
+              bottom: {
+                color: `#${cell.style.border?.bottom.color.argb.substring(2)}`,
+                style: 'solid', // cell.style.border?.bottom.style,
+                width: '1px'
+              }
+            },
+            overflow: !cell.style.alignment?.wrapText ? 'overflow' : ''
+          }
+        }
+        switch (cell.type) {
+          case 2:
+            return {
+              type: 'number',
+              value: Number(cell.value),
+              ...sharedProperties
+            } as NumberCell
+          case 4:
+            return {
+              type: 'date',
+              value: Number(cell.value),
+              ...sharedProperties
+            } as DateCell
+          case 9:
+            return {
+              type: 'checkbox',
+              checked: Boolean(cell.value),
+              ...sharedProperties
+            } as CheckboxCell
+          default:
+            return {
+              type: 'text',
+              text: cell.value.toString(),
+              ...sharedProperties
+            } as TextCell
+        }
+      })
+    }))
+
+    let index = 1
+    for (const row of gridRows) {
+      row.cells.unshift({
         type: 'text',
-        text: cell.value,
-        nonEditable: true
+        text: (index++).toString(),
+        style: {
+          background: `#D3D3D3`,
+          border: {
+            right: {
+              color: '#880808',
+              style: 'solid',
+              width: '1px'
+            }
+          }
+        }
       })
     }
-    gridRows.push(gridRow)
-  }
-  const headerRow: Row = {
-    rowId: 0,
-    cells: gridColumns.map(column => ({ type: 'text', text: column.columnId.toString() }))
-  }
-  gridRows = [headerRow, ...gridRows]
 
-  // const columns: Column[] = [
-  //   { columnId: 'name', width: 150, resizable: true, reorderable: true },
-  //   { columnId: 'surname', width: 150, resizable: true, reorderable: true }
-  // ]
+    const headerRow: Row = {
+      rowId: 0,
+      cells: gridColumns.map((column, index) => ({
+        type: 'text',
+        text: column.columnId.toString(),
+        style: {
+          background: index > 0 ? `#D3D3D3` : undefined,
+          border: {
+            right: {
+              color: '#880808',
+              style: 'dotted',
+              width: '1px'
+            }
+          }
+        }
+      }))
+    }
+    gridRows = [headerRow, ...gridRows]
+    sheets.push({
+      gridColumns,
+      gridRows,
+      name: excelSheet.name
+    })
+  }
 
   const simpleHandleContextMenu = (
     selectedRowIds: Id[],
@@ -876,14 +373,6 @@ const CreateSupportPackage = () => {
                   </DatePickerWrapper>
                 </LocalizationProvider>
               </Grid>
-              {/* <Grid item xs={12}>
-                <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                  2. Link to a Journal &nbsp;&nbsp;
-                  <Link component='button' variant='body2' onClick={handleJournalModalOpen}>
-                    Link
-                  </Link>
-                </Typography>
-              </Grid> */}
               <Grid item xs={12} sm={2}>
                 <FormLabel sx={{ marginLeft: 12 }}>Approver</FormLabel>
                 <Chip
@@ -949,8 +438,6 @@ const CreateSupportPackage = () => {
           </CardActions> */}
         </form>
       </Card>
-
-      <Grid item xs={12}></Grid>
       <Card>
         <Box>
           <Tabs
@@ -965,15 +452,45 @@ const CreateSupportPackage = () => {
             <Tab label='Journal Entry' />
           </Tabs>
           <TabPanel value={values.tab} index={0} dir={theme.direction}>
-            <Grid container wrap='nowrap' xs={12} sm={12} md={12}>
-              <ReactGrid
-                rows={gridRows}
-                columns={gridColumns}
-                enableRangeSelection
-                enableRowSelection
-                enableColumnSelection
-                onContextMenu={simpleHandleContextMenu}
-              />
+            <Grid container>
+              <Card
+                sx={{
+                  padding: '20px 20px 0px 20px',
+                  border: '1px dotted green',
+                  borderRadius: 2
+                }}
+              >
+                <CardActions sx={{ paddingBottom: 0 }}>
+                  <ButtonGroup variant='outlined' aria-label='outlined button group'>
+                    {sheets.map((sheet, index) => (
+                      <Button
+                        key={index}
+                        sheet-index={index}
+                        variant={sheetIndex === index ? 'contained' : undefined}
+                        onClick={event => {
+                          setSheetIndex(parseInt(event.currentTarget.getAttribute('sheet-index') ?? '0'))
+                        }}
+                      >
+                        {sheet.name}
+                      </Button>
+                    ))}
+                  </ButtonGroup>
+                </CardActions>
+                <CardContent
+                  sx={{
+                    overflow: 'scroll',
+                    paddingTop: 2
+                  }}
+                >
+                  <ReactGrid
+                    rows={sheets[sheetIndex].gridRows}
+                    columns={sheets[sheetIndex].gridColumns}
+                    enableRowSelection
+                    enableColumnSelection
+                    onContextMenu={simpleHandleContextMenu}
+                  />
+                </CardContent>
+              </Card>
             </Grid>
           </TabPanel>
           <TabPanel value={values.tab} index={1} dir={theme.direction}>
@@ -1001,14 +518,14 @@ const CreateSupportPackage = () => {
                 />
               </Grid>
               <Grid container justifyContent='flex-end' xs={12} sm={12}>
-                <FormControl variant='standard' sx={{ m: 1, minWidth: 120, margin: 5 }}>
+                <FormControl variant='standard' sx={{ m: 1,  minWidth: 120,  margin: 5 }}>
                   <InputLabel id='demo-simple-select-filled-label'>Sort By</InputLabel>
                   <Select
                     labelId='demo-simple-select-label'
                     id='demo-simple-select'
                     value={values.commentsSortedBy}
                     onChange={event => {
-                      setValues({ ...values, commentsSortedBy: event.target.value })
+                      setValues({ ...values,  commentsSortedBy: event.target.value })
                     }}
                   >
                     <MenuItem value={'dateAsc'}>Earliest First</MenuItem>
@@ -1021,17 +538,17 @@ const CreateSupportPackage = () => {
                   <Avatar alt='Remy Sharp'>RS</Avatar>
                 </Grid>
                 <Grid justifyContent='left' item xs zeroMinWidth>
-                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                  <h4 style={{ margin: 0,  textAlign: 'left' }}>Michel Michel</h4>
                   <p style={{ textAlign: 'left' }}>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                    Lorem ipsum dolor sit amet,  consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
                     bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
-                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
-                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
-                    urna, nec feugiat quam lectus vitae ex.{' '}
+                    tortor. Quisque arcu quam,  malesuada vel mauris et,  posuere sagittis ipsum. Aliquam ultricies a
+                    ligula nec faucibus. In elit metus,  efficitur lobortis nisi quis,  molestie porttitor metus.
+                    Pellentesque et neque risus. Aliquam vulputate,  mauris vitae tincidunt interdum,  mauris mi vehicula
+                    urna,  nec feugiat quam lectus vitae ex.{' '}
                   </p>
-                  <p style={{ textAlign: 'left', color: 'gray' }}>
-                    12th December, 2022 1:23PM
+                  <p style={{ textAlign: 'left',  color: 'gray' }}>
+                    12th December,  2022 1:23PM
                     <Chip
                       label='Attachment1'
                       color='primary'
@@ -1078,7 +595,22 @@ const CreateSupportPackage = () => {
             </Grid>
           </TabPanel>
         </Box>
-        <Divider sx={{ margin: 0 }} />
+        <Grid item xs={12} sm={12}>
+          <CardContent>
+            <Typography variant='body2' sx={{ fontWeight: 600 }}>
+              Supporting Package Attachments
+            </Typography>
+            <Divider sx={{ margin: 0 }} />
+            {attachments.map((attachment, index) => (
+              <>
+                <Link href='#' key={index}>
+                  {attachment.name}
+                </Link>
+                <br />
+              </>
+            ))}
+          </CardContent>
+        </Grid>
       </Card>
       <Modal
         open={personnelModalOpen}
