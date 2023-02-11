@@ -49,7 +49,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
 import TableCollapsible from 'src/views/tables/TableCollapsible'
 import TableCustomized from 'src/views/tables/TableCustomized'
-import { importedExcelJs } from './sample-excel-file'
+import { importedExcelJs } from 'src/mocked-data/sample-excel-file'
 
 const modalStyle = {
   position: 'absolute' as const,
