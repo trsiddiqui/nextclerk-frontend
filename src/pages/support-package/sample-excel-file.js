@@ -1,4 +1,4 @@
-export const importedExcelJs = [
+const importedExcelJs = [
   {
     name: 'Sheet1',
     columns: [
@@ -35646,3 +35646,5 @@ export const importedExcelJs = [
     ]
   }
 ]
+
+export { importedExcelJs }

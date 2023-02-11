@@ -286,10 +286,12 @@ const CreateSupportPackage = () => {
     selectionMode: SelectionMode,
     menuOptions: MenuOption[]
   ): MenuOption[] => {
-    return menuOptions.concat(
+    const filteredMenuOptions = menuOptions.filter(option => option.label === 'Copy')
+
+    return filteredMenuOptions.concat(
       {
-        id: 'add-comment',
-        label: 'Add Comment',
+        id: 'comments',
+        label: 'Comments',
         handler() // selectedRowIds: Id[],
         // selectedColIds: Id[],
         // selectionMode: SelectionMode,
@@ -299,8 +301,8 @@ const CreateSupportPackage = () => {
         }
       },
       {
-        id: 'attach-file',
-        label: 'Attach File',
+        id: 'files',
+        label: 'Files',
         handler() // selectedRowIds: Id[],
         // selectedColIds: Id[],
         // selectionMode: SelectionMode,
@@ -455,7 +457,7 @@ const CreateSupportPackage = () => {
             <Grid container>
               <Card
                 sx={{
-                  padding: '20px 20px 0px 20px',
+                  padding: '10px 10px 0px 10px',
                   border: '1px dotted green',
                   borderRadius: 2
                 }}
@@ -595,22 +597,33 @@ const CreateSupportPackage = () => {
             </Grid>
           </TabPanel>
         </Box>
-        <Grid item xs={12} sm={12}>
-          <CardContent>
-            <Typography variant='body2' sx={{ fontWeight: 600 }}>
-              Supporting Package Attachments
-            </Typography>
-            <Divider sx={{ margin: 0 }} />
-            {attachments.map((attachment, index) => (
-              <>
-                <Link href='#' key={index}>
-                  {attachment.name}
-                </Link>
-                <br />
-              </>
-            ))}
-          </CardContent>
-        </Grid>
+        <CardContent>
+          <Grid container>
+            <Grid item xs={12} sm={8}>
+              <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                Supporting Package Attachments
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={4} alignContent='end' textAlign='right'>
+              <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                Total Attachments: 2
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={12}>
+              <Divider sx={{ margin: 0 }} />
+            </Grid>
+            <Grid item xs={12} sm={12}>
+              {attachments.map((attachment, index) => (
+                <>
+                  <Link href='#' key={index}>
+                    {attachment.name}
+                  </Link>
+                  <br />
+                </>
+              ))}
+            </Grid>
+          </Grid>
+        </CardContent>
       </Card>
       <Modal
         open={personnelModalOpen}
