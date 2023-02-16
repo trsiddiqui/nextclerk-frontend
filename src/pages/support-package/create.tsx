@@ -52,6 +52,7 @@ import { DatePicker } from '@mui/lab'
 import TableCollapsible from 'src/views/tables/TableCollapsible'
 import TableCustomized from 'src/views/tables/TableCustomized'
 import { importedExcelJs } from 'src/mocked-data/sample-excel-file'
+// import * as importedExcelJs from 'src/mocked-data/testing.json'
 
 const modalStyle = {
   position: 'absolute' as const,
@@ -172,6 +173,7 @@ const CreateSupportPackage = () => {
   }
 
   const sheets = []
+  debugger
   for (const excelSheet of importedExcelJs) {
     const gridColumns: Column[] = excelSheet.columns.map((col, index) => ({
       columnId: col.address,
@@ -197,26 +199,26 @@ const CreateSupportPackage = () => {
           nonEditable: true,
           key: index,
           style: {
-            color: `#${cell.style.font?.color.argb.substring(2)}`,
-            background: `#${cell.style.fill?.fgColor.argb.substring(2)}`,
+            color: `#${cell.style.font?.color?.argb?.substring(2)}`,
+            background: `#${cell.style.fill?.fgColor?.argb?.substring(2)}`,
             border: {
               left: {
-                color: `#${cell.style.border?.left.color.argb.substring(2)}`,
+                color: `#${cell.style.border?.left?.color?.argb?.substring(2)}`,
                 style: 'solid', // cell.style.border?.left.style,
                 width: '1px'
               },
               top: {
-                color: `#${cell.style.border?.top.color.argb.substring(2)}`,
+                color: `#${cell.style.border?.top?.color?.argb?.substring(2)}`,
                 style: 'solid', // cell.style.border?.top.style,
                 width: '1px'
               },
               right: {
-                color: `#${cell.style.border?.right.color.argb.substring(2)}`,
+                color: `#${cell.style.border?.right?.color?.argb?.substring(2)}`,
                 style: 'solid', // cell.style.border?.right.style,
                 width: '1px'
               },
               bottom: {
-                color: `#${cell.style.border?.bottom.color.argb.substring(2)}`,
+                color: `#${cell.style.border?.bottom?.color?.argb?.substring(2)}`,
                 style: 'solid', // cell.style.border?.bottom.style,
                 width: '1px'
               }
@@ -234,7 +236,7 @@ const CreateSupportPackage = () => {
           case 4:
             return {
               type: 'date',
-              value: Number(cell.value),
+              value: cell.value,
               ...sharedProperties
             } as DateCell
           case 9:
@@ -246,7 +248,7 @@ const CreateSupportPackage = () => {
           default:
             return {
               type: 'text',
-              text: cell.value.toString(),
+              text: cell.value ?? '',
               ...sharedProperties
             } as TextCell
         }
