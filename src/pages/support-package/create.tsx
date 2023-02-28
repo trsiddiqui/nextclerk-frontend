@@ -25,6 +25,7 @@ import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
+import CloseIcon from '@mui/icons-material/Close'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
@@ -42,7 +43,10 @@ import {
   Link,
   useTheme,
   Menu,
-  MenuItem
+  MenuItem,
+  AppBar,
+  Toolbar,
+  IconButton
 } from '@mui/material'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import dayjs, { Dayjs } from 'dayjs'
@@ -52,19 +56,15 @@ import { DatePicker } from '@mui/lab'
 import TableCollapsible from 'src/views/tables/TableCollapsible'
 import TableCustomized from 'src/views/tables/TableCustomized'
 import { importedExcelJs } from 'src/mocked-data/sample-excel-file'
-// import * as importedExcelJs from 'src/mocked-data/testing.json'
+import Dialog from '@mui/material/Dialog'
 
 const modalStyle = {
-  position: 'absolute' as const,
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%,  -50%)',
-
   // width: 400,
   bgcolor: 'background.paper',
   boxShadow: 24,
+  marginTop: 15,
 
-  // p: 4,
+  p: 4,
   borderRadius: '5px'
 }
 
@@ -156,7 +156,7 @@ const CreateSupportPackage = () => {
   // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
 
-  // const handleJournalModalOpen = () => setJournalModalOpen(true)
+  const handleJournalModalOpen = () => setJournalModalOpen(true)
   const handleJournalModalClose = () => setJournalModalOpen(false)
 
   // Handle Password
@@ -190,70 +190,109 @@ const CreateSupportPackage = () => {
     })
 
     // Cell Types: 	Null = 0, Merge = 1, Number = 2, String = 3, Date = 4, Hyperlink = 5, Formula = 6, SharedString = 7, RichText = 8, Boolean = 9, Error = 10
-    let gridRows: Row[] = excelSheet.rows.map((row, index) => ({
-      height: row.height,
-      rowId: index,
-      key: index,
-      cells: row.cells.map((cell, index) => {
-        const sharedProperties = {
-          nonEditable: true,
-          key: index,
-          style: {
-            color: `#${cell.style.font?.color?.argb?.substring(2)}`,
-            background: `#${cell.style.fill?.fgColor?.argb?.substring(2)}`,
-            border: {
-              left: {
-                color: `#${cell.style.border?.left?.color?.argb?.substring(2)}`,
-                style: 'solid', // cell.style.border?.left.style,
-                width: '1px'
+    let gridRows: Row[] = excelSheet.rows.map((row, index) => {
+      const r = {
+        height: row.height,
+        rowId: index,
+        key: index,
+        cells: row.cells.map((cell, index) => {
+          const sharedProperties = {
+            nonEditable: true,
+            key: index,
+            style: {
+              color: `#${cell.style.font?.color?.argb?.substring(2)}`,
+              background: `#${cell.style.fill?.fgColor?.argb?.substring(2)}`,
+              border: {
+                left: {
+                  color: `#${cell.style.border?.left?.color?.argb?.substring(2)}`,
+                  style: 'solid', // cell.style.border?.left.style,
+                  width: '1px'
+                },
+                top: {
+                  color: `#${cell.style.border?.top?.color?.argb?.substring(2)}`,
+                  style: 'solid', // cell.style.border?.top.style,
+                  width: '1px'
+                },
+                right: {
+                  color: `#${cell.style.border?.right?.color?.argb?.substring(2)}`,
+                  style: 'solid', // cell.style.border?.right.style,
+                  width: '1px'
+                },
+                bottom: {
+                  color: `#${cell.style.border?.bottom?.color?.argb?.substring(2)}`,
+                  style: 'solid', // cell.style.border?.bottom.style,
+                  width: '1px'
+                }
               },
-              top: {
-                color: `#${cell.style.border?.top?.color?.argb?.substring(2)}`,
-                style: 'solid', // cell.style.border?.top.style,
-                width: '1px'
-              },
-              right: {
-                color: `#${cell.style.border?.right?.color?.argb?.substring(2)}`,
-                style: 'solid', // cell.style.border?.right.style,
-                width: '1px'
-              },
-              bottom: {
-                color: `#${cell.style.border?.bottom?.color?.argb?.substring(2)}`,
-                style: 'solid', // cell.style.border?.bottom.style,
-                width: '1px'
-              }
-            },
-            overflow: !cell.style.alignment?.wrapText ? 'overflow' : ''
+              overflow: !cell.style.alignment?.wrapText ? 'overflow' : ''
+            }
           }
-        }
-        switch (cell.type) {
-          case 2:
-            return {
-              type: 'number',
-              value: Number(cell.value),
-              ...sharedProperties
-            } as NumberCell
-          case 4:
-            return {
-              type: 'date',
-              value: cell.value,
-              ...sharedProperties
-            } as DateCell
-          case 9:
-            return {
-              type: 'checkbox',
-              checked: Boolean(cell.value),
-              ...sharedProperties
-            } as CheckboxCell
-          default:
-            return {
-              type: 'text',
-              text: cell.value ?? '',
-              ...sharedProperties
-            } as TextCell
-        }
-      })
-    }))
+          switch (cell.type) {
+            case 2:
+              return {
+                type: 'number',
+                value: Number(cell.value),
+                ...sharedProperties
+              } as NumberCell
+            case 4:
+              return {
+                type: 'date',
+                value: cell.value,
+                ...sharedProperties
+              } as DateCell
+            case 9:
+              return {
+                type: 'checkbox',
+                checked: Boolean(cell.value),
+                ...sharedProperties
+              } as CheckboxCell
+            default:
+              return {
+                type: 'text',
+                text: cell.value ?? '',
+                ...sharedProperties
+              } as TextCell
+          }
+        })
+      }
+
+      // if (r.cells.length < gridColumns.length) {
+      //   r.cells.push(
+      //     new Array(gridColumns.length - r.cells.length + 1).map(() => ({
+      //       nonEditable: true,
+      //       key: index,
+      //       style: {
+      //         color: `#FFFFFF`,
+      //         background: `#00000`,
+      //         border: {
+      //           left: {
+      //             color: `#FFFFFF`,
+      //             style: 'solid', // cell.style.border?.left.style,
+      //             width: '1px'
+      //           },
+      //           top: {
+      //             color: `#FFFFFF`,
+      //             style: 'solid', // cell.style.border?.top.style,
+      //             width: '1px'
+      //           },
+      //           right: {
+      //             color: `#FFFFFF`,
+      //             style: 'solid', // cell.style.border?.right.style,
+      //             width: '1px'
+      //           },
+      //           bottom: {
+      //             color: `#FFFFFF`,
+      //             style: 'solid', // cell.style.border?.bottom.style,
+      //             width: '1px'
+      //           }
+      //         }
+      //       }
+      //     }))
+      //   )
+      // }
+
+      return r
+    })
 
     let index = 1
     for (const row of gridRows) {
@@ -492,56 +531,12 @@ const CreateSupportPackage = () => {
           </Tabs>
           <TabPanel value={values.tab} index={0} dir={theme.direction}>
             <Grid container>
-              <Grid item xs={12} sm={9}>
-                <Card
-                  sx={{
-                    padding: '10px 10px 0px 10px',
-                    border: '1px dotted green',
-                    borderRadius: 2
-                  }}
-                >
-                  <CardActions sx={{ paddingBottom: 0 }}>
-                    <ButtonGroup variant='outlined' aria-label='outlined button group'>
-                      {sheets.map((sheet, index) => (
-                        <Button
-                          key={index}
-                          sheet-index={index}
-                          variant={sheetIndex === index ? 'contained' : undefined}
-                          onClick={event => {
-                            console.log(reactGrid.current?.state.selectedRanges)
-
-                            setSheetIndex(parseInt(event.currentTarget.getAttribute('sheet-index') ?? '0'))
-                          }}
-                        >
-                          {sheet.name}
-                        </Button>
-                      ))}
-                    </ButtonGroup>
-                  </CardActions>
-                  <CardContent
-                    sx={{
-                      overflow: 'scroll',
-                      paddingTop: 2
-                    }}
-                  >
-                    <ReactGrid
-                      ref={reactGrid}
-                      rows={sheets[sheetIndex].gridRows}
-                      columns={sheets[sheetIndex].gridColumns}
-                      enableRowSelection
-                      enableColumnSelection
-                      enableRangeSelection
-                      onContextMenu={simpleHandleContextMenu}
-                      onFocusLocationChanged={location => {
-                        if (location.columnId >= 'A' && location.rowId.toString() >= '0')
-                          setFocussedCell(`${location.columnId}${parseInt(String(location.rowId)) + 1}`)
-                      }}
-                    />
-                  </CardContent>
-                </Card>
+              <Grid item xs={12} sm={12} sx={{ pl: 1 }} width='100%'>
+                <Button onClick={handleJournalModalOpen} variant='contained'>
+                  View Line Item Sheet
+                </Button>
               </Grid>
-
-              <Grid item xs={12} sm={3} sx={{ pl: 1 }}>
+              {/* <Grid item xs={12} sm={3} sx={{ pl: 1 }}>
                 {focussedCell}
                 <Grid container wrap='nowrap' spacing={2}>
                   <Grid item>
@@ -557,7 +552,7 @@ const CreateSupportPackage = () => {
                   </Grid>
                 </Grid>
                 <Divider />
-              </Grid>
+              </Grid> */}
             </Grid>
           </TabPanel>
           <TabPanel value={values.tab} index={1} dir={theme.direction}>
@@ -712,28 +707,66 @@ const CreateSupportPackage = () => {
           </Card>
         </Box>
       </Modal>
-      <Modal
+      <Dialog
+        fullScreen
         open={journalModalOpen}
         onClose={handleJournalModalClose}
         aria-labelledby='modal-modal-journal'
         aria-describedby='modal-modal-journal'
+        sx={{
+          msOverflowX: 'scroll',
+          paddingTop: 2
+        }}
       >
+        <AppBar sx={{ position: 'fixed' }} color='secondary'>
+          <Toolbar>
+            <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'>
+              Line Items Workbook
+              <ButtonGroup variant='outlined' aria-label='outlined button group' sx={{ ml: 3 }}>
+                {sheets.map((sheet, index) => (
+                  <Button
+                    key={index}
+                    sheet-index={index}
+                    variant={sheetIndex === index ? 'contained' : 'outlined'}
+                    onClick={event => {
+                      console.log(reactGrid.current?.state.selectedRanges)
+
+                      setSheetIndex(parseInt(event.currentTarget.getAttribute('sheet-index') ?? '0'))
+                    }}
+                  >
+                    {sheet.name}
+                  </Button>
+                ))}
+              </ButtonGroup>
+            </Typography>
+            <IconButton edge='start' color='inherit' onClick={handleJournalModalClose} aria-label='close'>
+              <CloseIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
         <Box sx={modalStyle}>
-          <Card>
-            <CardHeader title='Select a Journal Entry' sx={{ textAlign: 'center' }}></CardHeader>
-            <CardContent>
-              <TableCollapsible />
-            </CardContent>
-            <CardActions>
-              <Grid container justifyContent='flex-end'>
-                <Button size='large' type='submit' variant='contained' onClick={handleJournalModalClose}>
-                  Close
-                </Button>
-              </Grid>
-            </CardActions>
-          </Card>
+          <hr />
+          <ReactGrid
+            ref={reactGrid}
+            rows={sheets[sheetIndex].gridRows}
+            columns={sheets[sheetIndex].gridColumns}
+            enableRowSelection
+            enableColumnSelection
+            enableRangeSelection
+            onContextMenu={simpleHandleContextMenu}
+            onFocusLocationChanged={location => {
+              if (location.columnId >= 'A' && location.rowId.toString() >= '0')
+                setFocussedCell(`${location.columnId}${parseInt(String(location.rowId)) + 1}`)
+            }}
+          />
+          {/* <TableCollapsible /> */}
+          <Grid container justifyContent='flex-end'>
+            <Button size='large' type='submit' variant='contained' onClick={handleJournalModalClose}>
+              Close
+            </Button>
+          </Grid>
         </Box>
-      </Modal>
+      </Dialog>
     </Grid>
   )
 }
