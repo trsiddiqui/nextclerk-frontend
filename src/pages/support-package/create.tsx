@@ -1,5 +1,5 @@
 // ** React Imports
-import React, { ChangeEvent, useRef, useState } from 'react'
+import React, { ChangeEvent, useState } from 'react'
 import {
   ReactGrid,
   Row,
@@ -10,7 +10,8 @@ import {
   TextCell,
   NumberCell,
   DateCell,
-  CheckboxCell
+  CheckboxCell,
+  CellLocation
 } from '@silevis/reactgrid'
 import '@silevis/reactgrid/styles.css'
 
@@ -26,6 +27,11 @@ import CardContent from '@mui/material/CardContent'
 import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
 import CloseIcon from '@mui/icons-material/Close'
+import BorderColorIcon from '@mui/icons-material/BorderColor'
+import MessageIcon from '@mui/icons-material/Message'
+import DownloadIcon from '@mui/icons-material/Download'
+import SendIcon from '@mui/icons-material/Send'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
@@ -46,14 +52,15 @@ import {
   MenuItem,
   AppBar,
   Toolbar,
-  IconButton
+  IconButton,
+  Drawer,
+  InputAdornment
 } from '@mui/material'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import dayjs, { Dayjs } from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
-import TableCollapsible from 'src/views/tables/TableCollapsible'
 import TableCustomized from 'src/views/tables/TableCustomized'
 import { importedExcelJs } from 'src/mocked-data/sample-excel-file'
 import Dialog from '@mui/material/Dialog'
@@ -62,8 +69,8 @@ const modalStyle = {
   // width: 400,
   bgcolor: 'background.paper',
   boxShadow: 24,
-  marginTop: 15,
-
+  marginTop: 13,
+  maxWidth: 200,
   p: 4,
   borderRadius: '5px'
 }
@@ -74,6 +81,7 @@ interface State {
   date: Dayjs | null
   tab: number
   commentsSortedBy: string
+  commentsTab: number
 }
 
 interface TabPanelProps {
@@ -127,13 +135,16 @@ const CreateSupportPackage = () => {
     ],
     date: dayjs(),
     tab: 0,
-    commentsSortedBy: 'dateAsc'
+    commentsSortedBy: 'dateAsc',
+    commentsTab: 0
   })
   const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
   const [sheetIndex, setSheetIndex] = React.useState(0)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [focussedCell, setFocussedCell] = React.useState('')
+  const [focussedCell, setFocussedCell] = React.useState(null)
+  const [focussedRange, setFocussedRange] = React.useState(null)
+  const [rightDrawerVisible, setRightDrawerVisible] = React.useState(false)
   const saveMenuOpen = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -151,7 +162,7 @@ const CreateSupportPackage = () => {
     }
   ])
 
-  const reactGrid = useRef<ReactGrid>(null)
+  const [reactGrid, setReactGrid] = useState<ReactGrid | null>(null)
 
   // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
@@ -172,10 +183,13 @@ const CreateSupportPackage = () => {
     setValues({ ...values, tab: newValue })
   }
 
+  const handleCommentsTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValues({ ...values, commentsTab: newValue })
+  }
+
   const sheets = []
-  debugger
   for (const excelSheet of importedExcelJs) {
-    const gridColumns: Column[] = excelSheet.columns.map((col, index) => ({
+    const gridColumns: Column[] = excelSheet.columns.map((col: { address: any; width: any }, index: any) => ({
       columnId: col.address,
       resizable: true,
       width: parseInt(((col.width ?? 20) * 10).toString()),
@@ -190,70 +204,94 @@ const CreateSupportPackage = () => {
     })
 
     // Cell Types: 	Null = 0, Merge = 1, Number = 2, String = 3, Date = 4, Hyperlink = 5, Formula = 6, SharedString = 7, RichText = 8, Boolean = 9, Error = 10
-    let gridRows: Row[] = excelSheet.rows.map((row, index) => {
+    let gridRows: Row[] = excelSheet.rows.map((row: { height: any; cells: any[] }, index: any) => {
       const r = {
         height: row.height,
         rowId: index,
         key: index,
-        cells: row.cells.map((cell, index) => {
-          const sharedProperties = {
-            nonEditable: true,
-            key: index,
-            style: {
-              color: `#${cell.style.font?.color?.argb?.substring(2)}`,
-              background: `#${cell.style.fill?.fgColor?.argb?.substring(2)}`,
-              border: {
-                left: {
-                  color: `#${cell.style.border?.left?.color?.argb?.substring(2)}`,
-                  style: 'solid', // cell.style.border?.left.style,
-                  width: '1px'
-                },
-                top: {
-                  color: `#${cell.style.border?.top?.color?.argb?.substring(2)}`,
-                  style: 'solid', // cell.style.border?.top.style,
-                  width: '1px'
-                },
-                right: {
-                  color: `#${cell.style.border?.right?.color?.argb?.substring(2)}`,
-                  style: 'solid', // cell.style.border?.right.style,
-                  width: '1px'
-                },
-                bottom: {
-                  color: `#${cell.style.border?.bottom?.color?.argb?.substring(2)}`,
-                  style: 'solid', // cell.style.border?.bottom.style,
-                  width: '1px'
+        cells: row.cells.map(
+          (
+            cell: {
+              style: {
+                font: { color: { argb: string } }
+                fill: { fgColor: { argb: string } }
+                border: {
+                  left: { color: { argb: string } }
+                  top: { color: { argb: string } }
+                  right: { color: { argb: string } }
+                  bottom: { color: { argb: string } }
                 }
-              },
-              overflow: !cell.style.alignment?.wrapText ? 'overflow' : ''
+                alignment: { wrapText: any }
+              }
+              address: string
+              type: any
+              value: any
+            },
+            index: any
+          ) => {
+            const sharedProperties = {
+              nonEditable: true,
+              key: index,
+              style: {
+                color: `#${cell.style.font?.color?.argb?.substring(2)}`,
+                background: `#${cell.style.fill?.fgColor?.argb?.substring(2)}`,
+                border: {
+                  left: {
+                    color: `#${cell.style.border?.left?.color?.argb?.substring(2)}`,
+                    style: 'solid', // cell.style.border?.left.style,
+                    width: '1px'
+                  },
+                  top: {
+                    color: `#${cell.style.border?.top?.color?.argb?.substring(2)}`,
+                    style: 'solid', // cell.style.border?.top.style,
+                    width: '1px'
+                  },
+                  right: {
+                    color: `#${cell.style.border?.right?.color?.argb?.substring(2)}`,
+                    style: 'solid', // cell.style.border?.right.style,
+                    width: '1px'
+                  },
+                  bottom: {
+                    color: `#${cell.style.border?.bottom?.color?.argb?.substring(2)}`,
+                    style: 'solid', // cell.style.border?.bottom.style,
+                    width: '1px'
+                  }
+                },
+                overflow: !cell.style.alignment?.wrapText ? 'overflow' : ''
+              }
+            }
+            if (cell.address === 'D8' || cell.address === 'D9') {
+              const backgroundColor = '#FFEB3B'
+              sharedProperties.style.background = backgroundColor
+            }
+            switch (cell.type) {
+              case 2:
+                return {
+                  type: 'number',
+                  value: Number(cell.value),
+                  ...sharedProperties
+                } as NumberCell
+              case 4:
+                return {
+                  type: 'date',
+                  value: cell.value,
+                  ...sharedProperties
+                } as DateCell
+              case 9:
+                return {
+                  type: 'checkbox',
+                  checked: Boolean(cell.value),
+                  ...sharedProperties
+                } as CheckboxCell
+              default:
+                return {
+                  type: 'text',
+                  text: cell.value ?? '',
+                  ...sharedProperties
+                } as TextCell
             }
           }
-          switch (cell.type) {
-            case 2:
-              return {
-                type: 'number',
-                value: Number(cell.value),
-                ...sharedProperties
-              } as NumberCell
-            case 4:
-              return {
-                type: 'date',
-                value: cell.value,
-                ...sharedProperties
-              } as DateCell
-            case 9:
-              return {
-                type: 'checkbox',
-                checked: Boolean(cell.value),
-                ...sharedProperties
-              } as CheckboxCell
-            default:
-              return {
-                type: 'text',
-                text: cell.value ?? '',
-                ...sharedProperties
-              } as TextCell
-          }
-        })
+        )
       }
 
       // if (r.cells.length < gridColumns.length) {
@@ -367,6 +405,38 @@ const CreateSupportPackage = () => {
         // selectedRanges: CellLocation[][]
         {
           console.log('attach_file')
+        }
+      },
+      {
+        id: 'highlight',
+        label: 'Highlight',
+        handler() {
+          console.log('highlight')
+        }
+      },
+      {
+        id: 'sum',
+        label: 'Sum',
+        handler(
+          _selectedRowIds: Id[],
+          _selectedColIds: Id[],
+          _selectionMode: SelectionMode,
+          selectedRanges: CellLocation[][]
+        ) {
+          if (
+            new Set(selectedRanges[0].map(x => x.columnId)).size === 1 ||
+            new Set(selectedRanges[0].map(x => x.rowId)).size === 1
+          ) {
+            let sum = 0
+            selectedRanges[0].forEach(x => {
+              const columnId = reactGrid?.props.columns.findIndex(y => y.columnId === x.columnId)
+              const cell = reactGrid?.props.rows[parseInt(x.rowId.valueOf() as string) + 1].cells[columnId as number]
+              if (cell?.type === 'number' && 'value' in cell) {
+                sum += parseFloat(cell.value as string)
+              }
+            })
+            alert(sum)
+          }
         }
       }
     )
@@ -556,83 +626,6 @@ const CreateSupportPackage = () => {
             </Grid>
           </TabPanel>
           <TabPanel value={values.tab} index={1} dir={theme.direction}>
-            {/* <Grid container wrap='nowrap' item xs={12} sm={12} sx={{ padding: '0 3rem' }}>
-                <TextField
-                  fullWidth
-                  id='outlined-multiline-flexible'
-                  label='Comments'
-                  multiline
-                  variant='standard'
-                  maxRows={4}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton color='primary'>
-                          <AttachFileIcon />
-                        </IconButton>
-
-                        <IconButton edge='end' color='primary'>
-                          <SendIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-              </Grid>
-              <Grid container justifyContent='flex-end' xs={12} sm={12}>
-                <FormControl variant='standard' sx={{ m: 1,  minWidth: 120,  margin: 5 }}>
-                  <InputLabel id='demo-simple-select-filled-label'>Sort By</InputLabel>
-                  <Select
-                    labelId='demo-simple-select-label'
-                    id='demo-simple-select'
-                    value={values.commentsSortedBy}
-                    onChange={event => {
-                      setValues({ ...values,  commentsSortedBy: event.target.value })
-                    }}
-                  >
-                    <MenuItem value={'dateAsc'}>Earliest First</MenuItem>
-                    <MenuItem value={'dateDesc'}>Latest First</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid container spacing={2} sx={{ marginTop: -12 }}>
-                <Grid item>
-                  <Avatar alt='Remy Sharp'>RS</Avatar>
-                </Grid>
-                <Grid justifyContent='left' item xs zeroMinWidth>
-                  <h4 style={{ margin: 0,  textAlign: 'left' }}>Michel Michel</h4>
-                  <p style={{ textAlign: 'left' }}>
-                    Lorem ipsum dolor sit amet,  consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                    tortor. Quisque arcu quam,  malesuada vel mauris et,  posuere sagittis ipsum. Aliquam ultricies a
-                    ligula nec faucibus. In elit metus,  efficitur lobortis nisi quis,  molestie porttitor metus.
-                    Pellentesque et neque risus. Aliquam vulputate,  mauris vitae tincidunt interdum,  mauris mi vehicula
-                    urna,  nec feugiat quam lectus vitae ex.{' '}
-                  </p>
-                  <p style={{ textAlign: 'left',  color: 'gray' }}>
-                    12th December,  2022 1:23PM
-                    <Chip
-                      label='Attachment1'
-                      color='primary'
-                      avatar={<Avatar color='secondary'>PDF</Avatar>}
-                      onClick={() => alert('Download This')}
-                      onDelete={() => alert('Download This')}
-                      deleteIcon={<DownloadIcon />}
-                      sx={{ marginLeft: 2 }}
-                    />
-                    <Chip
-                      label='Attachment2'
-                      color='primary'
-                      avatar={<Avatar color='secondary'>XLS</Avatar>}
-                      onClick={() => alert('Download This')}
-                      onDelete={() => alert('Download This')}
-                      deleteIcon={<DownloadIcon />}
-                      sx={{ marginLeft: 2 }}
-                    />
-                  </p>
-                </Grid>
-              </Grid>
-              <Divider variant='fullWidth' style={{ margin: '30px 0' }} /> */}
             <Grid container wrap='nowrap' spacing={2}>
               <Grid item>
                 <Avatar alt='Remy Sharp'>RS</Avatar>
@@ -718,41 +711,77 @@ const CreateSupportPackage = () => {
           paddingTop: 2
         }}
       >
-        <AppBar sx={{ position: 'fixed' }} color='secondary'>
+        <AppBar sx={{ position: 'fixed' }} color='inherit'>
           <Toolbar>
             <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'>
               Line Items Workbook
+            </Typography>
+            <IconButton edge='start' color='inherit' onClick={handleJournalModalClose} aria-label='close'>
+              <CloseIcon />
+            </IconButton>
+          </Toolbar>
+          <Toolbar sx={{ padding: 2, marginTop: -6, minHeight: 0 }}>
+            <div style={{ flex: 1 }}>
               <ButtonGroup variant='outlined' aria-label='outlined button group' sx={{ ml: 3 }}>
                 {sheets.map((sheet, index) => (
                   <Button
                     key={index}
                     sheet-index={index}
                     variant={sheetIndex === index ? 'contained' : 'outlined'}
+                    color='info'
+                    size='small'
                     onClick={event => {
-                      console.log(reactGrid.current?.state.selectedRanges)
-
                       setSheetIndex(parseInt(event.currentTarget.getAttribute('sheet-index') ?? '0'))
                     }}
                   >
-                    {sheet.name}
+                    <Typography fontSize={12}>{sheet.name}</Typography>
                   </Button>
                 ))}
               </ButtonGroup>
-            </Typography>
-            <IconButton edge='start' color='inherit' onClick={handleJournalModalClose} aria-label='close'>
-              <CloseIcon />
-            </IconButton>
+            </div>
+            <Grid>
+              <ButtonGroup>
+                <Button endIcon={<BorderColorIcon />}>Highlight</Button>
+                <Button
+                  endIcon={<MessageIcon />}
+                  onClick={() => {
+                    setRightDrawerVisible(!rightDrawerVisible)
+                  }}
+                >
+                  Comment
+                </Button>
+              </ButtonGroup>
+            </Grid>
           </Toolbar>
         </AppBar>
-        <Box sx={modalStyle}>
+        <Box
+          sx={modalStyle}
+          onMouseUp={() => {
+            setFocussedRange(
+              reactGrid?.state.selectedRanges[0].first.column.columnId +
+                reactGrid?.state.selectedRanges[0].first.row.idx +
+                ' to ' +
+                reactGrid?.state.selectedRanges[0].last.column.columnId +
+                reactGrid?.state.selectedRanges[0].last.row.idx
+            )
+          }}
+        >
           <hr />
           <ReactGrid
-            ref={reactGrid}
+            ref={newRef => {
+              // gotcha, this wont trigger on finish selection event
+              console.log('updated ref')
+              if (newRef) {
+                setReactGrid(newRef)
+              }
+            }}
             rows={sheets[sheetIndex].gridRows}
             columns={sheets[sheetIndex].gridColumns}
             enableRowSelection
             enableColumnSelection
             enableRangeSelection
+            stickyTopRows={1}
+            stickyLeftColumns={1}
             onContextMenu={simpleHandleContextMenu}
             onFocusLocationChanged={location => {
               if (location.columnId >= 'A' && location.rowId.toString() >= '0')
@@ -760,12 +789,179 @@ const CreateSupportPackage = () => {
             }}
           />
           {/* <TableCollapsible /> */}
-          <Grid container justifyContent='flex-end'>
-            <Button size='large' type='submit' variant='contained' onClick={handleJournalModalClose}>
-              Close
-            </Button>
-          </Grid>
         </Box>
+        {rightDrawerVisible ? (
+          <Drawer anchor='right' variant='permanent' sx={{ zIndex: 1300 }}>
+            <Toolbar>
+              <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'>
+                Focussed Cell: {focussedCell ?? 'None'}
+              </Typography>
+              <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'>
+                Range: {focussedRange}
+              </Typography>
+              <IconButton
+                edge='start'
+                color='inherit'
+                onClick={() => setRightDrawerVisible(!rightDrawerVisible)}
+                aria-label='close'
+              >
+                <CloseIcon />
+              </IconButton>
+            </Toolbar>
+            <Tabs
+              value={values.commentsTab}
+              onChange={handleCommentsTabChange}
+              variant='fullWidth'
+              aria-label='full width tabs example'
+            >
+              <Tab label='Comments' />
+              <Tab label='Action Items' />
+            </Tabs>
+            <TabPanel value={values.commentsTab} index={0} dir={theme.direction}>
+              <Grid container sx={{ padding: '0 1rem' }}>
+                <TextField
+                  fullWidth
+                  id='outlined-multiline-flexible'
+                  label='Comments'
+                  multiline
+                  variant='standard'
+                  maxRows={4}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton color='primary'>
+                          <AttachFileIcon />
+                        </IconButton>
+
+                        <IconButton
+                          edge='end'
+                          color='primary'
+                          onClick={() => {
+                            console.log(reactGrid?.state.selectedRanges)
+                          }}
+                        >
+                          <SendIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Grid>
+              <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 4 }}>
+                <Grid item>
+                  <Avatar alt='Remy Sharp'>RS</Avatar>
+                </Grid>
+                <Grid justifyContent='left' item xs>
+                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                  <Typography sx={{ ml: 2, width: '17rem' }} variant='body1' component='div'>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
+                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
+                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
+                    urna, nec feugiat quam lectus vitae ex.
+                  </Typography>
+                  <h4 style={{ marginTop: 5, marginBottom: 5, marginLeft: -50, marginRight: 0, textAlign: 'left' }}>
+                    12th December, 2022 1:23PM
+                  </h4>
+                  <Chip
+                    label='Attachment1'
+                    color='primary'
+                    avatar={<Avatar color='secondary'>PDF</Avatar>}
+                    onClick={() => alert('Download This')}
+                    onDelete={() => alert('Download This')}
+                    deleteIcon={<DownloadIcon />}
+                    sx={{ marginLeft: -12 }}
+                  />
+                  <Chip
+                    label='Attachment2'
+                    color='primary'
+                    avatar={<Avatar color='secondary'>XLS</Avatar>}
+                    onClick={() => alert('Download This')}
+                    onDelete={() => alert('Download This')}
+                    deleteIcon={<DownloadIcon />}
+                    sx={{ marginLeft: 2 }}
+                  />
+                </Grid>
+              </Grid>
+            </TabPanel>
+            <TabPanel value={values.commentsTab} index={1} dir={theme.direction}>
+              <Grid container sx={{ padding: '0 1rem' }}>
+                <TextField
+                  fullWidth
+                  id='outlined-multiline-flexible'
+                  label='Action Item'
+                  multiline
+                  variant='standard'
+                  maxRows={4}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton color='primary'>
+                          <AttachFileIcon />
+                        </IconButton>
+
+                        <IconButton
+                          edge='end'
+                          color='primary'
+                          onClick={() => {
+                            console.log(reactGrid?.state.selectedRanges)
+                          }}
+                        >
+                          <SendIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Grid>
+              <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 4 }}>
+                <Card sx={{ maxWidth: 385 }}>
+                  <CardContent>
+                    <Typography variant='body2' color='text.secondary'>
+                      Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across all
+                      continents except Antarctica
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button size='small'>Mark as Completed</Button>
+                    <Button size='small'>Delete</Button>
+                  </CardActions>
+                </Card>
+              </Grid>
+              <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 2 }}>
+                <Card sx={{ maxWidth: 385 }}>
+                  <CardContent>
+                    <Typography variant='body2' color='text.secondary'>
+                      Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across all
+                      continents except Antarctica
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button size='small'>Mark as Completed</Button>
+                    <Button size='small'>Delete</Button>
+                  </CardActions>
+                </Card>
+              </Grid>
+              <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 2 }}>
+                <Card sx={{ maxWidth: 385 }}>
+                  <CardContent>
+                    <Typography variant='body2' color='text.secondary'>
+                      Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across all
+                      continents except Antarctica
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button size='small'>Mark as Completed</Button>
+                    <Button size='small'>Delete</Button>
+                  </CardActions>
+                </Card>
+              </Grid>
+            </TabPanel>
+          </Drawer>
+        ) : (
+          <></>
+        )}
       </Dialog>
     </Grid>
   )
