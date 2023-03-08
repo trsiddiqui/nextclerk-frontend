@@ -32,6 +32,7 @@ import MessageIcon from '@mui/icons-material/Message'
 import DownloadIcon from '@mui/icons-material/Download'
 import SendIcon from '@mui/icons-material/Send'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
@@ -54,8 +55,13 @@ import {
   Toolbar,
   IconButton,
   Drawer,
-  InputAdornment
+  InputAdornment,
+  Container,
+  Paper,
+  RadioGroup,
+  Radio
 } from '@mui/material'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import dayjs, { Dayjs } from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -66,12 +72,11 @@ import { importedExcelJs } from 'src/mocked-data/sample-excel-file'
 import Dialog from '@mui/material/Dialog'
 
 const modalStyle = {
-  // width: 400,
+  width: 400,
   bgcolor: 'background.paper',
   boxShadow: 24,
-  marginTop: 13,
-  maxWidth: 200,
   p: 4,
+  margin: '0 auto',
   borderRadius: '5px'
 }
 
@@ -138,6 +143,7 @@ const CreateSupportPackage = () => {
     commentsSortedBy: 'dateAsc',
     commentsTab: 0
   })
+  const [chooseMaterFileModalOpen, setChooseMaterFileModalOpen] = React.useState(false)
   const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
   const [sheetIndex, setSheetIndex] = React.useState(0)
@@ -145,6 +151,8 @@ const CreateSupportPackage = () => {
   const [focussedCell, setFocussedCell] = React.useState(null)
   const [focussedRange, setFocussedRange] = React.useState(null)
   const [rightDrawerVisible, setRightDrawerVisible] = React.useState(false)
+  const [fileUploaded, setFileUploaded] = React.useState(false)
+  const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
   const saveMenuOpen = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -166,6 +174,8 @@ const CreateSupportPackage = () => {
 
   // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
+  const handleChooseMaterFileModalOpen = () => setChooseMaterFileModalOpen(true)
+  const handleChooseMaterFileModalClose = () => setChooseMaterFileModalOpen(false)
 
   const handleJournalModalOpen = () => setJournalModalOpen(true)
   const handleJournalModalClose = () => setJournalModalOpen(false)
@@ -586,27 +596,113 @@ const CreateSupportPackage = () => {
           </CardActions>
         </form>
       </Card>
-      <Card>
-        <Box>
-          <Tabs
-            value={values.tab}
-            onChange={handleTabChange}
-            variant='fullWidth'
-            aria-label='full width tabs example'
-            sx={{ margin: '10px 200px' }}
-          >
-            <Tab label='Support' />
-            <Tab label='Comments' />
-            <Tab label='Journal Entry' />
-          </Tabs>
-          <TabPanel value={values.tab} index={0} dir={theme.direction}>
-            <Grid container>
-              <Grid item xs={12} sm={12} sx={{ pl: 1 }} width='100%'>
-                <Button onClick={handleJournalModalOpen} variant='contained'>
-                  View Line Item Sheet
-                </Button>
-              </Grid>
-              {/* <Grid item xs={12} sm={3} sx={{ pl: 1 }}>
+      <Container>
+        <Tabs
+          value={values.tab}
+          onChange={handleTabChange}
+          variant='fullWidth'
+          aria-label='full width tabs example'
+          sx={{ margin: '10px 200px' }}
+        >
+          <Tab label='Support' />
+          <Tab label='Comments' />
+          <Tab label='Journal Entry' />
+        </Tabs>
+        <TabPanel value={values.tab} index={0} dir={theme.direction}>
+          {/* <Card sx={{ height: 400, textAlign: 'center', verticalAlign: 'middle' }}>
+            <CardContent> */}
+          <Paper>
+            <FormControlLabel
+              control={
+                <Switch
+                  defaultChecked
+                  onChange={() => {
+                    setFileUploaded(!fileUploaded)
+                  }}
+                />
+              }
+              label='File Uploaded (only for demo)'
+            />
+            <Button onClick={handleChooseMaterFileModalOpen}>Choose Master File (only for demo)</Button>
+            <Button
+              onClick={() => {
+                setFileOpenedInExcel(true)
+              }}
+            >
+              File opened in Excel (only for demo)
+            </Button>
+            <Grid container xs={12} sm={12} sx={{ pl: 1, padding: 30 }} width='100%'>
+              {fileUploaded ? (
+                <>
+                  <Grid item xs={6} sm={6} textAlign='center' justifyContent='center'>
+                    <Box sx={{}}>
+                      <IconButton
+                        size='large'
+                        aria-label='Upload'
+                        className='card-more-options'
+                        sx={{ color: 'text.secondary', fontSize: 100, padding: '22px' }}
+                        onClick={handleJournalModalOpen}
+                      >
+                        <Avatar
+                          alt='Flora'
+                          src={`${
+                            process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                          }/images/icons/excel.png`}
+                        />
+                      </IconButton>
+                      <Typography>View Master Sheet</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6} sm={6} textAlign='center' justifyContent='center' marginTop={10}>
+                    <Box sx={{}}>
+                      <Button variant='text' endIcon={<OpenInNewIcon />}>
+                        Edit in Microsoft Office Online
+                      </Button>
+                    </Box>
+                  </Grid>
+                </>
+              ) : (
+                <>
+                  <Grid item xs={6} textAlign='right' paddingRight='30px'>
+                    <Box sx={{}}>
+                      <IconButton
+                        size='large'
+                        aria-label='Upload'
+                        className='card-more-options'
+                        sx={{ color: 'blue', fontSize: 100, marginRight: '30px' }}
+                      >
+                        <CloudUploadIcon sx={{ color: 'blue', fontSize: 60 }} />
+                      </IconButton>
+                      <Typography>Upload File(s) to Start</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6} textAlign='left' paddingLeft='30px'>
+                    <Box>
+                      <IconButton
+                        size='large'
+                        aria-label='Upload'
+                        className='card-more-options'
+                        sx={{ color: 'text.secondary', fontSize: 100, marginLeft: '90px', padding: '22px' }}
+                        onClick={handleJournalModalOpen}
+                      >
+                        <Avatar
+                          alt='Flora'
+                          src={`${
+                            process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                          }/images/icons/excel.png`}
+                        />
+                      </IconButton>
+                      <Typography>Create a Master Microsoft Excel File</Typography>
+                    </Box>
+                  </Grid>
+                </>
+              )}
+            </Grid>
+          </Paper>
+          {/* </CardContent>
+          </Card> */}
+          <Grid container>
+            {/* <Grid item xs={12} sm={3} sx={{ pl: 1 }}>
                 {focussedCell}
                 <Grid container wrap='nowrap' spacing={2}>
                   <Grid item>
@@ -623,9 +719,10 @@ const CreateSupportPackage = () => {
                 </Grid>
                 <Divider />
               </Grid> */}
-            </Grid>
-          </TabPanel>
-          <TabPanel value={values.tab} index={1} dir={theme.direction}>
+          </Grid>
+        </TabPanel>
+        <TabPanel value={values.tab} index={1} dir={theme.direction}>
+          <Paper sx={{ padding: 10 }}>
             <Grid container wrap='nowrap' spacing={2}>
               <Grid item>
                 <Avatar alt='Remy Sharp'>RS</Avatar>
@@ -643,47 +740,121 @@ const CreateSupportPackage = () => {
                 <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
               </Grid>
             </Grid>
-          </TabPanel>
-          <TabPanel value={values.tab} index={2} dir={theme.direction}>
-            <Grid item xs={12} sm={12}>
-              TO DO
+            <Grid container wrap='nowrap' spacing={2}>
+              <Grid item>
+                <Avatar alt='Remy Sharp'>RS</Avatar>
+              </Grid>
+              <Grid justifyContent='left' item xs zeroMinWidth>
+                <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                <p style={{ textAlign: 'left' }}>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                  bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                  tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a ligula
+                  nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus. Pellentesque et
+                  neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula urna, nec feugiat
+                  quam lectus vitae ex.{' '}
+                </p>
+                <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
+              </Grid>
             </Grid>
-          </TabPanel>
-        </Box>
-        <CardContent>
-          <Grid container>
-            <Grid item xs={12} sm={8}>
-              <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                Supporting Package Attachments
-              </Typography>
+            <Grid container wrap='nowrap' spacing={2}>
+              <Grid item>
+                <Avatar alt='Remy Sharp'>RS</Avatar>
+              </Grid>
+              <Grid justifyContent='left' item xs zeroMinWidth>
+                <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                <p style={{ textAlign: 'left' }}>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                  bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                  tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a ligula
+                  nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus. Pellentesque et
+                  neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula urna, nec feugiat
+                  quam lectus vitae ex.{' '}
+                </p>
+                <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={4} alignContent='end' textAlign='right'>
-              <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                Total Attachments: 2
-              </Typography>
+            <Grid container wrap='nowrap' spacing={2}>
+              <Grid item>
+                <Avatar alt='Remy Sharp'>RS</Avatar>
+              </Grid>
+              <Grid justifyContent='left' item xs zeroMinWidth>
+                <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                <p style={{ textAlign: 'left' }}>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                  bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                  tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a ligula
+                  nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus. Pellentesque et
+                  neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula urna, nec feugiat
+                  quam lectus vitae ex.{' '}
+                </p>
+                <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={12}>
-              <Divider sx={{ margin: 0 }} />
+
+            <Grid container sx={{ padding: '0 1rem' }}>
+              <TextField
+                fullWidth
+                id='outlined-multiline-flexible'
+                label='Add Comment(s)'
+                multiline
+                variant='standard'
+                maxRows={4}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton color='primary'>
+                        <AttachFileIcon />
+                      </IconButton>
+
+                      <IconButton
+                        edge='end'
+                        color='primary'
+                        onClick={() => {
+                          console.log(reactGrid?.state.selectedRanges)
+                        }}
+                      >
+                        <SendIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+              />
             </Grid>
-            <Grid item xs={12} sm={12}>
-              {attachments.map((attachment, index) => (
-                <>
-                  <Link href='#' key={index}>
-                    {attachment.name}
-                  </Link>
-                  <br />
-                </>
-              ))}
-            </Grid>
+          </Paper>
+        </TabPanel>
+        <TabPanel value={values.tab} index={2} dir={theme.direction}>
+          <Grid item xs={12} sm={12}>
+            TO DO
           </Grid>
-        </CardContent>
-      </Card>
-      <Modal
-        open={personnelModalOpen}
-        onClose={handlePersonnelModalClose}
-        aria-labelledby='modal-modal-personnel'
-        aria-describedby='modal-modal-personnel'
-      >
+        </TabPanel>
+      </Container>
+      <Grid container marginTop={10}>
+        <Grid item xs={12} sm={8}>
+          <Typography variant='body2' sx={{ fontWeight: 600 }}>
+            Supporting Package Attachments
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={4} alignContent='end' textAlign='right'>
+          <Typography variant='body2' sx={{ fontWeight: 600 }}>
+            Supporting Package Attachments: 2
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={12}>
+          <Divider sx={{ margin: 0 }} />
+        </Grid>
+        <Grid item xs={12} sm={12}>
+          {attachments.map((attachment, index) => (
+            <>
+              <Link href='#' key={index}>
+                {attachment.name}
+              </Link>
+              <br />
+            </>
+          ))}
+        </Grid>
+      </Grid>
+      <Modal open={personnelModalOpen} onClose={handlePersonnelModalClose}>
         <Box sx={modalStyle}>
           <Card>
             <CardHeader title='Select a Personnel' sx={{ textAlign: 'center' }}></CardHeader>
@@ -700,6 +871,48 @@ const CreateSupportPackage = () => {
           </Card>
         </Box>
       </Modal>
+      <Modal
+        open={chooseMaterFileModalOpen}
+        onClose={handleChooseMaterFileModalClose}
+        aria-labelledby='modal-modal-personnel'
+        aria-describedby='modal-modal-personnel'
+      >
+        <Box sx={modalStyle}>
+          <Card>
+            <CardHeader title='Select a Personnel' sx={{ textAlign: 'center' }}></CardHeader>
+            <CardContent>
+              <FormLabel id='demo-radio-buttons-group-label'>Choose Master File</FormLabel>
+              <RadioGroup
+                aria-labelledby='demo-radio-buttons-group-label'
+                defaultValue='female'
+                name='radio-buttons-group'
+              >
+                <FormControlLabel value='female' control={<Radio />} label='File 1.xlsx' />
+                <FormControlLabel value='male' control={<Radio />} label='Audit.xlsx' />
+                <FormControlLabel value='other' control={<Radio />} label='Another.xlsx' />
+              </RadioGroup>
+            </CardContent>
+            <CardActions>
+              <Grid container justifyContent='flex-end'>
+                <Button size='large' type='submit' variant='contained' onClick={handleChooseMaterFileModalClose}>
+                  Save
+                </Button>
+              </Grid>
+            </CardActions>
+          </Card>
+        </Box>
+      </Modal>
+      <Dialog open={fileOpenedInExcel} fullScreen sx={{ marginLeft: 30 }}>
+        <Grid container xs={12} sm={12} sx={{ pl: 1, padding: 30 }} width='100%'>
+          <Grid item xs={12} sm={12} textAlign='center' justifyContent='center'>
+            <Box sx={{}}>
+              <Button color='primary' variant='contained' onClick={() => setFileOpenedInExcel(false)}>
+                Finish Editing Master Sheet
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </Dialog>
       <Dialog
         fullScreen
         open={journalModalOpen}
