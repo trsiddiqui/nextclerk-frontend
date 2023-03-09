@@ -605,17 +605,17 @@ const CreateSupportPackage = () => {
           </CardActions>
         </form>
       </Card>
-      <Container>
+      <Card sx={{ width: '100%', marginTop: 3 }}>
         <Paper>
-          <AppBar position='static'>
+          <AppBar position='static' color='inherit'>
             <Tabs
               value={values.tab}
               onChange={handleTabChange}
               variant='fullWidth'
               aria-label='full width tabs example'
-              sx={{ margin: '10px 50px' }}
+              sx={{ margin: '0 200px' }}
               indicatorColor='primary'
-              textColor='inherit'
+              textColor='secondary'
             >
               <Tab label='Support' />
               <Tab label='Comments' />
@@ -644,7 +644,7 @@ const CreateSupportPackage = () => {
             >
               File opened in Excel (only for demo)
             </Button>
-            <Grid container xs={12} sm={12} sx={{ pl: 1, padding: 30 }} width='100%'>
+            <Grid container xs={12} sm={12} sx={{ pl: 1, padding: 50 }} width='100%'>
               {fileUploaded ? (
                 <>
                   <Grid item xs={6} sm={6} textAlign='center' justifyContent='center'>
@@ -677,12 +677,12 @@ const CreateSupportPackage = () => {
               ) : (
                 <>
                   <Grid item xs={6} textAlign='right' paddingRight='30px'>
-                    <Box sx={{}}>
+                    <Box>
                       <IconButton
                         size='large'
                         aria-label='Upload'
                         className='card-more-options'
-                        sx={{ color: 'blue', fontSize: 100, marginRight: '30px' }}
+                        sx={{ color: 'blue', fontSize: 100, marginRight: '40px !important' }}
                       >
                         <CloudUploadIcon sx={{ color: 'blue', fontSize: 60 }} />
                       </IconButton>
@@ -734,7 +734,7 @@ const CreateSupportPackage = () => {
             </Grid>
           </TabPanel>
           <TabPanel value={values.tab} index={1} dir={theme.direction}>
-            <Paper sx={{ padding: 10 }}>
+            <Container sx={{ padding: '20px 0px' }}>
               <Grid container wrap='nowrap' spacing={2}>
                 <Grid item>
                   <Avatar alt='Remy Sharp'>RS</Avatar>
@@ -803,37 +803,38 @@ const CreateSupportPackage = () => {
                   <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
                 </Grid>
               </Grid>
+              <Paper sx={{ margin: '0px -50px' }}>
+                <Grid container sx={{ padding: '1rem 1rem' }}>
+                  <TextField
+                    fullWidth
+                    id='outlined-multiline-flexible'
+                    label='Add Comment(s)'
+                    multiline
+                    variant='standard'
+                    maxRows={4}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position='end'>
+                          <IconButton color='primary'>
+                            <AttachFileIcon />
+                          </IconButton>
 
-              <Grid container sx={{ padding: '0 1rem' }}>
-                <TextField
-                  fullWidth
-                  id='outlined-multiline-flexible'
-                  label='Add Comment(s)'
-                  multiline
-                  variant='standard'
-                  maxRows={4}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton color='primary'>
-                          <AttachFileIcon />
-                        </IconButton>
-
-                        <IconButton
-                          edge='end'
-                          color='primary'
-                          onClick={() => {
-                            console.log(reactGrid?.state.selectedRanges)
-                          }}
-                        >
-                          <SendIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-              </Grid>
-            </Paper>
+                          <IconButton
+                            edge='end'
+                            color='primary'
+                            onClick={() => {
+                              console.log(reactGrid?.state.selectedRanges)
+                            }}
+                          >
+                            <SendIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                </Grid>
+              </Paper>
+            </Container>
           </TabPanel>
           <TabPanel value={values.tab} index={2} dir={theme.direction}>
             <Grid item xs={12} sm={12}>
@@ -841,32 +842,30 @@ const CreateSupportPackage = () => {
             </Grid>
           </TabPanel>
         </Paper>
-      </Container>
-      <Grid container marginTop={10}>
-        <Grid item xs={12} sm={8}>
-          <Typography variant='body2' sx={{ fontWeight: 600 }}>
-            Supporting Package Attachments
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={4} alignContent='end' textAlign='right'>
-          <Typography variant='body2' sx={{ fontWeight: 600 }}>
+      </Card>
+      <Card sx={{ width: '100%', marginTop: 3, padding: 3 }}>
+        <Grid container>
+          <Grid item xs={12} sm={8}>
             Supporting Package Attachments: 2
-          </Typography>
+          </Grid>
+          <Grid item xs={12} sm={4} alignContent='end' textAlign='right'>
+            <Typography variant='body2' sx={{ fontWeight: 600 }}></Typography>
+          </Grid>
+          <Grid item xs={12} sm={12} sx={{ marginBottom: 3 }}>
+            <Divider sx={{ margin: 0 }} />
+          </Grid>
+          <Grid item xs={12} sm={12}>
+            {attachments.map((attachment, index) => (
+              <>
+                <Link href='#' key={index}>
+                  {attachment.name}
+                </Link>
+                <br />
+              </>
+            ))}
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={12}>
-          <Divider sx={{ margin: 0 }} />
-        </Grid>
-        <Grid item xs={12} sm={12}>
-          {attachments.map((attachment, index) => (
-            <>
-              <Link href='#' key={index}>
-                {attachment.name}
-              </Link>
-              <br />
-            </>
-          ))}
-        </Grid>
-      </Grid>
+      </Card>
       <Modal open={personnelModalOpen} onClose={handlePersonnelModalClose}>
         <Box sx={modalStyle}>
           <Card>
@@ -915,7 +914,16 @@ const CreateSupportPackage = () => {
           </Card>
         </Box>
       </Modal>
-      <Dialog open={fileOpenedInExcel} fullScreen sx={{ marginLeft: 30 }}>
+      <Dialog
+        open={fileOpenedInExcel}
+        fullScreen
+        PaperProps={{
+          style: {
+            backgroundColor: 'transparent',
+            boxShadow: 'none'
+          }
+        }}
+      >
         <Grid container xs={12} sm={12} sx={{ pl: 1, padding: 30 }} width='100%'>
           <Grid item xs={12} sm={12} textAlign='center' justifyContent='center'>
             <Box sx={{}}>
