@@ -72,6 +72,15 @@ import { importedExcelJs } from 'src/mocked-data/sample-excel-file'
 import Dialog from '@mui/material/Dialog'
 
 const modalStyle = {
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+
+  margin: '0 auto',
+  borderRadius: '5px'
+}
+const sheetModalStyle = {
   // width: 400,
   bgcolor: 'background.paper',
   boxShadow: 24,
@@ -598,17 +607,21 @@ const CreateSupportPackage = () => {
       </Card>
       <Container>
         <Paper>
-          <Tabs
-            value={values.tab}
-            onChange={handleTabChange}
-            variant='fullWidth'
-            aria-label='full width tabs example'
-            sx={{ margin: '10px 200px' }}
-          >
-            <Tab label='Support' />
-            <Tab label='Comments' />
-            <Tab label='Journal Entry' />
-          </Tabs>
+          <AppBar position='static'>
+            <Tabs
+              value={values.tab}
+              onChange={handleTabChange}
+              variant='fullWidth'
+              aria-label='full width tabs example'
+              sx={{ margin: '10px 50px' }}
+              indicatorColor='primary'
+              textColor='inherit'
+            >
+              <Tab label='Support' />
+              <Tab label='Comments' />
+              <Tab label='Journal Entry' />
+            </Tabs>
+          </AppBar>
           <TabPanel value={values.tab} index={0} dir={theme.direction}>
             {/* <Card sx={{ height: 400, textAlign: 'center', verticalAlign: 'middle' }}>
             <CardContent> */}
@@ -968,7 +981,7 @@ const CreateSupportPackage = () => {
           </Toolbar>
         </AppBar>
         <Box
-          sx={modalStyle}
+          sx={sheetModalStyle}
           onMouseUp={() => {
             setFocussedRange(
               reactGrid?.state.selectedRanges[0].first.column.columnId +
