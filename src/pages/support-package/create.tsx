@@ -72,7 +72,7 @@ import { importedExcelJs } from 'src/mocked-data/sample-excel-file'
 import Dialog from '@mui/material/Dialog'
 
 const modalStyle = {
-  width: 400,
+  // width: 400,
   bgcolor: 'background.paper',
   boxShadow: 24,
   p: 4,
@@ -597,21 +597,21 @@ const CreateSupportPackage = () => {
         </form>
       </Card>
       <Container>
-        <Tabs
-          value={values.tab}
-          onChange={handleTabChange}
-          variant='fullWidth'
-          aria-label='full width tabs example'
-          sx={{ margin: '10px 200px' }}
-        >
-          <Tab label='Support' />
-          <Tab label='Comments' />
-          <Tab label='Journal Entry' />
-        </Tabs>
-        <TabPanel value={values.tab} index={0} dir={theme.direction}>
-          {/* <Card sx={{ height: 400, textAlign: 'center', verticalAlign: 'middle' }}>
+        <Paper>
+          <Tabs
+            value={values.tab}
+            onChange={handleTabChange}
+            variant='fullWidth'
+            aria-label='full width tabs example'
+            sx={{ margin: '10px 200px' }}
+          >
+            <Tab label='Support' />
+            <Tab label='Comments' />
+            <Tab label='Journal Entry' />
+          </Tabs>
+          <TabPanel value={values.tab} index={0} dir={theme.direction}>
+            {/* <Card sx={{ height: 400, textAlign: 'center', verticalAlign: 'middle' }}>
             <CardContent> */}
-          <Paper>
             <FormControlLabel
               control={
                 <Switch
@@ -698,11 +698,10 @@ const CreateSupportPackage = () => {
                 </>
               )}
             </Grid>
-          </Paper>
-          {/* </CardContent>
+            {/* </CardContent>
           </Card> */}
-          <Grid container>
-            {/* <Grid item xs={12} sm={3} sx={{ pl: 1 }}>
+            <Grid container>
+              {/* <Grid item xs={12} sm={3} sx={{ pl: 1 }}>
                 {focussedCell}
                 <Grid container wrap='nowrap' spacing={2}>
                   <Grid item>
@@ -719,115 +718,116 @@ const CreateSupportPackage = () => {
                 </Grid>
                 <Divider />
               </Grid> */}
-          </Grid>
-        </TabPanel>
-        <TabPanel value={values.tab} index={1} dir={theme.direction}>
-          <Paper sx={{ padding: 10 }}>
-            <Grid container wrap='nowrap' spacing={2}>
-              <Grid item>
-                <Avatar alt='Remy Sharp'>RS</Avatar>
-              </Grid>
-              <Grid justifyContent='left' item xs zeroMinWidth>
-                <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                <p style={{ textAlign: 'left' }}>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                  bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                  tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a ligula
-                  nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus. Pellentesque et
-                  neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula urna, nec feugiat
-                  quam lectus vitae ex.{' '}
-                </p>
-                <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
-              </Grid>
             </Grid>
-            <Grid container wrap='nowrap' spacing={2}>
-              <Grid item>
-                <Avatar alt='Remy Sharp'>RS</Avatar>
+          </TabPanel>
+          <TabPanel value={values.tab} index={1} dir={theme.direction}>
+            <Paper sx={{ padding: 10 }}>
+              <Grid container wrap='nowrap' spacing={2}>
+                <Grid item>
+                  <Avatar alt='Remy Sharp'>RS</Avatar>
+                </Grid>
+                <Grid justifyContent='left' item xs zeroMinWidth>
+                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                  <p style={{ textAlign: 'left' }}>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
+                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
+                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
+                    urna, nec feugiat quam lectus vitae ex.{' '}
+                  </p>
+                  <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
+                </Grid>
               </Grid>
-              <Grid justifyContent='left' item xs zeroMinWidth>
-                <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                <p style={{ textAlign: 'left' }}>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                  bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                  tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a ligula
-                  nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus. Pellentesque et
-                  neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula urna, nec feugiat
-                  quam lectus vitae ex.{' '}
-                </p>
-                <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
+              <Grid container wrap='nowrap' spacing={2}>
+                <Grid item>
+                  <Avatar alt='Remy Sharp'>RS</Avatar>
+                </Grid>
+                <Grid justifyContent='left' item xs zeroMinWidth>
+                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                  <p style={{ textAlign: 'left' }}>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
+                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
+                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
+                    urna, nec feugiat quam lectus vitae ex.{' '}
+                  </p>
+                  <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
+                </Grid>
               </Grid>
-            </Grid>
-            <Grid container wrap='nowrap' spacing={2}>
-              <Grid item>
-                <Avatar alt='Remy Sharp'>RS</Avatar>
+              <Grid container wrap='nowrap' spacing={2}>
+                <Grid item>
+                  <Avatar alt='Remy Sharp'>RS</Avatar>
+                </Grid>
+                <Grid justifyContent='left' item xs zeroMinWidth>
+                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                  <p style={{ textAlign: 'left' }}>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
+                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
+                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
+                    urna, nec feugiat quam lectus vitae ex.{' '}
+                  </p>
+                  <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
+                </Grid>
               </Grid>
-              <Grid justifyContent='left' item xs zeroMinWidth>
-                <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                <p style={{ textAlign: 'left' }}>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                  bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                  tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a ligula
-                  nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus. Pellentesque et
-                  neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula urna, nec feugiat
-                  quam lectus vitae ex.{' '}
-                </p>
-                <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
+              <Grid container wrap='nowrap' spacing={2}>
+                <Grid item>
+                  <Avatar alt='Remy Sharp'>RS</Avatar>
+                </Grid>
+                <Grid justifyContent='left' item xs zeroMinWidth>
+                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                  <p style={{ textAlign: 'left' }}>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
+                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
+                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
+                    urna, nec feugiat quam lectus vitae ex.{' '}
+                  </p>
+                  <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
+                </Grid>
               </Grid>
-            </Grid>
-            <Grid container wrap='nowrap' spacing={2}>
-              <Grid item>
-                <Avatar alt='Remy Sharp'>RS</Avatar>
-              </Grid>
-              <Grid justifyContent='left' item xs zeroMinWidth>
-                <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                <p style={{ textAlign: 'left' }}>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                  bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                  tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a ligula
-                  nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus. Pellentesque et
-                  neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula urna, nec feugiat
-                  quam lectus vitae ex.{' '}
-                </p>
-                <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
-              </Grid>
-            </Grid>
 
-            <Grid container sx={{ padding: '0 1rem' }}>
-              <TextField
-                fullWidth
-                id='outlined-multiline-flexible'
-                label='Add Comment(s)'
-                multiline
-                variant='standard'
-                maxRows={4}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position='end'>
-                      <IconButton color='primary'>
-                        <AttachFileIcon />
-                      </IconButton>
+              <Grid container sx={{ padding: '0 1rem' }}>
+                <TextField
+                  fullWidth
+                  id='outlined-multiline-flexible'
+                  label='Add Comment(s)'
+                  multiline
+                  variant='standard'
+                  maxRows={4}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton color='primary'>
+                          <AttachFileIcon />
+                        </IconButton>
 
-                      <IconButton
-                        edge='end'
-                        color='primary'
-                        onClick={() => {
-                          console.log(reactGrid?.state.selectedRanges)
-                        }}
-                      >
-                        <SendIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }}
-              />
+                        <IconButton
+                          edge='end'
+                          color='primary'
+                          onClick={() => {
+                            console.log(reactGrid?.state.selectedRanges)
+                          }}
+                        >
+                          <SendIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Grid>
+            </Paper>
+          </TabPanel>
+          <TabPanel value={values.tab} index={2} dir={theme.direction}>
+            <Grid item xs={12} sm={12}>
+              TO DO
             </Grid>
-          </Paper>
-        </TabPanel>
-        <TabPanel value={values.tab} index={2} dir={theme.direction}>
-          <Grid item xs={12} sm={12}>
-            TO DO
-          </Grid>
-        </TabPanel>
+          </TabPanel>
+        </Paper>
       </Container>
       <Grid container marginTop={10}>
         <Grid item xs={12} sm={8}>
