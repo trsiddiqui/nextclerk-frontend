@@ -1,19 +1,5 @@
 // ** React Imports
 import React, { ChangeEvent, useState } from 'react'
-import {
-  ReactGrid,
-  Row,
-  Column,
-  Id,
-  MenuOption,
-  SelectionMode,
-  TextCell,
-  NumberCell,
-  DateCell,
-  CheckboxCell,
-  CellLocation
-} from '@silevis/reactgrid'
-import '@silevis/reactgrid/styles.css'
 
 // ** MUI Imports
 import Card from '@mui/material/Card'
@@ -32,7 +18,8 @@ import MessageIcon from '@mui/icons-material/Message'
 import DownloadIcon from '@mui/icons-material/Download'
 import SendIcon from '@mui/icons-material/Send'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+
+// import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
@@ -68,8 +55,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
 import TableCustomized from 'src/views/tables/TableCustomized'
-import { importedExcelJs } from 'src/mocked-data/sample-excel-file'
 import Dialog from '@mui/material/Dialog'
+import { SpreadsheetComponent } from '@syncfusion/ej2-react-spreadsheet'
 
 const modalStyle = {
   width: 400,
@@ -155,13 +142,12 @@ const CreateSupportPackage = () => {
   const [chooseMaterFileModalOpen, setChooseMaterFileModalOpen] = React.useState(false)
   const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
-  const [sheetIndex, setSheetIndex] = React.useState(0)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [focussedCell, setFocussedCell] = React.useState(null)
-  const [focussedRange, setFocussedRange] = React.useState(null)
   const [rightDrawerVisible, setRightDrawerVisible] = React.useState(false)
   const [fileUploaded, setFileUploaded] = React.useState(false)
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
+  const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
+
   const saveMenuOpen = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -178,8 +164,6 @@ const CreateSupportPackage = () => {
       name: 'JanuaryReports.pdf'
     }
   ])
-
-  const [reactGrid, setReactGrid] = useState<ReactGrid | null>(null)
 
   // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
@@ -206,259 +190,11 @@ const CreateSupportPackage = () => {
     setValues({ ...values, commentsTab: newValue })
   }
 
-  const sheets = []
-  for (const excelSheet of importedExcelJs) {
-    const gridColumns: Column[] = excelSheet.columns.map((col: { address: any; width: any }, index: any) => ({
-      columnId: col.address,
-      resizable: true,
-      width: parseInt(((col.width ?? 20) * 10).toString()),
-      key: index
-
-      // width: col.width ? col.width * 2 : undefined
-    }))
-    gridColumns.unshift({
-      columnId: '',
-      resizable: false,
-      width: 10
-    })
-
-    // Cell Types: 	Null = 0, Merge = 1, Number = 2, String = 3, Date = 4, Hyperlink = 5, Formula = 6, SharedString = 7, RichText = 8, Boolean = 9, Error = 10
-    let gridRows: Row[] = excelSheet.rows.map((row: { height: any; cells: any[] }, index: any) => {
-      const r = {
-        height: row.height,
-        rowId: index,
-        key: index,
-        cells: row.cells.map(
-          (
-            cell: {
-              style: {
-                font: { color: { argb: string } }
-                fill: { fgColor: { argb: string } }
-                border: {
-                  left: { color: { argb: string } }
-                  top: { color: { argb: string } }
-                  right: { color: { argb: string } }
-                  bottom: { color: { argb: string } }
-                }
-                alignment: { wrapText: any }
-              }
-              address: string
-              type: any
-              value: any
-            },
-            index: any
-          ) => {
-            const sharedProperties = {
-              nonEditable: true,
-              key: index,
-              style: {
-                color: `#${cell.style.font?.color?.argb?.substring(2)}`,
-                background: `#${cell.style.fill?.fgColor?.argb?.substring(2)}`,
-                border: {
-                  left: {
-                    color: `#${cell.style.border?.left?.color?.argb?.substring(2)}`,
-                    style: 'solid', // cell.style.border?.left.style,
-                    width: '1px'
-                  },
-                  top: {
-                    color: `#${cell.style.border?.top?.color?.argb?.substring(2)}`,
-                    style: 'solid', // cell.style.border?.top.style,
-                    width: '1px'
-                  },
-                  right: {
-                    color: `#${cell.style.border?.right?.color?.argb?.substring(2)}`,
-                    style: 'solid', // cell.style.border?.right.style,
-                    width: '1px'
-                  },
-                  bottom: {
-                    color: `#${cell.style.border?.bottom?.color?.argb?.substring(2)}`,
-                    style: 'solid', // cell.style.border?.bottom.style,
-                    width: '1px'
-                  }
-                },
-                overflow: !cell.style.alignment?.wrapText ? 'overflow' : ''
-              }
-            }
-            if (cell.address === 'D8' || cell.address === 'D9') {
-              const backgroundColor = '#FFEB3B'
-              sharedProperties.style.background = backgroundColor
-            }
-            switch (cell.type) {
-              case 2:
-                return {
-                  type: 'number',
-                  value: Number(cell.value),
-                  ...sharedProperties
-                } as NumberCell
-              case 4:
-                return {
-                  type: 'date',
-                  value: cell.value,
-                  ...sharedProperties
-                } as DateCell
-              case 9:
-                return {
-                  type: 'checkbox',
-                  checked: Boolean(cell.value),
-                  ...sharedProperties
-                } as CheckboxCell
-              default:
-                return {
-                  type: 'text',
-                  text: cell.value ?? '',
-                  ...sharedProperties
-                } as TextCell
-            }
-          }
-        )
-      }
-
-      // if (r.cells.length < gridColumns.length) {
-      //   r.cells.push(
-      //     new Array(gridColumns.length - r.cells.length + 1).map(() => ({
-      //       nonEditable: true,
-      //       key: index,
-      //       style: {
-      //         color: `#FFFFFF`,
-      //         background: `#00000`,
-      //         border: {
-      //           left: {
-      //             color: `#FFFFFF`,
-      //             style: 'solid', // cell.style.border?.left.style,
-      //             width: '1px'
-      //           },
-      //           top: {
-      //             color: `#FFFFFF`,
-      //             style: 'solid', // cell.style.border?.top.style,
-      //             width: '1px'
-      //           },
-      //           right: {
-      //             color: `#FFFFFF`,
-      //             style: 'solid', // cell.style.border?.right.style,
-      //             width: '1px'
-      //           },
-      //           bottom: {
-      //             color: `#FFFFFF`,
-      //             style: 'solid', // cell.style.border?.bottom.style,
-      //             width: '1px'
-      //           }
-      //         }
-      //       }
-      //     }))
-      //   )
-      // }
-
-      return r
-    })
-
-    let index = 1
-    for (const row of gridRows) {
-      row.cells.unshift({
-        type: 'text',
-        text: (index++).toString(),
-        style: {
-          background: `#D3D3D3`,
-          border: {
-            right: {
-              color: '#880808',
-              style: 'solid',
-              width: '1px'
-            }
-          }
-        }
-      })
+  function oncreated(args: { element: { id: string } }): void {
+    if (spreadsheet && args.element.id === spreadsheet.element.id + '_contextmenu') {
+      spreadsheet.removeContextMenuItems(['Cut', 'Copy', 'Paste', 'Paste Special'], false)
+      spreadsheet.addContextMenuItems([{ text: 'Add Comment' }, { text: 'Add File' }], '', false) //To pass the items, Item before / after that the element to be inserted, Set false if the items need to be inserted before the text.
     }
-
-    const headerRow: Row = {
-      rowId: 0,
-      cells: gridColumns.map((column, index) => ({
-        type: 'text',
-        text: column.columnId.toString(),
-        key: index,
-        style: {
-          background: index > 0 ? `#D3D3D3` : undefined,
-          border: {
-            right: {
-              color: '#880808',
-              style: 'dotted',
-              width: '1px'
-            }
-          }
-        }
-      }))
-    }
-    gridRows = [headerRow, ...gridRows]
-    sheets.push({
-      gridColumns,
-      gridRows,
-      name: excelSheet.name
-    })
-  }
-
-  const simpleHandleContextMenu = (
-    selectedRowIds: Id[],
-    selectedColIds: Id[],
-    selectionMode: SelectionMode,
-    menuOptions: MenuOption[]
-  ): MenuOption[] => {
-    const filteredMenuOptions = menuOptions.filter(option => option.label === 'Copy')
-
-    return filteredMenuOptions.concat(
-      {
-        id: 'comments',
-        label: 'Comments',
-        handler() // selectedRowIds: Id[],
-        // selectedColIds: Id[],
-        // selectionMode: SelectionMode,
-        // selectedRanges: CellLocation[][]
-        {
-          console.log('add_comment')
-        }
-      },
-      {
-        id: 'files',
-        label: 'Files',
-        handler() // selectedRowIds: Id[],
-        // selectedColIds: Id[],
-        // selectionMode: SelectionMode,
-        // selectedRanges: CellLocation[][]
-        {
-          console.log('attach_file')
-        }
-      },
-      {
-        id: 'highlight',
-        label: 'Highlight',
-        handler() {
-          console.log('highlight')
-        }
-      },
-      {
-        id: 'sum',
-        label: 'Sum',
-        handler(
-          _selectedRowIds: Id[],
-          _selectedColIds: Id[],
-          _selectionMode: SelectionMode,
-          selectedRanges: CellLocation[][]
-        ) {
-          if (
-            new Set(selectedRanges[0].map(x => x.columnId)).size === 1 ||
-            new Set(selectedRanges[0].map(x => x.rowId)).size === 1
-          ) {
-            let sum = 0
-            selectedRanges[0].forEach(x => {
-              const columnId = reactGrid?.props.columns.findIndex(y => y.columnId === x.columnId)
-              const cell = reactGrid?.props.rows[parseInt(x.rowId.valueOf() as string) + 1].cells[columnId as number]
-              if (cell?.type === 'number' && 'value' in cell) {
-                sum += parseFloat(cell.value as string)
-              }
-            })
-            alert(sum)
-          }
-        }
-      }
-    )
   }
 
   return (
@@ -644,36 +380,32 @@ const CreateSupportPackage = () => {
             >
               File opened in Excel (only for demo)
             </Button>
-            <Grid container xs={12} sm={12} sx={{ pl: 1, padding: 50 }} width='100%'>
+            <Grid container xs={12} sm={12} sx={{ pl: 1, height: '800px' }} width='100%'>
               {fileUploaded ? (
-                <>
-                  <Grid item xs={6} sm={6} textAlign='center' justifyContent='center'>
-                    <Box sx={{}}>
-                      <IconButton
-                        size='large'
-                        aria-label='Upload'
-                        className='card-more-options'
-                        sx={{ color: 'text.secondary', fontSize: 100, padding: '22px' }}
-                        onClick={handleJournalModalOpen}
-                      >
-                        <Avatar
-                          alt='Flora'
-                          src={`${
-                            process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-                          }/images/icons/excel.png`}
-                        />
-                      </IconButton>
-                      <Typography>View Master Sheet</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6} sm={6} textAlign='center' justifyContent='center' marginTop={10}>
-                    <Box sx={{}}>
-                      <Button variant='text' endIcon={<OpenInNewIcon />}>
-                        Edit in Microsoft Office Online
-                      </Button>
-                    </Box>
-                  </Grid>
-                </>
+                <SpreadsheetComponent
+                  enableContextMenu
+                  contextMenuBeforeOpen={oncreated.bind(this)}
+                  contextMenuItemSelect={item => {
+                    console.log(item)
+                  }}
+                  ref={ssObj => {
+                    if (ssObj) {
+                      setSpreadsheet(ssObj)
+                    }
+                  }}
+                  openUrl='https://ej2services.syncfusion.com/production/web-services/api/spreadsheet/open'
+                  created={() => {
+                    if (spreadsheet) {
+                      fetch('https://js.syncfusion.com/demos/ejservices/data/Spreadsheet/LargeData.xlsx') // fetch the remote url
+                        .then(response => {
+                          response.blob().then(fileBlob => {
+                            const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
+                            spreadsheet.open({ file: file }) // open the file into Spreadsheet
+                          })
+                        })
+                    }
+                  }}
+                ></SpreadsheetComponent>
               ) : (
                 <>
                   <Grid item xs={6} textAlign='right' paddingRight='30px'>
@@ -711,27 +443,7 @@ const CreateSupportPackage = () => {
                 </>
               )}
             </Grid>
-            {/* </CardContent>
-          </Card> */}
-            <Grid container>
-              {/* <Grid item xs={12} sm={3} sx={{ pl: 1 }}>
-                {focussedCell}
-                <Grid container wrap='nowrap' spacing={2}>
-                  <Grid item>
-                    <Avatar alt='Remy Sharp'>RS</Avatar>
-                  </Grid>
-                  <Grid justifyContent='left' item xs zeroMinWidth>
-                    <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel&nbsp;12th December, 2022 1:23PM</h4>
-                    <p style={{ textAlign: 'left' }}>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                      bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                      tortor.
-                    </p>
-                  </Grid>
-                </Grid>
-                <Divider />
-              </Grid> */}
-            </Grid>
+            <Grid container></Grid>
           </TabPanel>
           <TabPanel value={values.tab} index={1} dir={theme.direction}>
             <Container sx={{ padding: '20px 0px' }}>
@@ -819,13 +531,7 @@ const CreateSupportPackage = () => {
                             <AttachFileIcon />
                           </IconButton>
 
-                          <IconButton
-                            edge='end'
-                            color='primary'
-                            onClick={() => {
-                              console.log(reactGrid?.state.selectedRanges)
-                            }}
-                          >
+                          <IconButton edge='end' color='primary'>
                             <SendIcon />
                           </IconButton>
                         </InputAdornment>
@@ -955,24 +661,6 @@ const CreateSupportPackage = () => {
             </IconButton>
           </Toolbar>
           <Toolbar sx={{ padding: 2, marginTop: -6, minHeight: 0 }}>
-            <div style={{ flex: 1 }}>
-              <ButtonGroup variant='outlined' aria-label='outlined button group' sx={{ ml: 3 }}>
-                {sheets.map((sheet, index) => (
-                  <Button
-                    key={index}
-                    sheet-index={index}
-                    variant={sheetIndex === index ? 'contained' : 'outlined'}
-                    color='info'
-                    size='small'
-                    onClick={event => {
-                      setSheetIndex(parseInt(event.currentTarget.getAttribute('sheet-index') ?? '0'))
-                    }}
-                  >
-                    <Typography fontSize={12}>{sheet.name}</Typography>
-                  </Button>
-                ))}
-              </ButtonGroup>
-            </div>
             <Grid>
               <ButtonGroup>
                 <Button endIcon={<BorderColorIcon />}>Highlight</Button>
@@ -988,60 +676,9 @@ const CreateSupportPackage = () => {
             </Grid>
           </Toolbar>
         </AppBar>
-        <Box
-          sx={sheetModalStyle}
-          onMouseUp={() => {
-            setFocussedRange(
-              reactGrid?.state.selectedRanges[0].first.column.columnId +
-                reactGrid?.state.selectedRanges[0].first.row.idx +
-                ' to ' +
-                reactGrid?.state.selectedRanges[0].last.column.columnId +
-                reactGrid?.state.selectedRanges[0].last.row.idx
-            )
-          }}
-        >
-          <hr />
-          <ReactGrid
-            ref={newRef => {
-              // gotcha, this wont trigger on finish selection event
-              console.log('updated ref')
-              if (newRef) {
-                setReactGrid(newRef)
-              }
-            }}
-            rows={sheets[sheetIndex].gridRows}
-            columns={sheets[sheetIndex].gridColumns}
-            enableRowSelection
-            enableColumnSelection
-            enableRangeSelection
-            stickyTopRows={1}
-            stickyLeftColumns={1}
-            onContextMenu={simpleHandleContextMenu}
-            onFocusLocationChanged={location => {
-              if (location.columnId >= 'A' && location.rowId.toString() >= '0')
-                setFocussedCell(`${location.columnId}${parseInt(String(location.rowId)) + 1}`)
-            }}
-          />
-          {/* <TableCollapsible /> */}
-        </Box>
+        <Box sx={sheetModalStyle}></Box>
         {rightDrawerVisible ? (
           <Drawer anchor='right' variant='permanent' sx={{ zIndex: 1300 }}>
-            <Toolbar>
-              <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'>
-                Focussed Cell: {focussedCell ?? 'None'}
-              </Typography>
-              <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'>
-                Range: {focussedRange}
-              </Typography>
-              <IconButton
-                edge='start'
-                color='inherit'
-                onClick={() => setRightDrawerVisible(!rightDrawerVisible)}
-                aria-label='close'
-              >
-                <CloseIcon />
-              </IconButton>
-            </Toolbar>
             <Tabs
               value={values.commentsTab}
               onChange={handleCommentsTabChange}
@@ -1067,13 +704,7 @@ const CreateSupportPackage = () => {
                           <AttachFileIcon />
                         </IconButton>
 
-                        <IconButton
-                          edge='end'
-                          color='primary'
-                          onClick={() => {
-                            console.log(reactGrid?.state.selectedRanges)
-                          }}
-                        >
+                        <IconButton edge='end' color='primary'>
                           <SendIcon />
                         </IconButton>
                       </InputAdornment>
@@ -1135,13 +766,7 @@ const CreateSupportPackage = () => {
                           <AttachFileIcon />
                         </IconButton>
 
-                        <IconButton
-                          edge='end'
-                          color='primary'
-                          onClick={() => {
-                            console.log(reactGrid?.state.selectedRanges)
-                          }}
-                        >
+                        <IconButton edge='end' color='primary'>
                           <SendIcon />
                         </IconButton>
                       </InputAdornment>
