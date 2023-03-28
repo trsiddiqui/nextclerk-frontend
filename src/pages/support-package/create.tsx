@@ -359,6 +359,163 @@ const CreateSupportPackage = () => {
             </Tabs>
           </AppBar>
           <TabPanel value={values.tab} index={0} dir={theme.direction}>
+            {rightDrawerVisible ? (
+              <Drawer anchor='right' variant='permanent' sx={{ zIndex: 1300 }}>
+                <Toolbar>
+                  <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'></Typography>
+                  <IconButton
+                    edge='start'
+                    color='inherit'
+                    onClick={() => {
+                      setRightDrawerVisible(false)
+                    }}
+                    aria-label='close'
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Toolbar>
+                <Tabs
+                  value={values.commentsTab}
+                  onChange={handleCommentsTabChange}
+                  variant='fullWidth'
+                  aria-label='full width tabs example'
+                >
+                  <Tab label='Comments' />
+                  <Tab label='Action Items' />
+                </Tabs>
+                <TabPanel value={values.commentsTab} index={0} dir={theme.direction}>
+                  <Grid container sx={{ padding: '0 1rem' }}>
+                    <TextField
+                      fullWidth
+                      id='outlined-multiline-flexible'
+                      label='Comments'
+                      multiline
+                      variant='standard'
+                      maxRows={4}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton color='primary'>
+                              <AttachFileIcon />
+                            </IconButton>
+
+                            <IconButton edge='end' color='primary'>
+                              <SendIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  </Grid>
+                  <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 4 }}>
+                    <Grid item>
+                      <Avatar alt='Remy Sharp'>RS</Avatar>
+                    </Grid>
+                    <Grid justifyContent='left' item xs>
+                      <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
+                      <Typography sx={{ ml: 2, width: '17rem' }} variant='body1' component='div'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
+                        bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
+                        tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
+                        ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
+                        Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi
+                        vehicula urna, nec feugiat quam lectus vitae ex.
+                      </Typography>
+                      <h4 style={{ marginTop: 5, marginBottom: 5, marginLeft: -50, marginRight: 0, textAlign: 'left' }}>
+                        12th December, 2022 1:23PM
+                      </h4>
+                      <Chip
+                        label='Attachment1'
+                        color='primary'
+                        avatar={<Avatar color='secondary'>PDF</Avatar>}
+                        onClick={() => alert('Download This')}
+                        onDelete={() => alert('Download This')}
+                        deleteIcon={<DownloadIcon />}
+                        sx={{ marginLeft: -12 }}
+                      />
+                      <Chip
+                        label='Attachment2'
+                        color='primary'
+                        avatar={<Avatar color='secondary'>XLS</Avatar>}
+                        onClick={() => alert('Download This')}
+                        onDelete={() => alert('Download This')}
+                        deleteIcon={<DownloadIcon />}
+                        sx={{ marginLeft: 2 }}
+                      />
+                    </Grid>
+                  </Grid>
+                </TabPanel>
+                <TabPanel value={values.commentsTab} index={1} dir={theme.direction}>
+                  <Grid container sx={{ padding: '0 1rem' }}>
+                    <TextField
+                      fullWidth
+                      id='outlined-multiline-flexible'
+                      label='Action Item'
+                      multiline
+                      variant='standard'
+                      maxRows={4}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton color='primary'>
+                              <AttachFileIcon />
+                            </IconButton>
+
+                            <IconButton edge='end' color='primary'>
+                              <SendIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  </Grid>
+                  <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 4 }}>
+                    <Card sx={{ maxWidth: 385 }}>
+                      <CardContent>
+                        <Typography variant='body2' color='text.secondary'>
+                          Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across
+                          all continents except Antarctica
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        <Button size='small'>Mark as Completed</Button>
+                        <Button size='small'>Delete</Button>
+                      </CardActions>
+                    </Card>
+                  </Grid>
+                  <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 2 }}>
+                    <Card sx={{ maxWidth: 385 }}>
+                      <CardContent>
+                        <Typography variant='body2' color='text.secondary'>
+                          Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across
+                          all continents except Antarctica
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        <Button size='small'>Mark as Completed</Button>
+                        <Button size='small'>Delete</Button>
+                      </CardActions>
+                    </Card>
+                  </Grid>
+                  <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 2 }}>
+                    <Card sx={{ maxWidth: 385 }}>
+                      <CardContent>
+                        <Typography variant='body2' color='text.secondary'>
+                          Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across
+                          all continents except Antarctica
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        <Button size='small'>Mark as Completed</Button>
+                        <Button size='small'>Delete</Button>
+                      </CardActions>
+                    </Card>
+                  </Grid>
+                </TabPanel>
+              </Drawer>
+            ) : (
+              <></>
+            )}
             {/* <Card sx={{ height: 400, textAlign: 'center', verticalAlign: 'middle' }}>
             <CardContent> */}
             <FormControlLabel
@@ -380,13 +537,33 @@ const CreateSupportPackage = () => {
             >
               File opened in Excel (only for demo)
             </Button>
+            <AppBar position='static' color='inherit'>
+              <Toolbar sx={{ padding: 2, minHeight: 0 }}>
+                <Grid container justifyContent='end'>
+                  <ButtonGroup>
+                    <Button endIcon={<BorderColorIcon />}>Highlight</Button>
+                    <Button
+                      endIcon={<MessageIcon />}
+                      onClick={() => {
+                        setRightDrawerVisible(!rightDrawerVisible)
+                      }}
+                    >
+                      Comments
+                    </Button>
+                  </ButtonGroup>
+                </Grid>
+              </Toolbar>
+            </AppBar>
             <Grid container xs={12} sm={12} sx={{ pl: 1, height: '800px' }} width='100%'>
               {fileUploaded ? (
                 <SpreadsheetComponent
+                  allowConditionalFormat
                   enableContextMenu
                   contextMenuBeforeOpen={oncreated.bind(this)}
-                  contextMenuItemSelect={item => {
-                    console.log(item)
+                  contextMenuItemSelect={() => {
+                    if (spreadsheet) {
+                      console.log(spreadsheet.getActiveSheet().selectedRange)
+                    }
                   }}
                   ref={ssObj => {
                     if (ssObj) {
@@ -651,176 +828,7 @@ const CreateSupportPackage = () => {
           paddingTop: 2
         }}
       >
-        <AppBar sx={{ position: 'fixed' }} color='inherit'>
-          <Toolbar>
-            <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'>
-              Line Items Workbook
-            </Typography>
-            <IconButton edge='start' color='inherit' onClick={handleJournalModalClose} aria-label='close'>
-              <CloseIcon />
-            </IconButton>
-          </Toolbar>
-          <Toolbar sx={{ padding: 2, marginTop: -6, minHeight: 0 }}>
-            <Grid>
-              <ButtonGroup>
-                <Button endIcon={<BorderColorIcon />}>Highlight</Button>
-                <Button
-                  endIcon={<MessageIcon />}
-                  onClick={() => {
-                    setRightDrawerVisible(!rightDrawerVisible)
-                  }}
-                >
-                  Comment
-                </Button>
-              </ButtonGroup>
-            </Grid>
-          </Toolbar>
-        </AppBar>
         <Box sx={sheetModalStyle}></Box>
-        {rightDrawerVisible ? (
-          <Drawer anchor='right' variant='permanent' sx={{ zIndex: 1300 }}>
-            <Tabs
-              value={values.commentsTab}
-              onChange={handleCommentsTabChange}
-              variant='fullWidth'
-              aria-label='full width tabs example'
-            >
-              <Tab label='Comments' />
-              <Tab label='Action Items' />
-            </Tabs>
-            <TabPanel value={values.commentsTab} index={0} dir={theme.direction}>
-              <Grid container sx={{ padding: '0 1rem' }}>
-                <TextField
-                  fullWidth
-                  id='outlined-multiline-flexible'
-                  label='Comments'
-                  multiline
-                  variant='standard'
-                  maxRows={4}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton color='primary'>
-                          <AttachFileIcon />
-                        </IconButton>
-
-                        <IconButton edge='end' color='primary'>
-                          <SendIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-              </Grid>
-              <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 4 }}>
-                <Grid item>
-                  <Avatar alt='Remy Sharp'>RS</Avatar>
-                </Grid>
-                <Grid justifyContent='left' item xs>
-                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                  <Typography sx={{ ml: 2, width: '17rem' }} variant='body1' component='div'>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
-                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
-                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
-                    urna, nec feugiat quam lectus vitae ex.
-                  </Typography>
-                  <h4 style={{ marginTop: 5, marginBottom: 5, marginLeft: -50, marginRight: 0, textAlign: 'left' }}>
-                    12th December, 2022 1:23PM
-                  </h4>
-                  <Chip
-                    label='Attachment1'
-                    color='primary'
-                    avatar={<Avatar color='secondary'>PDF</Avatar>}
-                    onClick={() => alert('Download This')}
-                    onDelete={() => alert('Download This')}
-                    deleteIcon={<DownloadIcon />}
-                    sx={{ marginLeft: -12 }}
-                  />
-                  <Chip
-                    label='Attachment2'
-                    color='primary'
-                    avatar={<Avatar color='secondary'>XLS</Avatar>}
-                    onClick={() => alert('Download This')}
-                    onDelete={() => alert('Download This')}
-                    deleteIcon={<DownloadIcon />}
-                    sx={{ marginLeft: 2 }}
-                  />
-                </Grid>
-              </Grid>
-            </TabPanel>
-            <TabPanel value={values.commentsTab} index={1} dir={theme.direction}>
-              <Grid container sx={{ padding: '0 1rem' }}>
-                <TextField
-                  fullWidth
-                  id='outlined-multiline-flexible'
-                  label='Action Item'
-                  multiline
-                  variant='standard'
-                  maxRows={4}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton color='primary'>
-                          <AttachFileIcon />
-                        </IconButton>
-
-                        <IconButton edge='end' color='primary'>
-                          <SendIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-              </Grid>
-              <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 4 }}>
-                <Card sx={{ maxWidth: 385 }}>
-                  <CardContent>
-                    <Typography variant='body2' color='text.secondary'>
-                      Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across all
-                      continents except Antarctica
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button size='small'>Mark as Completed</Button>
-                    <Button size='small'>Delete</Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-              <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 2 }}>
-                <Card sx={{ maxWidth: 385 }}>
-                  <CardContent>
-                    <Typography variant='body2' color='text.secondary'>
-                      Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across all
-                      continents except Antarctica
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button size='small'>Mark as Completed</Button>
-                    <Button size='small'>Delete</Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-              <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 2 }}>
-                <Card sx={{ maxWidth: 385 }}>
-                  <CardContent>
-                    <Typography variant='body2' color='text.secondary'>
-                      Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across all
-                      continents except Antarctica
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button size='small'>Mark as Completed</Button>
-                    <Button size='small'>Delete</Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            </TabPanel>
-          </Drawer>
-        ) : (
-          <></>
-        )}
       </Dialog>
     </Grid>
   )
