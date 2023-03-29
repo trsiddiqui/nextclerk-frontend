@@ -241,7 +241,9 @@ const CreateSupportPackage = () => {
   function onHighlightClick() {
     if (spreadsheet) {
       // TODO: write an algo to get all cells between indexes below and highlight all of them with cellFormat
-      console.log(getRangeIndexes(spreadsheet.getActiveSheet().selectedRange))
+      if (spreadsheet.getActiveSheet().selectedRange) {
+        console.log(getRangeIndexes(String(spreadsheet.getActiveSheet().selectedRange)))
+      }
       spreadsheet.cellFormat(
         { backgroundColor: '#FFFF00', color: '#FFFFFF' },
         spreadsheet.getActiveSheet().selectedRange?.split(':')[0]
@@ -617,7 +619,7 @@ const CreateSupportPackage = () => {
               {fileUploaded ? (
                 <SpreadsheetComponent
                   allowConditionalFormat
-                  // allowEditing={true}
+                  allowEditing={true}
                   enableContextMenu
                   scrollSettings={{ isFinite: false, enableVirtualization: false }}
                   contextMenuBeforeOpen={contextMenuBeforeOpen.bind(this)}
