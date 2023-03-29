@@ -56,7 +56,12 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
 import TableCustomized from 'src/views/tables/TableCustomized'
 import Dialog from '@mui/material/Dialog'
-import { getRangeIndexes, MenuSelectEventArgs, SpreadsheetComponent } from '@syncfusion/ej2-react-spreadsheet'
+import {
+  CellStyleModel,
+  getRangeIndexes,
+  MenuSelectEventArgs,
+  SpreadsheetComponent
+} from '@syncfusion/ej2-react-spreadsheet'
 
 const modalStyle = {
   width: 400,
@@ -148,6 +153,8 @@ const CreateSupportPackage = () => {
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
 
+  const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
+
   const saveMenuOpen = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -203,14 +210,21 @@ const CreateSupportPackage = () => {
 
   function oncreated(): void {
     if (spreadsheet) {
-      //   fetch('http://localhost:3000/customerXRefID/supporting-packages/123/lineItems/sheet') // fetch the remote url
-      //     .then(response => {
-      //       response.blob().then(fileBlob => {
-      //         debugger
-      //         const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
-      //         spreadsheet.open({ file: file }) // open the file into Spreadsheet
-      //       })
+      // fetch('http://localhost:3000/customerXRefID/supporting-packages/123/lineItems/sheet') // fetch the remote url
+      //   .then(response => {
+      //     response.blob().then(fileBlob => {
+      //       debugger
+      //       const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
+      //       spreadsheet.open({ file: file }) // open the file into Spreadsheet
       //     })
+      //   })
+      fetch('/excel5') // fetch the remote url
+        .then(response => {
+          response.blob().then(fileBlob => {
+            const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
+            spreadsheet.open({ file: file }) // open the file into Spreadsheet
+          })
+        })
     }
   }
 
@@ -238,16 +252,65 @@ const CreateSupportPackage = () => {
     }
   }
 
+  const columnIndexToAddress = (n: number): string => {
+    const a = Math.floor(n / 26)
+
+    return a >= 0 ? columnIndexToAddress(a - 1) + String.fromCharCode(65 + (n % 26)) : ''
+  }
+
+  const columnAddressToIndex = (index: string): number => {
+    const base = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    let i,
+      j,
+      result = 0
+
+    for (i = 0, j = index.length - 1; i < index.length; i += 1, j -= 1) {
+      result += Math.pow(base.length, j) * (base.indexOf(index[i]) + 1)
+    }
+
+    return result
+  }
+
+  function getCellsFromRangeAddress(a: number, b: number, c: number, d: number): string[] {
+    const cells = []
+    for (let i = a; i <= c; i++) {
+      for (let j = b; j <= d; j++) {
+        const colLetters = columnIndexToAddress(j)
+        cells.push(colLetters + (i + 1))
+      }
+    }
+
+    return cells
+  }
+
   function onHighlightClick() {
     if (spreadsheet) {
-      // TODO: write an algo to get all cells between indexes below and highlight all of them with cellFormat
       if (spreadsheet.getActiveSheet().selectedRange) {
-        console.log(getRangeIndexes(String(spreadsheet.getActiveSheet().selectedRange)))
+        const ri = getRangeIndexes(String(spreadsheet.getActiveSheet().selectedRange))
+        const cells = getCellsFromRangeAddress(
+          ri[0] < ri[2] ? ri[0] : ri[2],
+          ri[1] < ri[3] ? ri[1] : ri[3],
+          ri[0] > ri[2] ? ri[0] : ri[2],
+          ri[1] > ri[3] ? ri[1] : ri[3]
+        )
+        cells.forEach(cell => {
+          const columnIndex = columnAddressToIndex(cell.replace(/[^A-Za-z]/g, ''))
+          const rowIndex = parseInt(cell.replace(/^\D+/g, ''))
+          const existingFormat = spreadsheet.getCellStyleValue(
+            ['backgroundColor', 'color'],
+            [rowIndex - 1, columnIndex - 1]
+          )
+          if (cellPreviousState[cell] == null) {
+            cellPreviousState[cell] = existingFormat
+            setCellPreviousState(cellPreviousState)
+          }
+          if (existingFormat.backgroundColor === '#FFFF01') {
+            spreadsheet.cellFormat(cellPreviousState[cell], cell)
+          } else {
+            spreadsheet.cellFormat({ backgroundColor: '#FFFF01', color: '#000000' }, cell)
+          }
+        })
       }
-      spreadsheet.cellFormat(
-        { backgroundColor: '#FFFF00', color: '#FFFFFF' },
-        spreadsheet.getActiveSheet().selectedRange?.split(':')[0]
-      )
 
       // TODO: find a way to unhighlight a cell as well
     }
@@ -615,7 +678,7 @@ const CreateSupportPackage = () => {
             >
               File opened in Excel (only for demo)
             </Button>
-            <Grid container sx={{ pl: 1, height: '800px' }} width='100%'>
+            <Grid container sx={{ pl: 1, height: fileUploaded ? '600px' : '200px' }} width='100%'>
               {fileUploaded ? (
                 <SpreadsheetComponent
                   allowConditionalFormat

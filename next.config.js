@@ -14,5 +14,13 @@ module.exports = {
     }
 
     return config
+  },
+  rewrites: () => {
+    return [
+      {
+        source: '/excel5',
+        destination: 'https://www.fssu.ie/app/uploads/2022/02/VSS-Budget-Template-2022-2023-NON-DEIS-21.06.22.xlsx'
+      }
+    ]
   }
 }
