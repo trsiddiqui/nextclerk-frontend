@@ -56,7 +56,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
 import TableCustomized from 'src/views/tables/TableCustomized'
 import Dialog from '@mui/material/Dialog'
-import { SpreadsheetComponent } from '@syncfusion/ej2-react-spreadsheet'
+import { getRangeIndexes, MenuSelectEventArgs, SpreadsheetComponent } from '@syncfusion/ej2-react-spreadsheet'
 
 const modalStyle = {
   width: 400,
@@ -189,11 +189,65 @@ const CreateSupportPackage = () => {
   const handleCommentsTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setValues({ ...values, commentsTab: newValue })
   }
-
-  function oncreated(args: { element: { id: string } }): void {
-    if (spreadsheet && args.element.id === spreadsheet.element.id + '_contextmenu') {
-      spreadsheet.removeContextMenuItems(['Cut', 'Copy', 'Paste', 'Paste Special'], false)
+  function contextMenuBeforeOpen(): void {
+    if (spreadsheet) {
+      spreadsheet.removeContextMenuItems(['Cut', 'Copy', 'Paste', 'Paste Special', 'Add Comment', 'Add File'], false)
       spreadsheet.addContextMenuItems([{ text: 'Add Comment' }, { text: 'Add File' }], '', false) //To pass the items, Item before / after that the element to be inserted, Set false if the items need to be inserted before the text.
+
+      // Dont need now, hidden through CSS
+      // spreadsheet.hideRibbonTabs(['File', 'Insert', 'Formulas', 'Data', 'View'], true)
+      // spreadsheet.hideFileMenuItems(['File', 'Insert', 'Formulas', 'Data', 'View'], true)
+      setSpreadsheet(spreadsheet)
+    }
+  }
+
+  function oncreated(): void {
+    if (spreadsheet) {
+      //   fetch('http://localhost:3000/customerXRefID/supporting-packages/123/lineItems/sheet') // fetch the remote url
+      //     .then(response => {
+      //       response.blob().then(fileBlob => {
+      //         debugger
+      //         const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
+      //         spreadsheet.open({ file: file }) // open the file into Spreadsheet
+      //       })
+      //     })
+    }
+  }
+
+  function onCommentClick(range: string) {
+    if (spreadsheet) {
+      spreadsheet.selectRange(range)
+    }
+  }
+
+  function contextMenuItemSelect(args: MenuSelectEventArgs) {
+    if (spreadsheet) {
+      switch (args.item.text) {
+        case 'Add Comment':
+          // spreadsheet.cellFormat({ backgroundColor: '#453423' }, 'A50')
+          // spreadsheet.selectRange(getRangeAddress([1, 2, 3, 4]))
+          setRightDrawerVisible(true)
+          spreadsheet.selectRange(String(spreadsheet.getActiveSheet().selectedRange))
+          spreadsheet.hideFileMenuItems(['File'], true)
+          setSpreadsheet(spreadsheet)
+          break
+        case 'Add File':
+          setRightDrawerVisible(true)
+          break
+      }
+    }
+  }
+
+  function onHighlightClick() {
+    if (spreadsheet) {
+      // TODO: write an algo to get all cells between indexes below and highlight all of them with cellFormat
+      console.log(getRangeIndexes(spreadsheet.getActiveSheet().selectedRange))
+      spreadsheet.cellFormat(
+        { backgroundColor: '#FFFF00', color: '#FFFFFF' },
+        spreadsheet.getActiveSheet().selectedRange?.split(':')[0]
+      )
+
+      // TODO: find a way to unhighlight a cell as well
     }
   }
 
@@ -359,6 +413,21 @@ const CreateSupportPackage = () => {
             </Tabs>
           </AppBar>
           <TabPanel value={values.tab} index={0} dir={theme.direction}>
+            <Grid container justifyContent='end'>
+              <ButtonGroup>
+                <Button endIcon={<BorderColorIcon />} onClick={onHighlightClick}>
+                  Highlight
+                </Button>
+                <Button
+                  endIcon={<MessageIcon />}
+                  onClick={() => {
+                    setRightDrawerVisible(!rightDrawerVisible)
+                  }}
+                >
+                  Comments
+                </Button>
+              </ButtonGroup>
+            </Grid>
             {rightDrawerVisible ? (
               <Drawer anchor='right' variant='permanent' sx={{ zIndex: 1300 }}>
                 <Toolbar>
@@ -411,7 +480,14 @@ const CreateSupportPackage = () => {
                     <Grid item>
                       <Avatar alt='Remy Sharp'>RS</Avatar>
                     </Grid>
-                    <Grid justifyContent='left' item xs>
+                    <Grid
+                      justifyContent='left'
+                      item
+                      sx={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        onCommentClick('A1:C5')
+                      }}
+                    >
                       <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
                       <Typography sx={{ ml: 2, width: '17rem' }} variant='body1' component='div'>
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
@@ -537,51 +613,22 @@ const CreateSupportPackage = () => {
             >
               File opened in Excel (only for demo)
             </Button>
-            <AppBar position='static' color='inherit'>
-              <Toolbar sx={{ padding: 2, minHeight: 0 }}>
-                <Grid container justifyContent='end'>
-                  <ButtonGroup>
-                    <Button endIcon={<BorderColorIcon />}>Highlight</Button>
-                    <Button
-                      endIcon={<MessageIcon />}
-                      onClick={() => {
-                        setRightDrawerVisible(!rightDrawerVisible)
-                      }}
-                    >
-                      Comments
-                    </Button>
-                  </ButtonGroup>
-                </Grid>
-              </Toolbar>
-            </AppBar>
-            <Grid container xs={12} sm={12} sx={{ pl: 1, height: '800px' }} width='100%'>
+            <Grid container sx={{ pl: 1, height: '800px' }} width='100%'>
               {fileUploaded ? (
                 <SpreadsheetComponent
                   allowConditionalFormat
+                  // allowEditing={true}
                   enableContextMenu
-                  contextMenuBeforeOpen={oncreated.bind(this)}
-                  contextMenuItemSelect={() => {
-                    if (spreadsheet) {
-                      console.log(spreadsheet.getActiveSheet().selectedRange)
-                    }
-                  }}
+                  scrollSettings={{ isFinite: false, enableVirtualization: false }}
+                  contextMenuBeforeOpen={contextMenuBeforeOpen.bind(this)}
+                  contextMenuItemSelect={contextMenuItemSelect.bind(this)}
                   ref={ssObj => {
                     if (ssObj) {
                       setSpreadsheet(ssObj)
                     }
                   }}
                   openUrl='https://ej2services.syncfusion.com/production/web-services/api/spreadsheet/open'
-                  created={() => {
-                    if (spreadsheet) {
-                      fetch('https://js.syncfusion.com/demos/ejservices/data/Spreadsheet/LargeData.xlsx') // fetch the remote url
-                        .then(response => {
-                          response.blob().then(fileBlob => {
-                            const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
-                            spreadsheet.open({ file: file }) // open the file into Spreadsheet
-                          })
-                        })
-                    }
-                  }}
+                  created={oncreated.bind(this)}
                 ></SpreadsheetComponent>
               ) : (
                 <>
@@ -620,7 +667,6 @@ const CreateSupportPackage = () => {
                 </>
               )}
             </Grid>
-            <Grid container></Grid>
           </TabPanel>
           <TabPanel value={values.tab} index={1} dir={theme.direction}>
             <Container sx={{ padding: '20px 0px' }}>
@@ -807,7 +853,7 @@ const CreateSupportPackage = () => {
           }
         }}
       >
-        <Grid container xs={12} sm={12} sx={{ pl: 1, padding: 30 }} width='100%'>
+        <Grid container sx={{ pl: 1, padding: 30 }} width='100%'>
           <Grid item xs={12} sm={12} textAlign='center' justifyContent='center'>
             <Box sx={{}}>
               <Button color='primary' variant='contained' onClick={() => setFileOpenedInExcel(false)}>

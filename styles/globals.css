@@ -32,3 +32,11 @@ code:not([class*='language-']):after {
 code[class*='language-'] {
   padding: 0;
 }
+
+.e-tab-header.e-control.e-toolbar {
+  display: none;
+}
+
+.e-control.e-ribbon.e-lib {
+  display: none;
+}
