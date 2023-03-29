@@ -230,6 +230,16 @@ const CreateSupportPackage = () => {
 
   function onCommentClick(range: string) {
     if (spreadsheet) {
+      const ri = getRangeIndexes(range)
+      const cells = getCellsFromRangeAddress(
+        ri[0] < ri[2] ? ri[0] : ri[2],
+        ri[1] < ri[3] ? ri[1] : ri[3],
+        ri[0] > ri[2] ? ri[0] : ri[2],
+        ri[1] > ri[3] ? ri[1] : ri[3]
+      )
+
+      // const middleCell = cells[Math.floor(cells.length / 2)]
+      spreadsheet.goTo(cells[0])
       spreadsheet.selectRange(range)
     }
   }
@@ -550,7 +560,7 @@ const CreateSupportPackage = () => {
                       item
                       sx={{ cursor: 'pointer' }}
                       onClick={() => {
-                        onCommentClick('A1:C5')
+                        onCommentClick('A100:C130')
                       }}
                     >
                       <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
