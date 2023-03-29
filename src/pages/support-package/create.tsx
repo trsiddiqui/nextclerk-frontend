@@ -144,7 +144,7 @@ const CreateSupportPackage = () => {
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [rightDrawerVisible, setRightDrawerVisible] = React.useState(false)
-  const [fileUploaded, setFileUploaded] = React.useState(false)
+  const [fileUploaded, setFileUploaded] = React.useState(true)
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
 
