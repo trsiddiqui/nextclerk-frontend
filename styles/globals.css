@@ -33,10 +33,6 @@ code[class*='language-'] {
   padding: 0;
 }
 
-/* .e-tab-header.e-control.e-toolbar {
-  display: none;
-} */
-
-.e-control.e-ribbon.e-lib {
+.journal-entry-tab .e-sheet-tab-panel {
   display: none;
 }

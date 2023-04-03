@@ -18,6 +18,8 @@ import MessageIcon from '@mui/icons-material/Message'
 import DownloadIcon from '@mui/icons-material/Download'
 import SendIcon from '@mui/icons-material/Send'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
+import LaunchIcon from '@mui/icons-material/Launch'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 // import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 
@@ -58,8 +60,12 @@ import TableCustomized from 'src/views/tables/TableCustomized'
 import Dialog from '@mui/material/Dialog'
 import {
   CellStyleModel,
+  ColumnDirective,
+  ColumnsDirective,
   getRangeIndexes,
   MenuSelectEventArgs,
+  SheetDirective,
+  SheetsDirective,
   SpreadsheetComponent
 } from '@syncfusion/ej2-react-spreadsheet'
 
@@ -83,7 +89,7 @@ const sheetModalStyle = {
 
 interface State {
   name: string
-  allCategories: { label: string; id: string }[]
+  allCategories: { label: string; id: string; key: number }[]
   date: Dayjs | null
   tab: number
   commentsSortedBy: string
@@ -124,18 +130,22 @@ const CreateSupportPackage = () => {
     allCategories: [
       {
         label: 'Category 1',
+        key: 1,
         id: '1'
       },
       {
         label: 'Category 2',
+        key: 2,
         id: '2'
       },
       {
         label: 'Category 3',
+        key: 3,
         id: '3'
       },
       {
         label: 'Category 4',
+        key: 4,
         id: '4'
       }
     ],
@@ -152,6 +162,25 @@ const CreateSupportPackage = () => {
   const [fileUploaded, setFileUploaded] = React.useState(true)
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
+  const [journalEntrySpreadsheet, setJournalEntrySpreadsheet] = React.useState<SpreadsheetComponent>()
+  const [lineItemsMoreOptionsVisible, setLineItemsMoreOptionsVisible] = React.useState<boolean>(true)
+  const accounts = [
+    { id: 1, label: 'Checking' },
+    { id: 2, label: 'Savings' }
+  ]
+  const departments = [
+    { id: 1, label: 'Administration' },
+    { id: 2, label: 'Software Development' }
+  ]
+  const locations = [
+    { id: 1, label: 'Ohio' },
+    { id: 2, label: 'Miami' }
+  ]
+  const customers = [
+    { id: 1, label: 'Amazon AWS' },
+    { id: 2, label: 'Google Cloud' },
+    { id: 2, label: 'Google Home' }
+  ]
 
   const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
 
@@ -165,10 +194,12 @@ const CreateSupportPackage = () => {
 
   const [attachments] = React.useState([
     {
-      name: 'JanuaryReceipts.xlsx'
+      name: 'JanuaryReceipts.xlsx',
+      key: 1
     },
     {
-      name: 'JanuaryReports.pdf'
+      name: 'JanuaryReports.pdf',
+      key: 2
     }
   ])
 
@@ -223,6 +254,8 @@ const CreateSupportPackage = () => {
           response.blob().then(fileBlob => {
             const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
             spreadsheet.open({ file: file }) // open the file into Spreadsheet
+            spreadsheet.hideFileMenuItems(['File'], true)
+            spreadsheet.hideToolbarItems('Home', [19])
           })
         })
     }
@@ -323,6 +356,97 @@ const CreateSupportPackage = () => {
       }
 
       // TODO: find a way to unhighlight a cell as well
+    }
+  }
+
+  function onJournalSpreadsheetCreated(): void {
+    if (journalEntrySpreadsheet) {
+      //   // Prepare validation data by adding data to sheet 2
+      journalEntrySpreadsheet.insertSheet(1)
+      journalEntrySpreadsheet.sheets[1].rows = [
+        {
+          cells: [{ value: 'Accounts' }, { value: 'Departments' }, { value: 'Locations' }, { value: 'Customers' }]
+        }
+      ]
+      for (let a = 0; a < Math.max(accounts.length, departments.length, locations.length, customers.length); a++) {
+        journalEntrySpreadsheet.sheets[1].rows?.push({
+          cells: [
+            { value: accounts[a]?.label ?? '' },
+            { value: departments[a]?.label ?? '' },
+            { value: locations[a]?.label ?? '' },
+            { value: customers[a]?.label ?? '' }
+          ]
+        })
+      }
+      journalEntrySpreadsheet.sheets[1].isProtected = true
+
+      // Sheet 1 headers
+      journalEntrySpreadsheet.sheets[0].rows?.push({
+        cells: [
+          { value: 'Account', style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' } },
+          { value: 'Debit', style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' } },
+          { value: 'Credit', style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' } },
+          {
+            value: 'Line Memo',
+            style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' }
+          },
+          {
+            value: 'Department',
+            style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' }
+          },
+          {
+            value: 'Location',
+            style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' }
+          },
+          { value: 'Customer', style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' } }
+        ]
+
+        // height: 25
+      })
+
+      // Add validations to sheet1
+      journalEntrySpreadsheet.addDataValidation(
+        {
+          inCellDropDown: true,
+          type: 'List',
+          value1: `=Sheet2!A2:A${accounts.length + 1}`
+        },
+        'A2:A1000'
+      )
+      journalEntrySpreadsheet.addDataValidation(
+        {
+          inCellDropDown: true,
+          type: 'Decimal',
+          value1: '-100000000',
+          value2: '100000000'
+        },
+        'B2:C1000'
+      )
+      journalEntrySpreadsheet.addDataValidation(
+        {
+          inCellDropDown: true,
+          type: 'List',
+          value1: `=Sheet2!B2:B${departments.length + 1}`
+        },
+        'E2:E1000'
+      )
+      journalEntrySpreadsheet.addDataValidation(
+        {
+          inCellDropDown: true,
+          type: 'List',
+          value1: `=Sheet2!C2:C${locations.length + 1}`
+        },
+        'F2:F1000'
+      )
+      journalEntrySpreadsheet.addDataValidation(
+        {
+          inCellDropDown: true,
+          type: 'List',
+          value1: `=Sheet2!D2:D${customers.length + 1}`
+        },
+        'G2:G1000'
+      )
+      journalEntrySpreadsheet.freezePanes(1, 7)
     }
   }
 
@@ -483,25 +607,75 @@ const CreateSupportPackage = () => {
               textColor='secondary'
             >
               <Tab label='Support' />
-              <Tab label='Comments' />
+              <Tab label='Notes' />
               <Tab label='Journal Entry' />
             </Tabs>
           </AppBar>
           <TabPanel value={values.tab} index={0} dir={theme.direction}>
-            <Grid container justifyContent='end'>
-              <ButtonGroup>
-                <Button endIcon={<BorderColorIcon />} onClick={onHighlightClick}>
-                  Highlight
-                </Button>
+            <Grid
+              justifyContent='space-between' // Add it here :)
+              container
+              spacing={24}
+            >
+              <Grid item>
+                <ButtonGroup>
+                  <Button endIcon={<BorderColorIcon />} onClick={onHighlightClick}>
+                    Highlight
+                  </Button>
+                  <Button
+                    endIcon={<MessageIcon />}
+                    variant={rightDrawerVisible ? 'contained' : 'outlined'}
+                    onClick={() => {
+                      setRightDrawerVisible(!rightDrawerVisible)
+                    }}
+                  >
+                    Comments
+                  </Button>
+                </ButtonGroup>
+              </Grid>
+              <Grid item>
                 <Button
-                  endIcon={<MessageIcon />}
+                  variant='text'
+                  endIcon={<LaunchIcon />}
                   onClick={() => {
-                    setRightDrawerVisible(!rightDrawerVisible)
+                    setFileOpenedInExcel(true)
+                    window.open(
+                      'https://2l2vbz.sharepoint.com/:x:/g/EfT9Nn4Dbr1PsEKQiY8NBSABqvfg9srEaji3uJr1dJsH0A?e=AnOv0i',
+                      '_default'
+                    )
                   }}
                 >
-                  Comments
+                  View in Excel Online
                 </Button>
-              </ButtonGroup>
+                <IconButton
+                  aria-label='more'
+                  id='long-button'
+                  aria-controls={lineItemsMoreOptionsVisible ? 'long-menu' : undefined}
+                  aria-expanded={lineItemsMoreOptionsVisible ? 'true' : undefined}
+                  aria-haspopup='true'
+                  onClick={() => setLineItemsMoreOptionsVisible(!lineItemsMoreOptionsVisible)}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+                <Menu
+                  id='long-menu'
+                  MenuListProps={{
+                    'aria-labelledby': 'long-button'
+                  }}
+                  open={lineItemsMoreOptionsVisible}
+                  onClose={() => setLineItemsMoreOptionsVisible(false)}
+                  PaperProps={{
+                    style: {
+                      maxHeight: 48 * 4.5,
+                      width: '20ch'
+                    }
+                  }}
+                >
+                  {['Upload File', 'Select Master File'].map(option => (
+                    <MenuItem key={option}>{option}</MenuItem>
+                  ))}
+                </Menu>
+              </Grid>
             </Grid>
             {rightDrawerVisible ? (
               <Drawer anchor='right' variant='permanent' sx={{ zIndex: 1300 }}>
@@ -841,8 +1015,39 @@ const CreateSupportPackage = () => {
             </Container>
           </TabPanel>
           <TabPanel value={values.tab} index={2} dir={theme.direction}>
-            <Grid item xs={12} sm={12}>
-              TO DO
+            <Grid
+              container
+              sx={{ pl: 1, height: fileUploaded ? '600px' : '200px' }}
+              width='100%'
+              className='journal-entry-tab'
+            >
+              <SpreadsheetComponent
+                allowDataValidation
+                allowFreezePane
+                ref={ref => {
+                  if (ref) {
+                    setJournalEntrySpreadsheet(ref)
+                  }
+                }}
+                created={onJournalSpreadsheetCreated.bind(this)}
+              >
+                <SheetsDirective>
+                  <SheetDirective>
+                    {/* <RangesDirective>
+                                    <RangeDirective dataSource={data}></RangeDirective>
+                                </RangesDirective> */}
+                    <ColumnsDirective>
+                      <ColumnDirective width={200}></ColumnDirective>
+                      <ColumnDirective width={80}></ColumnDirective>
+                      <ColumnDirective width={80}></ColumnDirective>
+                      <ColumnDirective width={280}></ColumnDirective>
+                      <ColumnDirective width={150}></ColumnDirective>
+                      <ColumnDirective width={150}></ColumnDirective>
+                      <ColumnDirective width={150}></ColumnDirective>
+                    </ColumnsDirective>
+                  </SheetDirective>
+                </SheetsDirective>
+              </SpreadsheetComponent>
             </Grid>
           </TabPanel>
         </Paper>
