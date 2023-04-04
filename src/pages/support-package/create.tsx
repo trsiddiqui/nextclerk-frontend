@@ -159,11 +159,13 @@ const CreateSupportPackage = () => {
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [rightDrawerVisible, setRightDrawerVisible] = React.useState(false)
-  const [fileUploaded, setFileUploaded] = React.useState(true)
+  const [fileUploaded, setFileUploaded] = React.useState(false)
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
   const [journalEntrySpreadsheet, setJournalEntrySpreadsheet] = React.useState<SpreadsheetComponent>()
-  const [lineItemsMoreOptionsVisible, setLineItemsMoreOptionsVisible] = React.useState<boolean>(true)
+  const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
+
+  // #region Mocks
   const accounts = [
     { id: 1, label: 'Checking' },
     { id: 2, label: 'Savings' }
@@ -182,7 +184,7 @@ const CreateSupportPackage = () => {
     { id: 2, label: 'Google Home' }
   ]
 
-  const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
+  // #endregion Mocks
 
   const saveMenuOpen = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -450,6 +452,15 @@ const CreateSupportPackage = () => {
     }
   }
 
+  const [anchorSheetMenuEl, setAnchorSheetMenuEl] = React.useState<null | HTMLElement>(null)
+  const menuOpen = Boolean(anchorSheetMenuEl)
+  const handleSheetMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorSheetMenuEl(event.currentTarget)
+  }
+  const handleSheetMenuClose = () => {
+    setAnchorSheetMenuEl(null)
+  }
+
   return (
     <Grid container spacing={5}>
       <Card>
@@ -579,15 +590,7 @@ const CreateSupportPackage = () => {
             >
               Save
             </Button>
-            <Menu
-              id='basic-menu'
-              anchorEl={anchorEl}
-              open={saveMenuOpen}
-              onClose={handleClose}
-              MenuListProps={{
-                'aria-labelledby': 'basic-button'
-              }}
-            >
+            <Menu id='basic-menu' open={saveMenuOpen} onClose={handleClose}>
               <MenuItem onClick={handleClose}>Save Draft</MenuItem>
               <MenuItem onClick={handleClose}>Save</MenuItem>
             </Menu>
@@ -612,71 +615,84 @@ const CreateSupportPackage = () => {
             </Tabs>
           </AppBar>
           <TabPanel value={values.tab} index={0} dir={theme.direction}>
-            <Grid
-              justifyContent='space-between' // Add it here :)
-              container
-              spacing={24}
-            >
-              <Grid item>
-                <ButtonGroup>
-                  <Button endIcon={<BorderColorIcon />} onClick={onHighlightClick}>
-                    Highlight
-                  </Button>
+            {fileUploaded ? (
+              <Grid
+                justifyContent='space-between' // Add it here :)
+                container
+                spacing={24}
+              >
+                <Grid item>
+                  <ButtonGroup>
+                    <Button endIcon={<BorderColorIcon />} onClick={onHighlightClick}>
+                      Highlight
+                    </Button>
+                    <Button
+                      endIcon={<MessageIcon />}
+                      variant={rightDrawerVisible ? 'contained' : 'outlined'}
+                      onClick={() => {
+                        setRightDrawerVisible(!rightDrawerVisible)
+                      }}
+                    >
+                      Comments
+                    </Button>
+                  </ButtonGroup>
+                </Grid>
+                <Grid item>
                   <Button
-                    endIcon={<MessageIcon />}
-                    variant={rightDrawerVisible ? 'contained' : 'outlined'}
+                    variant='text'
+                    endIcon={<LaunchIcon />}
                     onClick={() => {
-                      setRightDrawerVisible(!rightDrawerVisible)
+                      setFileOpenedInExcel(true)
+                      window.open(
+                        'https://2l2vbz.sharepoint.com/:x:/g/EfT9Nn4Dbr1PsEKQiY8NBSABqvfg9srEaji3uJr1dJsH0A?e=AnOv0i',
+                        '_default'
+                      )
                     }}
                   >
-                    Comments
+                    View in Excel Online
                   </Button>
-                </ButtonGroup>
+                  <IconButton
+                    aria-label='more'
+                    id='long-button'
+                    aria-controls={menuOpen ? 'long-menu' : undefined}
+                    aria-expanded={menuOpen ? 'true' : undefined}
+                    aria-haspopup='true'
+                    onClick={handleSheetMenuClick}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    id='basic-menu'
+                    anchorEl={anchorSheetMenuEl}
+                    open={menuOpen}
+                    onClose={handleSheetMenuClose}
+                    MenuListProps={{
+                      'aria-labelledby': 'basic-button'
+                    }}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        setFileUploaded(!fileUploaded)
+                        handleSheetMenuClose()
+                      }}
+                    >
+                      Upload File
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleChooseMaterFileModalOpen()
+                        handleSheetMenuClose()
+                      }}
+                    >
+                      Select Master File
+                    </MenuItem>
+                  </Menu>
+                </Grid>
               </Grid>
-              <Grid item>
-                <Button
-                  variant='text'
-                  endIcon={<LaunchIcon />}
-                  onClick={() => {
-                    setFileOpenedInExcel(true)
-                    window.open(
-                      'https://2l2vbz.sharepoint.com/:x:/g/EfT9Nn4Dbr1PsEKQiY8NBSABqvfg9srEaji3uJr1dJsH0A?e=AnOv0i',
-                      '_default'
-                    )
-                  }}
-                >
-                  View in Excel Online
-                </Button>
-                <IconButton
-                  aria-label='more'
-                  id='long-button'
-                  aria-controls={lineItemsMoreOptionsVisible ? 'long-menu' : undefined}
-                  aria-expanded={lineItemsMoreOptionsVisible ? 'true' : undefined}
-                  aria-haspopup='true'
-                  onClick={() => setLineItemsMoreOptionsVisible(!lineItemsMoreOptionsVisible)}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-                <Menu
-                  id='long-menu'
-                  MenuListProps={{
-                    'aria-labelledby': 'long-button'
-                  }}
-                  open={lineItemsMoreOptionsVisible}
-                  onClose={() => setLineItemsMoreOptionsVisible(false)}
-                  PaperProps={{
-                    style: {
-                      maxHeight: 48 * 4.5,
-                      width: '20ch'
-                    }
-                  }}
-                >
-                  {['Upload File', 'Select Master File'].map(option => (
-                    <MenuItem key={option}>{option}</MenuItem>
-                  ))}
-                </Menu>
-              </Grid>
-            </Grid>
+            ) : (
+              <></>
+            )}
+
             {rightDrawerVisible ? (
               <Drawer anchor='right' variant='permanent' sx={{ zIndex: 1300 }}>
                 <Toolbar>
@@ -843,26 +859,7 @@ const CreateSupportPackage = () => {
             )}
             {/* <Card sx={{ height: 400, textAlign: 'center', verticalAlign: 'middle' }}>
             <CardContent> */}
-            <FormControlLabel
-              control={
-                <Switch
-                  defaultChecked
-                  onChange={() => {
-                    setFileUploaded(!fileUploaded)
-                  }}
-                />
-              }
-              label='File Uploaded (only for demo)'
-            />
-            <Button onClick={handleChooseMaterFileModalOpen}>Choose Master File (only for demo)</Button>
-            <Button
-              onClick={() => {
-                setFileOpenedInExcel(true)
-              }}
-            >
-              File opened in Excel (only for demo)
-            </Button>
-            <Grid container sx={{ pl: 1, height: fileUploaded ? '600px' : '200px' }} width='100%'>
+            <Grid container sx={{ pl: 1, pt: 1, height: fileUploaded ? '600px' : '300px' }} width='100%'>
               {fileUploaded ? (
                 <SpreadsheetComponent
                   allowConditionalFormat
@@ -881,20 +878,21 @@ const CreateSupportPackage = () => {
                 ></SpreadsheetComponent>
               ) : (
                 <>
-                  <Grid item xs={6} textAlign='right' paddingRight='30px'>
+                  <Grid item xs={6} textAlign='right' paddingRight='30px' style={{ marginTop: 80 }}>
                     <Box>
                       <IconButton
                         size='large'
                         aria-label='Upload'
                         className='card-more-options'
                         sx={{ color: 'blue', fontSize: 100, marginRight: '40px !important' }}
+                        onClick={() => setFileUploaded(!fileUploaded)}
                       >
                         <CloudUploadIcon sx={{ color: 'blue', fontSize: 60 }} />
                       </IconButton>
                       <Typography>Upload File(s) to Start</Typography>
                     </Box>
                   </Grid>
-                  <Grid item xs={6} textAlign='left' paddingLeft='30px'>
+                  <Grid item xs={6} textAlign='left' paddingLeft='30px' style={{ marginTop: 80 }}>
                     <Box>
                       <IconButton
                         size='large'
