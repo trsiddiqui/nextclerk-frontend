@@ -1,17 +1,7 @@
 // ** React Imports
-import React, { ChangeEvent, useState } from 'react'
+import React, { useState } from 'react'
 
 // ** MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
-import TextField from '@mui/material/TextField'
-import CardHeader from '@mui/material/CardHeader'
-import Typography from '@mui/material/Typography'
-import CardContent from '@mui/material/CardContent'
-import CardActions from '@mui/material/CardActions'
-import FormControl from '@mui/material/FormControl'
 import CloseIcon from '@mui/icons-material/Close'
 import BorderColorIcon from '@mui/icons-material/BorderColor'
 import MessageIcon from '@mui/icons-material/Message'
@@ -20,10 +10,9 @@ import SendIcon from '@mui/icons-material/Send'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import LaunchIcon from '@mui/icons-material/Launch'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-
-// import OpenInNewIcon from '@mui/icons-material/OpenInNew'
-
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import SearchIcon from '@mui/icons-material/Search'
 import {
   Autocomplete,
   Avatar,
@@ -48,52 +37,84 @@ import {
   Container,
   Paper,
   RadioGroup,
-  Radio
+  Radio,
+  Card,
+  Grid,
+  Button,
+  Divider,
+  TextField,
+  CardHeader,
+  Typography,
+  CardContent,
+  CardActions,
+  FormControl,
+  Dialog
 } from '@mui/material'
-import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import dayjs, { Dayjs } from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
 import TableCustomized from 'src/views/tables/TableCustomized'
-import Dialog from '@mui/material/Dialog'
 import {
+  CellDirective,
+  CellsDirective,
   CellStyleModel,
   ColumnDirective,
   ColumnsDirective,
   getRangeIndexes,
   MenuSelectEventArgs,
+  RangeDirective,
+  RangesDirective,
+  RowDirective,
+  RowsDirective,
   SheetDirective,
   SheetsDirective,
   SpreadsheetComponent
 } from '@syncfusion/ej2-react-spreadsheet'
+import { AutoCompleteComponent } from '@syncfusion/ej2-react-dropdowns'
+import {
+  getAllAccounts,
+  getAllCategories,
+  getAllCustomers,
+  getAllDepartments,
+  getAllLocations
+} from 'src/utils/apiClient'
 
-const modalStyle = {
-  width: 400,
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 4,
+const styles = {
+  modalStyle: {
+    width: 400,
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
 
-  margin: '0 auto',
-  borderRadius: '5px'
-}
-const sheetModalStyle = {
-  // width: 400,
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 4,
-  margin: '0 auto',
-  borderRadius: '5px'
-}
+    margin: '0 auto',
+    borderRadius: '5px'
+  },
+  personnelModalStyle: {
+    width: 800,
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
 
-interface State {
-  name: string
-  allCategories: { label: string; id: string; key: number }[]
-  date: Dayjs | null
-  tab: number
-  commentsSortedBy: string
-  commentsTab: number
+    margin: '0 auto',
+    borderRadius: '5px'
+  },
+  sheetModalStyle: {
+    // width: 400,
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
+    margin: '0 auto',
+    borderRadius: '5px'
+  },
+  boldCenter: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: '12pt',
+    verticalAlign: 'middle',
+    textDecoration: 'underline'
+  }
 }
 
 interface TabPanelProps {
@@ -123,37 +144,44 @@ function TabPanel(props: TabPanelProps) {
   )
 }
 
-const CreateSupportPackage = () => {
+interface DropDownRow {
+  label: string
+  id: string
+  key: string
+}
+
+export async function getServerSideProps() {
+  // Fetch data from external API
+  const categories = await getAllCategories()
+  const accounts = await getAllAccounts()
+  const departments = await getAllDepartments()
+  const locations = await getAllLocations()
+  const customers = await getAllCustomers()
+
+  // Pass data to the page via props
+  return { props: { categories, accounts, departments, locations, customers } }
+}
+
+const CreateSupportPackage = ({
+  categories,
+  accounts,
+  departments,
+  locations,
+  customers
+}: {
+  categories: Array<DropDownRow>
+  accounts: Array<DropDownRow>
+  departments: Array<DropDownRow>
+  locations: Array<DropDownRow>
+  customers: Array<DropDownRow>
+}) => {
   const theme = useTheme()
-  const [values, setValues] = useState<State>({
-    name: '',
-    allCategories: [
-      {
-        label: 'Category 1',
-        key: 1,
-        id: '1'
-      },
-      {
-        label: 'Category 2',
-        key: 2,
-        id: '2'
-      },
-      {
-        label: 'Category 3',
-        key: 3,
-        id: '3'
-      },
-      {
-        label: 'Category 4',
-        key: 4,
-        id: '4'
-      }
-    ],
-    date: dayjs(),
-    tab: 0,
-    commentsSortedBy: 'dateAsc',
-    commentsTab: 0
-  })
+  const [name, setName] = useState('')
+  const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
+  const [allCategories] = useState(categories)
+  const [date, setDate] = useState<Dayjs | null>(dayjs())
+  const [tab, setTab] = useState(0)
+  const [commentsTab, setCommentsTab] = useState(0)
   const [chooseMaterFileModalOpen, setChooseMaterFileModalOpen] = React.useState(false)
   const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
@@ -162,27 +190,59 @@ const CreateSupportPackage = () => {
   const [fileUploaded, setFileUploaded] = React.useState(false)
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
-  const [journalEntrySpreadsheet, setJournalEntrySpreadsheet] = React.useState<SpreadsheetComponent>()
   const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
 
-  // #region Mocks
-  const accounts = [
-    { id: 1, label: 'Checking' },
-    { id: 2, label: 'Savings' }
-  ]
-  const departments = [
-    { id: 1, label: 'Administration' },
-    { id: 2, label: 'Software Development' }
-  ]
-  const locations = [
-    { id: 1, label: 'Ohio' },
-    { id: 2, label: 'Miami' }
-  ]
-  const customers = [
-    { id: 1, label: 'Amazon AWS' },
-    { id: 2, label: 'Google Cloud' },
-    { id: 2, label: 'Google Home' }
-  ]
+  const autoCompleteAccountComponent = () => {
+    return (
+      <div className='auto-complete-inside-sheet'>
+        <AutoCompleteComponent
+          allowCustom={false}
+          dataSource={accounts.map(a => a.label)}
+          className='abc'
+          showPopupButton
+        ></AutoCompleteComponent>
+      </div>
+    )
+  }
+
+  const autoCompleteDepartmentComponent = () => {
+    return (
+      <div className='auto-complete-inside-sheet'>
+        <AutoCompleteComponent
+          allowCustom={false}
+          dataSource={departments.map(a => a.label)}
+          className='abc'
+          showPopupButton
+        ></AutoCompleteComponent>
+      </div>
+    )
+  }
+
+  const autoCompleteLocationsComponent = () => {
+    return (
+      <div className='auto-complete-inside-sheet'>
+        <AutoCompleteComponent
+          allowCustom={false}
+          dataSource={locations.map(a => a.label)}
+          className='abc'
+          showPopupButton
+        ></AutoCompleteComponent>
+      </div>
+    )
+  }
+
+  const autoCompleteCustomersComponent = () => {
+    return (
+      <div className='auto-complete-inside-sheet'>
+        <AutoCompleteComponent
+          allowCustom={false}
+          dataSource={customers.map(a => a.label)}
+          className='abc'
+          showPopupButton
+        ></AutoCompleteComponent>
+      </div>
+    )
+  }
 
   // #endregion Mocks
 
@@ -205,7 +265,7 @@ const CreateSupportPackage = () => {
     }
   ])
 
-  // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
+  const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
   const handleChooseMaterFileModalOpen = () => setChooseMaterFileModalOpen(true)
   const handleChooseMaterFileModalClose = () => setChooseMaterFileModalOpen(false)
@@ -213,22 +273,6 @@ const CreateSupportPackage = () => {
   const handleJournalModalOpen = () => setJournalModalOpen(true)
   const handleJournalModalClose = () => setJournalModalOpen(false)
 
-  // Handle Password
-  const handleStateChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
-    setValues({ ...values, [prop]: event.target.value })
-  }
-
-  const handleChange = (newValue: Dayjs | null) => {
-    setValues({ ...values, date: newValue })
-  }
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValues({ ...values, tab: newValue })
-  }
-
-  const handleCommentsTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValues({ ...values, commentsTab: newValue })
-  }
   function contextMenuBeforeOpen(): void {
     if (spreadsheet) {
       spreadsheet.removeContextMenuItems(['Cut', 'Copy', 'Paste', 'Paste Special', 'Add Comment', 'Add File'], false)
@@ -361,97 +405,6 @@ const CreateSupportPackage = () => {
     }
   }
 
-  function onJournalSpreadsheetCreated(): void {
-    if (journalEntrySpreadsheet) {
-      //   // Prepare validation data by adding data to sheet 2
-      journalEntrySpreadsheet.insertSheet(1)
-      journalEntrySpreadsheet.sheets[1].rows = [
-        {
-          cells: [{ value: 'Accounts' }, { value: 'Departments' }, { value: 'Locations' }, { value: 'Customers' }]
-        }
-      ]
-      for (let a = 0; a < Math.max(accounts.length, departments.length, locations.length, customers.length); a++) {
-        journalEntrySpreadsheet.sheets[1].rows?.push({
-          cells: [
-            { value: accounts[a]?.label ?? '' },
-            { value: departments[a]?.label ?? '' },
-            { value: locations[a]?.label ?? '' },
-            { value: customers[a]?.label ?? '' }
-          ]
-        })
-      }
-      journalEntrySpreadsheet.sheets[1].isProtected = true
-
-      // Sheet 1 headers
-      journalEntrySpreadsheet.sheets[0].rows?.push({
-        cells: [
-          { value: 'Account', style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' } },
-          { value: 'Debit', style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' } },
-          { value: 'Credit', style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' } },
-          {
-            value: 'Line Memo',
-            style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' }
-          },
-          {
-            value: 'Department',
-            style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' }
-          },
-          {
-            value: 'Location',
-            style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' }
-          },
-          { value: 'Customer', style: { fontSize: '12pt', fontFamily: 'Arial Black', color: '#', textAlign: 'center' } }
-        ]
-
-        // height: 25
-      })
-
-      // Add validations to sheet1
-      journalEntrySpreadsheet.addDataValidation(
-        {
-          inCellDropDown: true,
-          type: 'List',
-          value1: `=Sheet2!A2:A${accounts.length + 1}`
-        },
-        'A2:A1000'
-      )
-      journalEntrySpreadsheet.addDataValidation(
-        {
-          inCellDropDown: true,
-          type: 'Decimal',
-          value1: '-100000000',
-          value2: '100000000'
-        },
-        'B2:C1000'
-      )
-      journalEntrySpreadsheet.addDataValidation(
-        {
-          inCellDropDown: true,
-          type: 'List',
-          value1: `=Sheet2!B2:B${departments.length + 1}`
-        },
-        'E2:E1000'
-      )
-      journalEntrySpreadsheet.addDataValidation(
-        {
-          inCellDropDown: true,
-          type: 'List',
-          value1: `=Sheet2!C2:C${locations.length + 1}`
-        },
-        'F2:F1000'
-      )
-      journalEntrySpreadsheet.addDataValidation(
-        {
-          inCellDropDown: true,
-          type: 'List',
-          value1: `=Sheet2!D2:D${customers.length + 1}`
-        },
-        'G2:G1000'
-      )
-      journalEntrySpreadsheet.freezePanes(1, 7)
-    }
-  }
-
   const [anchorSheetMenuEl, setAnchorSheetMenuEl] = React.useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorSheetMenuEl)
   const handleSheetMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -482,8 +435,9 @@ const CreateSupportPackage = () => {
                   fullWidth
                   label='Support Title'
                   placeholder='Title of Support Package'
-                  onChange={handleStateChange('name')}
+                  onChange={e => setName(e.target.value)}
                   variant='filled'
+                  value={name}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -497,7 +451,7 @@ const CreateSupportPackage = () => {
                   <Autocomplete
                     multiple
                     id='tags-outlined'
-                    options={values.allCategories}
+                    options={allCategories}
                     getOptionLabel={option => option.label}
                     filterSelectedOptions
                     renderInput={params => (
@@ -509,21 +463,23 @@ const CreateSupportPackage = () => {
               <Grid item xs={12} sm={6}>
                 <TextField variant='filled' fullWidth label='Journal Number' placeholder='Name of Support Package' />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={3}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePickerWrapper>
                     <DatePicker
                       label='Support Date'
                       inputFormat='MM/DD/YYYY'
-                      value={values.date}
-                      onChange={handleChange}
+                      value={date}
+                      onChange={e => setDate(e)}
                       renderInput={params => <TextField variant='filled' fullWidth {...params} />}
                     />
                   </DatePickerWrapper>
                 </LocalizationProvider>
               </Grid>
-              <Grid item xs={12} sm={2}>
-                <FormLabel sx={{ marginLeft: 12 }}>Approver</FormLabel>
+              <Grid item xs={12} sm={3} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Link component='button' variant='body2' onClick={handlePersonnelModalOpen}>
+                  <FormLabel sx={{ cursor: 'pointer', color: 'blue' }}>Approver</FormLabel>
+                </Link>
                 <Chip
                   avatar={<Avatar alt='Mike Champ'>MC</Avatar>}
                   label='Mike Champ'
@@ -533,20 +489,20 @@ const CreateSupportPackage = () => {
                   }}
                   sx={{ marginLeft: 3 }}
                 />
-                {/* <Link component='button' variant='body2' sx={{ marginTop: 4 }} onClick={handlePersonnelModalOpen}>
-                  Select
-                </Link> */}
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField variant='filled' fullWidth label='Participants' placeholder='Search for Participants' />
-                {/* <Link component='button' variant='body2' sx={{ marginTop: 4 }} onClick={handlePersonnelModalOpen}>
-                  Select
-                </Link> */}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField variant='filled' fullWidth label='Labels' placeholder='Assign Labels' />
-              </Grid>
-              <Grid item xs={12} sm={6} sx={{ marginTop: -3 }}>
+              <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Link component='button' variant='body2' onClick={handlePersonnelModalOpen}>
+                  <FormLabel sx={{ cursor: 'pointer', color: 'blue' }}>Participants</FormLabel>
+                </Link>
+                <Chip
+                  avatar={<Avatar alt='Mike Champ'>MC</Avatar>}
+                  label='Mike Champ'
+                  variant='outlined'
+                  onDelete={() => {
+                    alert('delete action')
+                  }}
+                  sx={{ marginLeft: 3 }}
+                />
                 <Chip
                   avatar={<Avatar alt='Remy Sharp'>RS</Avatar>}
                   label='Remy Sharp'
@@ -565,6 +521,12 @@ const CreateSupportPackage = () => {
                   }}
                   sx={{ marginLeft: 3 }}
                 />
+                {/* <Link component='button' variant='body2' sx={{ marginTop: 4 }} onClick={handlePersonnelModalOpen}>
+                  Select
+                </Link> */}
+              </Grid>
+              <Grid item xs={12} sm={12}>
+                <TextField variant='filled' fullWidth label='Labels' placeholder='Assign Labels' />
               </Grid>
 
               {/* <Grid item xs={12}>
@@ -601,8 +563,8 @@ const CreateSupportPackage = () => {
         <Paper>
           <AppBar position='static' color='inherit'>
             <Tabs
-              value={values.tab}
-              onChange={handleTabChange}
+              value={tab}
+              onChange={(_e, v) => setTab(v)}
               variant='fullWidth'
               aria-label='full width tabs example'
               sx={{ margin: '0 200px' }}
@@ -614,7 +576,7 @@ const CreateSupportPackage = () => {
               <Tab label='Journal Entry' />
             </Tabs>
           </AppBar>
-          <TabPanel value={values.tab} index={0} dir={theme.direction}>
+          <TabPanel value={tab} index={0} dir={theme.direction}>
             {fileUploaded ? (
               <Grid
                 justifyContent='space-between' // Add it here :)
@@ -709,15 +671,15 @@ const CreateSupportPackage = () => {
                   </IconButton>
                 </Toolbar>
                 <Tabs
-                  value={values.commentsTab}
-                  onChange={handleCommentsTabChange}
+                  value={commentsTab}
+                  onChange={(_e, v) => setCommentsTab(v)}
                   variant='fullWidth'
                   aria-label='full width tabs example'
                 >
                   <Tab label='Comments' />
                   <Tab label='Action Items' />
                 </Tabs>
-                <TabPanel value={values.commentsTab} index={0} dir={theme.direction}>
+                <TabPanel value={commentsTab} index={0} dir={theme.direction}>
                   <Grid container sx={{ padding: '0 1rem' }}>
                     <TextField
                       fullWidth
@@ -786,7 +748,7 @@ const CreateSupportPackage = () => {
                     </Grid>
                   </Grid>
                 </TabPanel>
-                <TabPanel value={values.commentsTab} index={1} dir={theme.direction}>
+                <TabPanel value={commentsTab} index={1} dir={theme.direction}>
                   <Grid container sx={{ padding: '0 1rem' }}>
                     <TextField
                       fullWidth
@@ -915,7 +877,7 @@ const CreateSupportPackage = () => {
               )}
             </Grid>
           </TabPanel>
-          <TabPanel value={values.tab} index={1} dir={theme.direction}>
+          <TabPanel value={tab} index={1} dir={theme.direction}>
             <Container sx={{ padding: '20px 0px' }}>
               <Grid container wrap='nowrap' spacing={2}>
                 <Grid item>
@@ -1012,25 +974,16 @@ const CreateSupportPackage = () => {
               </Paper>
             </Container>
           </TabPanel>
-          <TabPanel value={values.tab} index={2} dir={theme.direction}>
+          <TabPanel value={tab} index={2} dir={theme.direction}>
             <Grid
               container
               sx={{ pl: 1, height: fileUploaded ? '600px' : '200px' }}
               width='100%'
               className='journal-entry-tab'
             >
-              <SpreadsheetComponent
-                allowDataValidation
-                allowFreezePane
-                ref={ref => {
-                  if (ref) {
-                    setJournalEntrySpreadsheet(ref)
-                  }
-                }}
-                created={onJournalSpreadsheetCreated.bind(this)}
-              >
+              <SpreadsheetComponent allowDataValidation allowFreezePane>
                 <SheetsDirective>
-                  <SheetDirective>
+                  <SheetDirective frozenRows={1} frozenColumns={7}>
                     {/* <RangesDirective>
                                     <RangeDirective dataSource={data}></RangeDirective>
                                 </RangesDirective> */}
@@ -1043,6 +996,95 @@ const CreateSupportPackage = () => {
                       <ColumnDirective width={150}></ColumnDirective>
                       <ColumnDirective width={150}></ColumnDirective>
                     </ColumnsDirective>
+                    <RowsDirective>
+                      <RowDirective height={30}>
+                        <CellsDirective>
+                          <CellDirective
+                            value='Account'
+                            style={{
+                              color: 'grey',
+                              textAlign: 'center',
+                              verticalAlign: 'middle',
+                              fontSize: '18px',
+                              fontFamily: 'Courier New',
+                              fontWeight: 'bold'
+                            }}
+                          ></CellDirective>
+                          <CellDirective
+                            value='Debit'
+                            style={{
+                              color: 'grey',
+                              textAlign: 'center',
+                              verticalAlign: 'middle',
+                              fontSize: '18px',
+                              fontFamily: 'Courier New',
+                              fontWeight: 'bold'
+                            }}
+                          ></CellDirective>
+                          <CellDirective
+                            value='Credit'
+                            style={{
+                              color: 'grey',
+                              textAlign: 'center',
+                              verticalAlign: 'middle',
+                              fontSize: '18px',
+                              fontFamily: 'Courier New',
+                              fontWeight: 'bold'
+                            }}
+                          ></CellDirective>
+                          <CellDirective
+                            value='Line Memo'
+                            style={{
+                              color: 'grey',
+                              textAlign: 'center',
+                              verticalAlign: 'middle',
+                              fontSize: '18px',
+                              fontFamily: 'Courier New',
+                              fontWeight: 'bold'
+                            }}
+                          ></CellDirective>
+                          <CellDirective
+                            value='Department'
+                            style={{
+                              color: 'grey',
+                              textAlign: 'center',
+                              verticalAlign: 'middle',
+                              fontSize: '18px',
+                              fontFamily: 'Courier New',
+                              fontWeight: 'bold'
+                            }}
+                          ></CellDirective>
+                          <CellDirective
+                            value='Location'
+                            style={{
+                              color: 'grey',
+                              textAlign: 'center',
+                              verticalAlign: 'middle',
+                              fontSize: '18px',
+                              fontFamily: 'Courier New',
+                              fontWeight: 'bold'
+                            }}
+                          ></CellDirective>
+                          <CellDirective
+                            value='Customer'
+                            style={{
+                              color: 'grey',
+                              textAlign: 'center',
+                              verticalAlign: 'middle',
+                              fontSize: '18px',
+                              fontFamily: 'Courier New',
+                              fontWeight: 'bold'
+                            }}
+                          ></CellDirective>
+                        </CellsDirective>
+                      </RowDirective>
+                    </RowsDirective>
+                    <RangesDirective>
+                      <RangeDirective address='A2:A1000' template={autoCompleteAccountComponent} />
+                      <RangeDirective address='E2:E1000' template={autoCompleteDepartmentComponent} />
+                      <RangeDirective address='F2:F1000' template={autoCompleteLocationsComponent} />
+                      <RangeDirective address='G2:G1000' template={autoCompleteCustomersComponent} />
+                    </RangesDirective>
                   </SheetDirective>
                 </SheetsDirective>
               </SpreadsheetComponent>
@@ -1074,21 +1116,35 @@ const CreateSupportPackage = () => {
         </Grid>
       </Card>
       <Modal open={personnelModalOpen} onClose={handlePersonnelModalClose}>
-        <Box sx={modalStyle}>
-          <Card>
-            <CardHeader title='Select a Personnel' sx={{ textAlign: 'center' }}></CardHeader>
-            <CardContent>
-              <TableCustomized />
-            </CardContent>
-            <CardActions>
-              <Grid container justifyContent='flex-end'>
-                <Button size='large' type='submit' variant='contained' onClick={handlePersonnelModalClose}>
-                  Close
-                </Button>
-              </Grid>
-            </CardActions>
-          </Card>
-        </Box>
+        <Card sx={styles.personnelModalStyle}>
+          <CardHeader title='Select a Personnel' sx={{ textAlign: 'center' }}></CardHeader>
+          <CardContent>
+            <Toolbar>
+              <TextField
+                id='search-bar'
+                className='text'
+                onChange={e => {
+                  setPersonnelSearchQuery(e.target.value)
+                }}
+                variant='outlined'
+                placeholder='Search...'
+                size='small'
+                fullWidth
+              />
+              <IconButton type='submit' aria-label='search'>
+                <SearchIcon style={{ fill: 'blue' }} />
+              </IconButton>
+            </Toolbar>
+            <TableCustomized />
+          </CardContent>
+          <CardActions>
+            <Grid container justifyContent='flex-end'>
+              <Button size='large' type='submit' variant='contained' onClick={handlePersonnelModalClose}>
+                Close
+              </Button>
+            </Grid>
+          </CardActions>
+        </Card>
       </Modal>
       <Modal
         open={chooseMaterFileModalOpen}
@@ -1096,7 +1152,7 @@ const CreateSupportPackage = () => {
         aria-labelledby='modal-modal-personnel'
         aria-describedby='modal-modal-personnel'
       >
-        <Box sx={modalStyle}>
+        <Box sx={styles.modalStyle}>
           <Card>
             <CardHeader title='Select a Personnel' sx={{ textAlign: 'center' }}></CardHeader>
             <CardContent>
@@ -1152,7 +1208,7 @@ const CreateSupportPackage = () => {
           paddingTop: 2
         }}
       >
-        <Box sx={sheetModalStyle}></Box>
+        <Box sx={styles.sheetModalStyle}></Box>
       </Dialog>
     </Grid>
   )

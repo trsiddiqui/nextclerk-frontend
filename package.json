@@ -62,6 +62,7 @@
     "@popperjs/core": "^2.11.2",
     "@silevis/reactgrid": "^4.0.4",
     "@syncfusion/ej2-base": "^21.1.35",
+    "@syncfusion/ej2-react-dropdowns": "^21.1.41",
     "@syncfusion/ej2-react-spreadsheet": "^21.1.35",
     "apexcharts-clevision": "3.28.5",
     "clsx": "^1.1.1",

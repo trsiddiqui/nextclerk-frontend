@@ -33,6 +33,17 @@ code[class*='language-'] {
   padding: 0;
 }
 
-.journal-entry-tab .e-sheet-tab-panel {
+.journal-entry-tab .e-sheet-tab-panel,
+.journal-entry-tab .e-ribbon,
+.journal-entry-tab .e-formula-bar-panel {
   display: none;
+}
+
+.auto-complete-inside-sheet,
+.auto-complete-inside-sheet span,
+.auto-complete-inside-sheet input {
+  height: 18px !important;
+  padding: 0px !important;
+  margin: 0px !important;
+  min-height: 0px !important;
 }
