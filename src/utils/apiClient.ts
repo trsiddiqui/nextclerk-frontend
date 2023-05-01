@@ -122,3 +122,25 @@ export const getAllCustomers = async () => {
     }
   ])
 }
+
+export const searchUsers = async (str: string) => {
+  console.log('searched for ', str)
+
+  return Promise.resolve([
+    {
+      id: '1',
+      name: 'Taha Siddiqui',
+      email: 'taha@nextclerk.com'
+    },
+    {
+      id: '2',
+      name: 'Majid Razmjoo',
+      email: 'majid@nextclerk.com'
+    },
+    {
+      id: '3',
+      name: 'Amir Amiri',
+      email: 'amir@nextclerk.com'
+    }
+  ])
+}

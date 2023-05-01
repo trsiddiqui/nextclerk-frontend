@@ -48,14 +48,20 @@ import {
   CardContent,
   CardActions,
   FormControl,
-  Dialog
+  Dialog,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  Checkbox
 } from '@mui/material'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import dayjs, { Dayjs } from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
-import TableCustomized from 'src/views/tables/TableCustomized'
+import { StyledTableCell, StyledTableRow } from 'src/views/tables/TableCustomized'
 import {
   CellDirective,
   CellsDirective,
@@ -78,7 +84,8 @@ import {
   getAllCategories,
   getAllCustomers,
   getAllDepartments,
-  getAllLocations
+  getAllLocations,
+  searchUsers
 } from 'src/utils/apiClient'
 
 const styles = {
@@ -150,6 +157,12 @@ interface DropDownRow {
   key: string
 }
 
+interface User {
+  name: string
+  email: string
+  id: string
+}
+
 export async function getServerSideProps() {
   // Fetch data from external API
   const categories = await getAllCategories()
@@ -178,12 +191,18 @@ const CreateSupportPackage = ({
   const theme = useTheme()
   const [name, setName] = useState('')
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
+  const [jESpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
   const [allCategories] = useState(categories)
   const [date, setDate] = useState<Dayjs | null>(dayjs())
+  const [personnels, setPersonnels] = useState<Array<User>>([])
   const [tab, setTab] = useState(0)
+  const [approver, setApprover] = useState<User | null>()
+  const [multiPersonnelSelection, setMultiPersonnelSelection] = useState<User[]>([])
+  const [participants, setParticipants] = useState<User[]>([])
   const [commentsTab, setCommentsTab] = useState(0)
   const [chooseMaterFileModalOpen, setChooseMaterFileModalOpen] = React.useState(false)
   const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
+  const [multiPersonnelModalOpen, setMultiPersonnelModalOpen] = React.useState(false)
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [rightDrawerVisible, setRightDrawerVisible] = React.useState(false)
@@ -244,7 +263,13 @@ const CreateSupportPackage = ({
     )
   }
 
-  // #endregion Mocks
+  const jESpreadsheetCreated = () => {
+    if (!jESpreadsheetRef) {
+      return
+    }
+    jESpreadsheetRef.addDataValidation({ type: 'Decimal', isHighlighted: true, ignoreBlank: true }, 'B2:B1000')
+    jESpreadsheetRef.addDataValidation({ type: 'Decimal', isHighlighted: true, ignoreBlank: true }, 'C2:C1000')
+  }
 
   const saveMenuOpen = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -267,6 +292,11 @@ const CreateSupportPackage = ({
 
   const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
+  const handleMultiPersonnelModalOpen = () => setMultiPersonnelModalOpen(true)
+  const handleMultiPersonnelModalClose = () => {
+    setMultiPersonnelModalOpen(false)
+    setMultiPersonnelSelection([])
+  }
   const handleChooseMaterFileModalOpen = () => setChooseMaterFileModalOpen(true)
   const handleChooseMaterFileModalClose = () => setChooseMaterFileModalOpen(false)
 
@@ -480,50 +510,38 @@ const CreateSupportPackage = ({
                 <Link component='button' variant='body2' onClick={handlePersonnelModalOpen}>
                   <FormLabel sx={{ cursor: 'pointer', color: 'blue' }}>Approver</FormLabel>
                 </Link>
-                <Chip
-                  avatar={<Avatar alt='Mike Champ'>MC</Avatar>}
-                  label='Mike Champ'
-                  variant='outlined'
-                  onDelete={() => {
-                    alert('delete action')
-                  }}
-                  sx={{ marginLeft: 3 }}
-                />
+                {approver ? (
+                  <Chip
+                    label={approver.name}
+                    variant='outlined'
+                    onDelete={() => {
+                      setApprover(null)
+                    }}
+                    sx={{ marginLeft: 3 }}
+                  />
+                ) : (
+                  <></>
+                )}
               </Grid>
               <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Link component='button' variant='body2' onClick={handlePersonnelModalOpen}>
+                <Link component='button' variant='body2' onClick={handleMultiPersonnelModalOpen}>
                   <FormLabel sx={{ cursor: 'pointer', color: 'blue' }}>Participants</FormLabel>
                 </Link>
-                <Chip
-                  avatar={<Avatar alt='Mike Champ'>MC</Avatar>}
-                  label='Mike Champ'
-                  variant='outlined'
-                  onDelete={() => {
-                    alert('delete action')
-                  }}
-                  sx={{ marginLeft: 3 }}
-                />
-                <Chip
-                  avatar={<Avatar alt='Remy Sharp'>RS</Avatar>}
-                  label='Remy Sharp'
-                  variant='outlined'
-                  onDelete={() => {
-                    alert('delete action')
-                  }}
-                  sx={{ marginLeft: 3 }}
-                />
-                <Chip
-                  avatar={<Avatar alt='Mike Champ'>MC</Avatar>}
-                  label='Mike Champ'
-                  variant='outlined'
-                  onDelete={() => {
-                    alert('delete action')
-                  }}
-                  sx={{ marginLeft: 3 }}
-                />
-                {/* <Link component='button' variant='body2' sx={{ marginTop: 4 }} onClick={handlePersonnelModalOpen}>
-                  Select
-                </Link> */}
+                {participants.length > 0 ? (
+                  participants.map((participant, index) => (
+                    <Chip
+                      key={index}
+                      label={participant.name}
+                      variant='outlined'
+                      onDelete={() => {
+                        setParticipants(participants.filter(x => x.id !== participant.id))
+                      }}
+                      sx={{ marginLeft: 3 }}
+                    />
+                  ))
+                ) : (
+                  <></>
+                )}
               </Grid>
               <Grid item xs={12} sm={12}>
                 <TextField variant='filled' fullWidth label='Labels' placeholder='Assign Labels' />
@@ -981,7 +999,30 @@ const CreateSupportPackage = ({
               width='100%'
               className='journal-entry-tab'
             >
-              <SpreadsheetComponent allowDataValidation allowFreezePane>
+              <SpreadsheetComponent
+                ref={ssObj => {
+                  if (ssObj) {
+                    setJESpreadsheetRef(ssObj)
+                  }
+                }}
+                created={jESpreadsheetCreated.bind(this)}
+                allowDataValidation
+                allowFreezePane
+                cellEdit={args => {
+                  // Preventing the editing in 5th(Amount) column.
+                  if (
+                    args.address.endsWith('A1') ||
+                    args.address.endsWith('B1') ||
+                    args.address.endsWith('C1') ||
+                    args.address.endsWith('D1') ||
+                    args.address.endsWith('E1') ||
+                    args.address.endsWith('F1') ||
+                    args.address.endsWith('G1')
+                  ) {
+                    args.cancel = true
+                  }
+                }}
+              >
                 <SheetsDirective>
                   <SheetDirective frozenRows={1} frozenColumns={7}>
                     {/* <RangesDirective>
@@ -1001,6 +1042,7 @@ const CreateSupportPackage = ({
                         <CellsDirective>
                           <CellDirective
                             value='Account'
+                            isLocked
                             style={{
                               color: 'grey',
                               textAlign: 'center',
@@ -1012,6 +1054,7 @@ const CreateSupportPackage = ({
                           ></CellDirective>
                           <CellDirective
                             value='Debit'
+                            isLocked
                             style={{
                               color: 'grey',
                               textAlign: 'center',
@@ -1023,6 +1066,7 @@ const CreateSupportPackage = ({
                           ></CellDirective>
                           <CellDirective
                             value='Credit'
+                            isLocked
                             style={{
                               color: 'grey',
                               textAlign: 'center',
@@ -1034,6 +1078,7 @@ const CreateSupportPackage = ({
                           ></CellDirective>
                           <CellDirective
                             value='Line Memo'
+                            isLocked
                             style={{
                               color: 'grey',
                               textAlign: 'center',
@@ -1045,6 +1090,7 @@ const CreateSupportPackage = ({
                           ></CellDirective>
                           <CellDirective
                             value='Department'
+                            isLocked
                             style={{
                               color: 'grey',
                               textAlign: 'center',
@@ -1056,6 +1102,7 @@ const CreateSupportPackage = ({
                           ></CellDirective>
                           <CellDirective
                             value='Location'
+                            isLocked
                             style={{
                               color: 'grey',
                               textAlign: 'center',
@@ -1067,6 +1114,7 @@ const CreateSupportPackage = ({
                           ></CellDirective>
                           <CellDirective
                             value='Customer'
+                            isLocked
                             style={{
                               color: 'grey',
                               textAlign: 'center',
@@ -1081,6 +1129,7 @@ const CreateSupportPackage = ({
                     </RowsDirective>
                     <RangesDirective>
                       <RangeDirective address='A2:A1000' template={autoCompleteAccountComponent} />
+                      <RangeDirective address='B2:B1000' showFieldAsHeader />
                       <RangeDirective address='E2:E1000' template={autoCompleteDepartmentComponent} />
                       <RangeDirective address='F2:F1000' template={autoCompleteLocationsComponent} />
                       <RangeDirective address='G2:G1000' template={autoCompleteCustomersComponent} />
@@ -1130,16 +1179,160 @@ const CreateSupportPackage = ({
                 placeholder='Search...'
                 size='small'
                 fullWidth
+                onKeyDown={async event => {
+                  if (event.key === 'Enter') {
+                    setPersonnels([])
+                    const users = await searchUsers(personnelSearchQuery)
+                    setPersonnels(users)
+                  }
+                }}
               />
-              <IconButton type='submit' aria-label='search'>
+              <IconButton
+                type='submit'
+                aria-label='search'
+                onClick={async () => {
+                  setPersonnels([])
+                  const users = await searchUsers(personnelSearchQuery)
+                  setPersonnels(users)
+                }}
+              >
                 <SearchIcon style={{ fill: 'blue' }} />
               </IconButton>
             </Toolbar>
-            <TableCustomized />
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 700 }} aria-label='customized table'>
+                <TableHead>
+                  <TableRow>
+                    <StyledTableCell></StyledTableCell>
+                    <StyledTableCell>Name</StyledTableCell>
+                    <StyledTableCell>Email</StyledTableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {personnels.map(row => (
+                    <StyledTableRow key={row.name}>
+                      <StyledTableCell component='th' scope='row'>
+                        <Link
+                          onClick={() => {
+                            setApprover(row)
+                            handlePersonnelModalClose()
+                          }}
+                        >
+                          Select
+                        </Link>
+                      </StyledTableCell>
+                      <StyledTableCell component='th' scope='row'>
+                        {row.name}
+                      </StyledTableCell>
+                      <StyledTableCell>{row.email}</StyledTableCell>
+                    </StyledTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </CardContent>
           <CardActions>
             <Grid container justifyContent='flex-end'>
               <Button size='large' type='submit' variant='contained' onClick={handlePersonnelModalClose}>
+                Close
+              </Button>
+            </Grid>
+          </CardActions>
+        </Card>
+      </Modal>
+      <Modal open={multiPersonnelModalOpen} onClose={handleMultiPersonnelModalClose}>
+        <Card sx={styles.personnelModalStyle}>
+          <CardHeader title='Select a Personnel' sx={{ textAlign: 'center' }}></CardHeader>
+          <CardContent>
+            <Toolbar>
+              <TextField
+                id='search-bar'
+                className='text'
+                onChange={e => {
+                  setPersonnelSearchQuery(e.target.value)
+                }}
+                variant='outlined'
+                placeholder='Search...'
+                size='small'
+                fullWidth
+                onKeyDown={async event => {
+                  if (event.key === 'Enter') {
+                    setPersonnels([])
+                    const users = await searchUsers(personnelSearchQuery)
+                    setPersonnels(users)
+                  }
+                }}
+              />
+              <IconButton
+                type='submit'
+                aria-label='search'
+                onClick={async () => {
+                  setPersonnels([])
+                  const users = await searchUsers(personnelSearchQuery)
+                  setPersonnels(users)
+                }}
+              >
+                <SearchIcon style={{ fill: 'blue' }} />
+              </IconButton>
+            </Toolbar>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 700 }} aria-label='customized table'>
+                <TableHead>
+                  <TableRow>
+                    <StyledTableCell></StyledTableCell>
+                    <StyledTableCell>Name</StyledTableCell>
+                    <StyledTableCell>Email</StyledTableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {personnels.map(row => (
+                    <StyledTableRow key={row.name}>
+                      <StyledTableCell component='th' scope='row'>
+                        <Checkbox
+                          onChange={e => {
+                            if (e.target.checked) {
+                              const temp = Array.from(new Set(multiPersonnelSelection))
+                              temp.push(row)
+                              setMultiPersonnelSelection(temp)
+                            } else {
+                              setMultiPersonnelSelection(multiPersonnelSelection?.filter(x => x.id !== row.id))
+                            }
+                          }}
+                        />
+                      </StyledTableCell>
+                      <StyledTableCell component='th' scope='row'>
+                        {row.name}
+                      </StyledTableCell>
+                      <StyledTableCell>{row.email}</StyledTableCell>
+                    </StyledTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+          <CardActions>
+            <Grid container>
+              <Button
+                size='large'
+                type='submit'
+                variant='contained'
+                onClick={() => {
+                  debugger
+                  setParticipants(Array.from(new Set(multiPersonnelSelection)))
+                  handleMultiPersonnelModalClose()
+                }}
+              >
+                Ok
+              </Button>
+            </Grid>
+            <Grid container justifyContent='flex-end'>
+              <Button
+                size='large'
+                type='submit'
+                variant='contained'
+                color='warning'
+                onClick={handleMultiPersonnelModalClose}
+              >
                 Close
               </Button>
             </Grid>

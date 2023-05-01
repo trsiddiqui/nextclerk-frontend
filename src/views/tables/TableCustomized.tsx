@@ -9,7 +9,7 @@ import TableRow, { TableRowProps } from '@mui/material/TableRow'
 import TableCell, { TableCellProps, tableCellClasses } from '@mui/material/TableCell'
 import { Link } from '@mui/material'
 
-const StyledTableCell = styled(TableCell)<TableCellProps>(({ theme }) => ({
+export const StyledTableCell = styled(TableCell)<TableCellProps>(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     color: theme.palette.common.white,
     backgroundColor: theme.palette.common.black
@@ -19,7 +19,7 @@ const StyledTableCell = styled(TableCell)<TableCellProps>(({ theme }) => ({
   }
 }))
 
-const StyledTableRow = styled(TableRow)<TableRowProps>(({ theme }) => ({
+export const StyledTableRow = styled(TableRow)<TableRowProps>(({ theme }) => ({
   '&:nth-of-type(odd)': {
     backgroundColor: theme.palette.action.hover
   },

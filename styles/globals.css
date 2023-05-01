@@ -47,3 +47,7 @@ code[class*='language-'] {
   margin: 0px !important;
   min-height: 0px !important;
 }
+
+div#__next-build-watcher + div {
+  display: none;
+}
