@@ -1,5 +1,6 @@
 // ** React Imports
 import React, { useState } from 'react'
+import { DateTime } from 'luxon'
 
 // ** MUI Imports
 import CloseIcon from '@mui/icons-material/Close'
@@ -85,8 +86,10 @@ import {
   getAllCustomers,
   getAllDepartments,
   getAllLocations,
-  searchUsers
+  searchUsers,
+  getActiveUser
 } from 'src/utils/apiClient'
+import { DropDownRow, TabPanel, User, getInitials } from 'src/@core/utils'
 
 const styles = {
   modalStyle: {
@@ -124,45 +127,6 @@ const styles = {
   }
 }
 
-interface TabPanelProps {
-  children?: React.ReactNode
-  dir?: string
-  index: number
-  value: number
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-
-  return (
-    <div
-      role='tabpanel'
-      hidden={value !== index}
-      id={`full-width-tabpanel-${index}`}
-      aria-labelledby={`full-width-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  )
-}
-
-interface DropDownRow {
-  label: string
-  id: string
-  key: string
-}
-
-interface User {
-  name: string
-  email: string
-  id: string
-}
-
 export async function getServerSideProps() {
   // Fetch data from external API
   const categories = await getAllCategories()
@@ -170,9 +134,10 @@ export async function getServerSideProps() {
   const departments = await getAllDepartments()
   const locations = await getAllLocations()
   const customers = await getAllCustomers()
+  const activeUser = await getActiveUser()
 
   // Pass data to the page via props
-  return { props: { categories, accounts, departments, locations, customers } }
+  return { props: { categories, accounts, departments, locations, customers, activeUser } }
 }
 
 const CreateSupportPackage = ({
@@ -180,23 +145,25 @@ const CreateSupportPackage = ({
   accounts,
   departments,
   locations,
-  customers
+  customers,
+  activeUser
 }: {
   categories: Array<DropDownRow>
   accounts: Array<DropDownRow>
   departments: Array<DropDownRow>
   locations: Array<DropDownRow>
   customers: Array<DropDownRow>
+  activeUser: { details: { id: string; name: string }; manager: { id: string; name: string } }
 }) => {
+  debugger
   const theme = useTheme()
   const [name, setName] = useState('')
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
   const [jESpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
   const [allCategories] = useState(categories)
   const [date, setDate] = useState<Dayjs | null>(dayjs())
-  const [personnels, setPersonnels] = useState<Array<User>>([])
+  const [personnel, setPersonnel] = useState<Array<User>>([])
   const [tab, setTab] = useState(0)
-  const [approver, setApprover] = useState<User | null>()
   const [multiPersonnelSelection, setMultiPersonnelSelection] = useState<User[]>([])
   const [participants, setParticipants] = useState<User[]>([])
   const [commentsTab, setCommentsTab] = useState(0)
@@ -210,6 +177,10 @@ const CreateSupportPackage = ({
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
   const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
+  const [currentSPNote, setCurrentSPNote] = useState('')
+  const [SPNotes, setSPNotes] = useState<
+    Array<{ message: string; files: unknown[]; user: { id: string; name: string }; createdAt: DateTime }>
+  >([])
 
   const autoCompleteAccountComponent = () => {
     return (
@@ -290,7 +261,7 @@ const CreateSupportPackage = ({
     }
   ])
 
-  const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
+  // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
   const handleMultiPersonnelModalOpen = () => setMultiPersonnelModalOpen(true)
   const handleMultiPersonnelModalClose = () => {
@@ -506,22 +477,20 @@ const CreateSupportPackage = ({
                   </DatePickerWrapper>
                 </LocalizationProvider>
               </Grid>
-              <Grid item xs={12} sm={3} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Link component='button' variant='body2' onClick={handlePersonnelModalOpen}>
-                  <FormLabel sx={{ cursor: 'pointer', color: 'blue' }}>Approver</FormLabel>
-                </Link>
-                {approver ? (
-                  <Chip
-                    label={approver.name}
-                    variant='outlined'
-                    onDelete={() => {
-                      setApprover(null)
-                    }}
-                    sx={{ marginLeft: 3 }}
-                  />
-                ) : (
-                  <></>
-                )}
+              <Grid
+                item
+                xs={12}
+                sm={3}
+                justifyContent='end'
+                sx={{ display: 'flex', alignItems: 'center', textAlign: 'right' }}
+              >
+                <FormLabel>Approver</FormLabel>
+                <Chip
+                  label={activeUser.manager.name}
+                  avatar={<Avatar>{activeUser.manager.name ? getInitials(activeUser.manager.name) : ''}</Avatar>}
+                  variant='outlined'
+                  sx={{ marginLeft: 3 }}
+                />
               </Grid>
               <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center' }}>
                 <Link component='button' variant='body2' onClick={handleMultiPersonnelModalOpen}>
@@ -544,7 +513,18 @@ const CreateSupportPackage = ({
                 )}
               </Grid>
               <Grid item xs={12} sm={12}>
-                <TextField variant='filled' fullWidth label='Labels' placeholder='Assign Labels' />
+                <Autocomplete
+                  multiple
+                  id='tags-filled'
+                  options={['']}
+                  freeSolo
+                  renderTags={(value: readonly string[]) =>
+                    value.map((option: string, index: number) => <Chip variant='outlined' label={option} key={index} />)
+                  }
+                  renderInput={params => (
+                    <TextField {...params} variant='filled' label='Labels' placeholder='Assign Labels' />
+                  )}
+                />
               </Grid>
 
               {/* <Grid item xs={12}>
@@ -642,7 +622,7 @@ const CreateSupportPackage = ({
                     <MoreVertIcon />
                   </IconButton>
                   <Menu
-                    id='basic-menu'
+                    id='basic-menu-2'
                     anchorEl={anchorSheetMenuEl}
                     open={menuOpen}
                     onClose={handleSheetMenuClose}
@@ -897,75 +877,7 @@ const CreateSupportPackage = ({
           </TabPanel>
           <TabPanel value={tab} index={1} dir={theme.direction}>
             <Container sx={{ padding: '20px 0px' }}>
-              <Grid container wrap='nowrap' spacing={2}>
-                <Grid item>
-                  <Avatar alt='Remy Sharp'>RS</Avatar>
-                </Grid>
-                <Grid justifyContent='left' item xs zeroMinWidth>
-                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                  <p style={{ textAlign: 'left' }}>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
-                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
-                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
-                    urna, nec feugiat quam lectus vitae ex.{' '}
-                  </p>
-                  <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
-                </Grid>
-              </Grid>
-              <Grid container wrap='nowrap' spacing={2}>
-                <Grid item>
-                  <Avatar alt='Remy Sharp'>RS</Avatar>
-                </Grid>
-                <Grid justifyContent='left' item xs zeroMinWidth>
-                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                  <p style={{ textAlign: 'left' }}>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
-                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
-                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
-                    urna, nec feugiat quam lectus vitae ex.{' '}
-                  </p>
-                  <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
-                </Grid>
-              </Grid>
-              <Grid container wrap='nowrap' spacing={2}>
-                <Grid item>
-                  <Avatar alt='Remy Sharp'>RS</Avatar>
-                </Grid>
-                <Grid justifyContent='left' item xs zeroMinWidth>
-                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                  <p style={{ textAlign: 'left' }}>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
-                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
-                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
-                    urna, nec feugiat quam lectus vitae ex.{' '}
-                  </p>
-                  <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
-                </Grid>
-              </Grid>
-              <Grid container wrap='nowrap' spacing={2}>
-                <Grid item>
-                  <Avatar alt='Remy Sharp'>RS</Avatar>
-                </Grid>
-                <Grid justifyContent='left' item xs zeroMinWidth>
-                  <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                  <p style={{ textAlign: 'left' }}>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                    bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                    tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
-                    ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
-                    Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi vehicula
-                    urna, nec feugiat quam lectus vitae ex.{' '}
-                  </p>
-                  <p style={{ textAlign: 'left', color: 'gray' }}>12th December, 2022 1:23PM</p>
-                </Grid>
-              </Grid>
-              <Paper sx={{ margin: '0px -50px' }}>
+              <Paper sx={{ margin: '0px -50px 30px -50px' }}>
                 <Grid container sx={{ padding: '1rem 1rem' }}>
                   <TextField
                     fullWidth
@@ -973,6 +885,8 @@ const CreateSupportPackage = ({
                     label='Add Comment(s)'
                     multiline
                     variant='standard'
+                    value={currentSPNote}
+                    onChange={event => setCurrentSPNote(event.target.value)}
                     maxRows={4}
                     InputProps={{
                       endAdornment: (
@@ -981,7 +895,21 @@ const CreateSupportPackage = ({
                             <AttachFileIcon />
                           </IconButton>
 
-                          <IconButton edge='end' color='primary'>
+                          <IconButton
+                            edge='end'
+                            color='primary'
+                            onClick={() => {
+                              setSPNotes(
+                                SPNotes.concat({
+                                  message: currentSPNote,
+                                  files: [],
+                                  user: activeUser.details,
+                                  createdAt: DateTime.now()
+                                })
+                              )
+                              setCurrentSPNote('')
+                            }}
+                          >
                             <SendIcon />
                           </IconButton>
                         </InputAdornment>
@@ -990,6 +918,23 @@ const CreateSupportPackage = ({
                   />
                 </Grid>
               </Paper>
+              {SPNotes.map((note, index) => (
+                <>
+                  <Grid container wrap='nowrap' spacing={2} key={index}>
+                    <Grid item>
+                      <Avatar alt={note.user.name}>{getInitials(note.user.name)}</Avatar>
+                    </Grid>
+                    <Grid justifyContent='left' item xs zeroMinWidth>
+                      <h4 style={{ margin: 0, textAlign: 'left' }}>{note.user.name}</h4>
+                      <p style={{ textAlign: 'left' }}>{note.message}</p>
+                      <p style={{ textAlign: 'left', color: 'gray' }}>
+                        {note.createdAt.toFormat('dd MMM, yyyy hh:mm a')}
+                      </p>
+                    </Grid>
+                  </Grid>
+                  <Divider />
+                </>
+              ))}
             </Container>
           </TabPanel>
           <TabPanel value={tab} index={2} dir={theme.direction}>
@@ -1181,9 +1126,9 @@ const CreateSupportPackage = ({
                 fullWidth
                 onKeyDown={async event => {
                   if (event.key === 'Enter') {
-                    setPersonnels([])
+                    setPersonnel([])
                     const users = await searchUsers(personnelSearchQuery)
-                    setPersonnels(users)
+                    setPersonnel(users)
                   }
                 }}
               />
@@ -1191,9 +1136,9 @@ const CreateSupportPackage = ({
                 type='submit'
                 aria-label='search'
                 onClick={async () => {
-                  setPersonnels([])
+                  setPersonnel([])
                   const users = await searchUsers(personnelSearchQuery)
-                  setPersonnels(users)
+                  setPersonnel(users)
                 }}
               >
                 <SearchIcon style={{ fill: 'blue' }} />
@@ -1209,12 +1154,12 @@ const CreateSupportPackage = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {personnels.map(row => (
+                  {personnel.map(row => (
                     <StyledTableRow key={row.name}>
                       <StyledTableCell component='th' scope='row'>
                         <Link
                           onClick={() => {
-                            setApprover(row)
+                            // setApprover(row)
                             handlePersonnelModalClose()
                           }}
                         >
@@ -1257,9 +1202,9 @@ const CreateSupportPackage = ({
                 fullWidth
                 onKeyDown={async event => {
                   if (event.key === 'Enter') {
-                    setPersonnels([])
+                    setPersonnel([])
                     const users = await searchUsers(personnelSearchQuery)
-                    setPersonnels(users)
+                    setPersonnel(users)
                   }
                 }}
               />
@@ -1267,9 +1212,9 @@ const CreateSupportPackage = ({
                 type='submit'
                 aria-label='search'
                 onClick={async () => {
-                  setPersonnels([])
+                  setPersonnel([])
                   const users = await searchUsers(personnelSearchQuery)
-                  setPersonnels(users)
+                  setPersonnel(users)
                 }}
               >
                 <SearchIcon style={{ fill: 'blue' }} />
@@ -1285,7 +1230,7 @@ const CreateSupportPackage = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {personnels.map(row => (
+                  {personnel.map(row => (
                     <StyledTableRow key={row.name}>
                       <StyledTableCell component='th' scope='row'>
                         <Checkbox

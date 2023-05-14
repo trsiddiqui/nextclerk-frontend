@@ -144,3 +144,16 @@ export const searchUsers = async (str: string) => {
     }
   ])
 }
+
+export const getActiveUser = async () => {
+  return Promise.resolve({
+    details: {
+      id: 'xyz-asd-vnkd',
+      name: 'Taha Siddiqui'
+    },
+    manager: {
+      id: 'abcd-efg-hijkl',
+      name: 'Majid Razmjoo'
+    }
+  })
+}
