@@ -1,26 +1,18 @@
+import axios from 'axios'
+import { UploadedFileProps, User } from './types'
+
+const api = axios.create({
+  baseURL: 'http://localhost:3000/api/'
+})
+
+// TODO: This should come from the JWT
+// Currently coming from backend seeds
+const customerXRefID = 'f590257b-a925-45d3-b980-26ff13faf64e'
+
 export const getAllCategories = async () => {
-  return Promise.resolve([
-    {
-      label: 'Category 1',
-      key: 1,
-      id: '1'
-    },
-    {
-      label: 'Category 2',
-      key: 2,
-      id: '2'
-    },
-    {
-      label: 'Category 3',
-      key: 3,
-      id: '3'
-    },
-    {
-      label: 'Category 4',
-      key: 4,
-      id: '4'
-    }
-  ])
+  const categories = await api.get<User[]>(`/${customerXRefID}/categories`)
+
+  return categories.data
 }
 
 export const getAllAccounts = async () => {
@@ -123,26 +115,10 @@ export const getAllCustomers = async () => {
   ])
 }
 
-export const searchUsers = async (str: string) => {
-  console.log('searched for ', str)
+export const searchUsers = async (str: string): Promise<User[]> => {
+  const users = await api.get<User[]>(`/${customerXRefID}/users?search=${str}`)
 
-  return Promise.resolve([
-    {
-      id: '1',
-      name: 'Taha Siddiqui',
-      email: 'taha@nextclerk.com'
-    },
-    {
-      id: '2',
-      name: 'Majid Razmjoo',
-      email: 'majid@nextclerk.com'
-    },
-    {
-      id: '3',
-      name: 'Amir Amiri',
-      email: 'amir@nextclerk.com'
-    }
-  ])
+  return users.data
 }
 
 export const getActiveUser = async () => {
@@ -156,4 +132,22 @@ export const getActiveUser = async () => {
       name: 'Majid Razmjoo'
     }
   })
+}
+
+export const uploadFile = async (file: File) => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await api.post<UploadedFileProps>('/global/actions/upload-file', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+
+  if (response.status === 200) {
+    return response.data
+  } else {
+    // TODO: Find a way to handle error in a better way
+    throw new Error('An error occurred')
+  }
 }

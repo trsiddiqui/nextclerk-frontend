@@ -33,6 +33,11 @@ export interface DropDownRow {
   key: string
 }
 
+export interface AutocompleteRow {
+  name: string
+  uuid: string
+}
+
 export interface User {
   name: string
   email: string
@@ -46,4 +51,20 @@ export const getInitials = (name: string) => {
     .match(/(^\S|\S$)?/g)!
     .join('')
     .toUpperCase()
+}
+
+export const isSupportedMimeType = (type: string) => {
+  const supportedMimetypeKeywords = ['pdf', 'spreadsheet']
+
+  return supportedMimetypeKeywords.some(mimetype => type.includes(mimetype))
+}
+
+export const mimetypeToIconImage = (type: string) => {
+  const mimetypeImageMap = {
+    pdf: '/images/icons/pdf.png',
+    spreadsheet: '/images/icons/excel.png'
+  }
+  const mimetypeImageKey = Object.keys(mimetypeImageMap).find(mimetype => type.includes(mimetype))
+
+  return mimetypeImageKey ? mimetypeImageMap[mimetypeImageKey as keyof typeof mimetypeImageMap] : undefined
 }

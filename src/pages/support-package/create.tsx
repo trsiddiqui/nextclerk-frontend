@@ -1,3 +1,4 @@
+/* eslint-disable lines-around-comment */
 // ** React Imports
 import React, { useState } from 'react'
 import { DateTime } from 'luxon'
@@ -87,9 +88,19 @@ import {
   getAllDepartments,
   getAllLocations,
   searchUsers,
-  getActiveUser
+  getActiveUser,
+  uploadFile
 } from 'src/utils/apiClient'
-import { DropDownRow, TabPanel, User, getInitials } from 'src/@core/utils'
+import {
+  AutocompleteRow,
+  DropDownRow,
+  TabPanel,
+  getInitials,
+  isSupportedMimeType,
+  mimetypeToIconImage
+} from 'src/@core/utils'
+import { UploadedFileProps, User } from 'src/utils/types'
+import { FileUpload, FileUploadProps } from 'src/@core/components/custom/file-upload'
 
 const styles = {
   modalStyle: {
@@ -97,7 +108,6 @@ const styles = {
     bgcolor: 'background.paper',
     boxShadow: 24,
     p: 4,
-
     margin: '0 auto',
     borderRadius: '5px'
   },
@@ -148,14 +158,13 @@ const CreateSupportPackage = ({
   customers,
   activeUser
 }: {
-  categories: Array<DropDownRow>
+  categories: Array<AutocompleteRow>
   accounts: Array<DropDownRow>
   departments: Array<DropDownRow>
   locations: Array<DropDownRow>
   customers: Array<DropDownRow>
   activeUser: { details: { id: string; name: string }; manager: { id: string; name: string } }
 }) => {
-  debugger
   const theme = useTheme()
   const [name, setName] = useState('')
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
@@ -173,7 +182,6 @@ const CreateSupportPackage = ({
   const [journalModalOpen, setJournalModalOpen] = React.useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [rightDrawerVisible, setRightDrawerVisible] = React.useState(false)
-  const [fileUploaded, setFileUploaded] = React.useState(false)
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
   const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
@@ -181,6 +189,7 @@ const CreateSupportPackage = ({
   const [SPNotes, setSPNotes] = useState<
     Array<{ message: string; files: unknown[]; user: { id: string; name: string }; createdAt: DateTime }>
   >([])
+  const [masterFile, setMasterFile] = React.useState<string | null>()
 
   const autoCompleteAccountComponent = () => {
     return (
@@ -250,16 +259,7 @@ const CreateSupportPackage = ({
     setAnchorEl(null)
   }
 
-  const [attachments] = React.useState([
-    {
-      name: 'JanuaryReceipts.xlsx',
-      key: 1
-    },
-    {
-      name: 'JanuaryReports.pdf',
-      key: 2
-    }
-  ])
+  const [attachments, setAttachments] = React.useState<UploadedFileProps[]>([])
 
   // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
@@ -269,7 +269,9 @@ const CreateSupportPackage = ({
     setMultiPersonnelSelection([])
   }
   const handleChooseMaterFileModalOpen = () => setChooseMaterFileModalOpen(true)
-  const handleChooseMaterFileModalClose = () => setChooseMaterFileModalOpen(false)
+  const handleChooseMaterFileModalClose = () => {
+    setChooseMaterFileModalOpen(false)
+  }
 
   const handleJournalModalOpen = () => setJournalModalOpen(true)
   const handleJournalModalClose = () => setJournalModalOpen(false)
@@ -291,7 +293,6 @@ const CreateSupportPackage = ({
       // fetch('http://localhost:3000/customerXRefID/supporting-packages/123/lineItems/sheet') // fetch the remote url
       //   .then(response => {
       //     response.blob().then(fileBlob => {
-      //       debugger
       //       const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
       //       spreadsheet.open({ file: file }) // open the file into Spreadsheet
       //     })
@@ -414,6 +415,23 @@ const CreateSupportPackage = ({
   const handleSheetMenuClose = () => {
     setAnchorSheetMenuEl(null)
   }
+  const fileUploadProp: FileUploadProps = {
+    accept: '*/*',
+    onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.files !== null && event.target?.files?.length > 0) {
+        console.log(`Saving ${event.target.value}`)
+        const resp = await uploadFile(event.target.files[0])
+        setAttachments(attachments.concat(resp))
+        handleJournalModalClose()
+      }
+    },
+    onDrop: async (event: React.DragEvent<HTMLElement>) => {
+      console.log(`Drop ${event.dataTransfer.files[0].name}`)
+      const resp = await uploadFile(event.dataTransfer.files[0])
+      setAttachments(attachments.concat(resp))
+      handleJournalModalClose()
+    }
+  }
 
   return (
     <Grid container spacing={5}>
@@ -450,10 +468,9 @@ const CreateSupportPackage = ({
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
                   <Autocomplete
-                    multiple
                     id='tags-outlined'
                     options={allCategories}
-                    getOptionLabel={option => option.label}
+                    getOptionLabel={option => option.name}
                     filterSelectedOptions
                     renderInput={params => (
                       <TextField variant='filled' {...params} label='Support Category' placeholder='Support Category' />
@@ -500,10 +517,17 @@ const CreateSupportPackage = ({
                   participants.map((participant, index) => (
                     <Chip
                       key={index}
-                      label={participant.name}
+                      label={`${participant.firstName} ${participant.lastName}`}
                       variant='outlined'
+                      avatar={
+                        <Avatar>
+                          {participant.firstName || participant.lastName
+                            ? getInitials(`${participant.firstName} ${participant.lastName}`)
+                            : ''}
+                        </Avatar>
+                      }
                       onDelete={() => {
-                        setParticipants(participants.filter(x => x.id !== participant.id))
+                        setParticipants(participants.filter(x => x.uuid !== participant.uuid))
                       }}
                       sx={{ marginLeft: 3 }}
                     />
@@ -575,7 +599,7 @@ const CreateSupportPackage = ({
             </Tabs>
           </AppBar>
           <TabPanel value={tab} index={0} dir={theme.direction}>
-            {fileUploaded ? (
+            {masterFile ? (
               <Grid
                 justifyContent='space-between' // Add it here :)
                 container
@@ -632,8 +656,8 @@ const CreateSupportPackage = ({
                   >
                     <MenuItem
                       onClick={() => {
-                        setFileUploaded(!fileUploaded)
                         handleSheetMenuClose()
+                        handleJournalModalOpen()
                       }}
                     >
                       Upload File
@@ -644,7 +668,7 @@ const CreateSupportPackage = ({
                         handleSheetMenuClose()
                       }}
                     >
-                      Select Master File
+                      Choose Master File
                     </MenuItem>
                   </Menu>
                 </Grid>
@@ -819,8 +843,8 @@ const CreateSupportPackage = ({
             )}
             {/* <Card sx={{ height: 400, textAlign: 'center', verticalAlign: 'middle' }}>
             <CardContent> */}
-            <Grid container sx={{ pl: 1, pt: 1, height: fileUploaded ? '600px' : '300px' }} width='100%'>
-              {fileUploaded ? (
+            <Grid container sx={{ pl: 1, pt: 1, height: masterFile ? '600px' : '300px' }} width='100%'>
+              {masterFile ? (
                 <SpreadsheetComponent
                   allowConditionalFormat
                   allowEditing={true}
@@ -845,7 +869,7 @@ const CreateSupportPackage = ({
                         aria-label='Upload'
                         className='card-more-options'
                         sx={{ color: 'blue', fontSize: 100, marginRight: '40px !important' }}
-                        onClick={() => setFileUploaded(!fileUploaded)}
+                        onClick={handleJournalModalOpen}
                       >
                         <CloudUploadIcon sx={{ color: 'blue', fontSize: 60 }} />
                       </IconButton>
@@ -859,7 +883,11 @@ const CreateSupportPackage = ({
                         aria-label='Upload'
                         className='card-more-options'
                         sx={{ color: 'text.secondary', fontSize: 100, marginLeft: '90px', padding: '22px' }}
-                        onClick={handleJournalModalOpen}
+                        onClick={() =>
+                          // TODO: Call API to create a master excel file
+                          // Then set the response filename to attachments as well as set as master file
+                          setMasterFile('abc.pdf')
+                        }
                       >
                         <Avatar
                           alt='Flora'
@@ -877,7 +905,7 @@ const CreateSupportPackage = ({
           </TabPanel>
           <TabPanel value={tab} index={1} dir={theme.direction}>
             <Container sx={{ padding: '20px 0px' }}>
-              <Paper sx={{ margin: '0px -50px 30px -50px' }}>
+              <Paper sx={{ margin: '0px 0 30px 0' }}>
                 <Grid container sx={{ padding: '1rem 1rem' }}>
                   <TextField
                     fullWidth
@@ -940,7 +968,7 @@ const CreateSupportPackage = ({
           <TabPanel value={tab} index={2} dir={theme.direction}>
             <Grid
               container
-              sx={{ pl: 1, height: fileUploaded ? '600px' : '200px' }}
+              sx={{ pl: 1, height: masterFile ? '600px' : '200px' }}
               width='100%'
               className='journal-entry-tab'
             >
@@ -1089,20 +1117,44 @@ const CreateSupportPackage = ({
       <Card sx={{ width: '100%', marginTop: 3, padding: 3 }}>
         <Grid container>
           <Grid item xs={12} sm={8}>
-            Supporting Package Attachments: 2
+            Supporting Package Attachments: {attachments.length}
           </Grid>
-          <Grid item xs={12} sm={4} alignContent='end' textAlign='right'>
-            <Typography variant='body2' sx={{ fontWeight: 600 }}></Typography>
-          </Grid>
+          {attachments.length > 0 ? (
+            <Grid item xs={12} sm={4} alignContent='end' textAlign='right'>
+              <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                <Link onClick={handleChooseMaterFileModalOpen}>Choose Master File</Link>
+              </Typography>
+            </Grid>
+          ) : (
+            <></>
+          )}
           <Grid item xs={12} sm={12} sx={{ marginBottom: 3 }}>
             <Divider sx={{ margin: 0 }} />
           </Grid>
-          <Grid item xs={12} sm={12}>
+          <Grid container>
             {attachments.map((attachment, index) => (
               <>
-                <Link href='#' key={index}>
-                  {attachment.name}
-                </Link>
+                <Chip
+                  key={index}
+                  color='primary'
+                  label={`${attachment.originalname} (${(attachment.size / 1024).toFixed(1)} KB)`}
+                  variant={masterFile === attachment.originalname ? 'filled' : 'outlined'}
+                  avatar={
+                    isSupportedMimeType(attachment.mimetype) ? (
+                      <Avatar
+                        alt='Flora'
+                        src={`${
+                          process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                        }${mimetypeToIconImage(attachment.mimetype)}`}
+                      />
+                    ) : undefined
+                  }
+                  onDelete={() => {
+                    // TODO: CALL API TO DELETE THE ATTACHED FILE
+                    setAttachments(attachments.filter(x => x.originalname !== attachment.originalname))
+                  }}
+                  sx={{ marginLeft: 3 }}
+                />
                 <br />
               </>
             ))}
@@ -1155,7 +1207,7 @@ const CreateSupportPackage = ({
                 </TableHead>
                 <TableBody>
                   {personnel.map(row => (
-                    <StyledTableRow key={row.name}>
+                    <StyledTableRow key={row.uuid}>
                       <StyledTableCell component='th' scope='row'>
                         <Link
                           onClick={() => {
@@ -1167,7 +1219,7 @@ const CreateSupportPackage = ({
                         </Link>
                       </StyledTableCell>
                       <StyledTableCell component='th' scope='row'>
-                        {row.name}
+                        {`${row.firstName} ${row.lastName}`}
                       </StyledTableCell>
                       <StyledTableCell>{row.email}</StyledTableCell>
                     </StyledTableRow>
@@ -1231,7 +1283,7 @@ const CreateSupportPackage = ({
                 </TableHead>
                 <TableBody>
                   {personnel.map(row => (
-                    <StyledTableRow key={row.name}>
+                    <StyledTableRow key={row.uuid}>
                       <StyledTableCell component='th' scope='row'>
                         <Checkbox
                           onChange={e => {
@@ -1240,13 +1292,13 @@ const CreateSupportPackage = ({
                               temp.push(row)
                               setMultiPersonnelSelection(temp)
                             } else {
-                              setMultiPersonnelSelection(multiPersonnelSelection?.filter(x => x.id !== row.id))
+                              setMultiPersonnelSelection(multiPersonnelSelection?.filter(x => x.uuid !== row.uuid))
                             }
                           }}
                         />
                       </StyledTableCell>
                       <StyledTableCell component='th' scope='row'>
-                        {row.name}
+                        {`${row.firstName} ${row.lastName}`}
                       </StyledTableCell>
                       <StyledTableCell>{row.email}</StyledTableCell>
                     </StyledTableRow>
@@ -1262,7 +1314,6 @@ const CreateSupportPackage = ({
                 type='submit'
                 variant='contained'
                 onClick={() => {
-                  debugger
                   setParticipants(Array.from(new Set(multiPersonnelSelection)))
                   handleMultiPersonnelModalClose()
                 }}
@@ -1297,18 +1348,34 @@ const CreateSupportPackage = ({
               <FormLabel id='demo-radio-buttons-group-label'>Choose Master File</FormLabel>
               <RadioGroup
                 aria-labelledby='demo-radio-buttons-group-label'
-                defaultValue='female'
                 name='radio-buttons-group'
+                onChange={event => {
+                  // TODO: Call API to Upload master file to excel
+                  // Then open the new file with the spreadsheet component
+                  setMasterFile(event.target.value)
+                  handleChooseMaterFileModalClose()
+                }}
+                defaultValue={masterFile}
               >
-                <FormControlLabel value='female' control={<Radio />} label='File 1.xlsx' />
-                <FormControlLabel value='male' control={<Radio />} label='Audit.xlsx' />
-                <FormControlLabel value='other' control={<Radio />} label='Another.xlsx' />
+                {attachments.map((attachment, index) => (
+                  <FormControlLabel
+                    key={index}
+                    value={attachment.originalname}
+                    control={<Radio />}
+                    label={attachment.originalname}
+                  />
+                ))}
               </RadioGroup>
             </CardContent>
             <CardActions>
+              <Grid container justifyContent='flex-start'>
+                <Button size='large' type='reset' variant='outlined' onClick={() => setMasterFile(null)}>
+                  Clear
+                </Button>
+              </Grid>
               <Grid container justifyContent='flex-end'>
-                <Button size='large' type='submit' variant='contained' onClick={handleChooseMaterFileModalClose}>
-                  Save
+                <Button size='large' type='submit' variant='outlined' onClick={handleChooseMaterFileModalClose}>
+                  Close
                 </Button>
               </Grid>
             </CardActions>
@@ -1336,7 +1403,6 @@ const CreateSupportPackage = ({
         </Grid>
       </Dialog>
       <Dialog
-        fullScreen
         open={journalModalOpen}
         onClose={handleJournalModalClose}
         aria-labelledby='modal-modal-journal'
@@ -1346,7 +1412,9 @@ const CreateSupportPackage = ({
           paddingTop: 2
         }}
       >
-        <Box sx={styles.sheetModalStyle}></Box>
+        <Box sx={styles.sheetModalStyle}>
+          <FileUpload {...fileUploadProp} />
+        </Box>
       </Dialog>
     </Grid>
   )
