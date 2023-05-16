@@ -56,7 +56,9 @@ import {
   TableHead,
   TableRow,
   TableBody,
-  Checkbox
+  Checkbox,
+  Backdrop,
+  CircularProgress
 } from '@mui/material'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import dayjs, { Dayjs } from 'dayjs'
@@ -144,10 +146,11 @@ export async function getServerSideProps() {
   const departments = await getAllDepartments()
   const locations = await getAllLocations()
   const customers = await getAllCustomers()
+  const users = await searchUsers()
   const activeUser = await getActiveUser()
 
   // Pass data to the page via props
-  return { props: { categories, accounts, departments, locations, customers, activeUser } }
+  return { props: { categories, accounts, departments, locations, customers, activeUser, users } }
 }
 
 const CreateSupportPackage = ({
@@ -156,22 +159,25 @@ const CreateSupportPackage = ({
   departments,
   locations,
   customers,
-  activeUser
+  activeUser,
+  users
 }: {
   categories: Array<AutocompleteRow>
   accounts: Array<DropDownRow>
   departments: Array<DropDownRow>
   locations: Array<DropDownRow>
   customers: Array<DropDownRow>
+  users: User[]
   activeUser: { details: { id: string; name: string }; manager: { id: string; name: string } }
 }) => {
   const theme = useTheme()
   const [name, setName] = useState('')
+  const [loading, setLoading] = useState(false)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
   const [jESpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
   const [allCategories] = useState(categories)
   const [date, setDate] = useState<Dayjs | null>(dayjs())
-  const [personnel, setPersonnel] = useState<Array<User>>([])
+  const [personnel, setPersonnel] = useState<Array<User>>(users)
   const [tab, setTab] = useState(0)
   const [multiPersonnelSelection, setMultiPersonnelSelection] = useState<User[]>([])
   const [participants, setParticipants] = useState<User[]>([])
@@ -179,7 +185,13 @@ const CreateSupportPackage = ({
   const [chooseMaterFileModalOpen, setChooseMaterFileModalOpen] = React.useState(false)
   const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
   const [multiPersonnelModalOpen, setMultiPersonnelModalOpen] = React.useState(false)
-  const [journalModalOpen, setJournalModalOpen] = React.useState(false)
+  const [uploadSPFileOpen, setUploadSPFileOpen] = React.useState(false)
+  const handleUploadSPFileOpen = () => setUploadSPFileOpen(true)
+  const handleUploadSPFileClose = () => setUploadSPFileOpen(false)
+  const [uploadNotesFileOpen, setUploadNotesFileOpen] = React.useState(false)
+  const [notesFile, setNotesFile] = React.useState<UploadedFileProps | null>(null)
+  const handleUploadNotesFileOpen = () => setUploadNotesFileOpen(true)
+  const handleUploadNotesFileClose = () => setUploadNotesFileOpen(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [rightDrawerVisible, setRightDrawerVisible] = React.useState(false)
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
@@ -187,7 +199,7 @@ const CreateSupportPackage = ({
   const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
   const [currentSPNote, setCurrentSPNote] = useState('')
   const [SPNotes, setSPNotes] = useState<
-    Array<{ message: string; files: unknown[]; user: { id: string; name: string }; createdAt: DateTime }>
+    Array<{ message: string; file: UploadedFileProps | null; user: { id: string; name: string }; createdAt: DateTime }>
   >([])
   const [masterFile, setMasterFile] = React.useState<string | null>()
 
@@ -272,9 +284,6 @@ const CreateSupportPackage = ({
   const handleChooseMaterFileModalClose = () => {
     setChooseMaterFileModalOpen(false)
   }
-
-  const handleJournalModalOpen = () => setJournalModalOpen(true)
-  const handleJournalModalClose = () => setJournalModalOpen(false)
 
   function contextMenuBeforeOpen(): void {
     if (spreadsheet) {
@@ -384,6 +393,7 @@ const CreateSupportPackage = ({
           ri[0] > ri[2] ? ri[0] : ri[2],
           ri[1] > ri[3] ? ri[1] : ri[3]
         )
+        debugger
         cells.forEach(cell => {
           const columnIndex = columnAddressToIndex(cell.replace(/[^A-Za-z]/g, ''))
           const rowIndex = parseInt(cell.replace(/^\D+/g, ''))
@@ -415,23 +425,31 @@ const CreateSupportPackage = ({
   const handleSheetMenuClose = () => {
     setAnchorSheetMenuEl(null)
   }
-  const fileUploadProp: FileUploadProps = {
+  const fileUploadProp = (params: {
+    setFileMethod: any
+    filesCollection?: unknown[]
+    handleModalClose: any
+  }): FileUploadProps => ({
     accept: '*/*',
     onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.files !== null && event.target?.files?.length > 0) {
         console.log(`Saving ${event.target.value}`)
+        setLoading(true)
         const resp = await uploadFile(event.target.files[0])
-        setAttachments(attachments.concat(resp))
-        handleJournalModalClose()
+        setLoading(false)
+        params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
+        params.handleModalClose()
       }
     },
     onDrop: async (event: React.DragEvent<HTMLElement>) => {
       console.log(`Drop ${event.dataTransfer.files[0].name}`)
+      setLoading(true)
       const resp = await uploadFile(event.dataTransfer.files[0])
-      setAttachments(attachments.concat(resp))
-      handleJournalModalClose()
+      setLoading(false)
+      params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
+      params.handleModalClose()
     }
-  }
+  })
 
   return (
     <Grid container spacing={5}>
@@ -460,7 +478,7 @@ const CreateSupportPackage = ({
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth type='number' label='Support Number' placeholder='R32938' variant='filled' />
+                <TextField fullWidth type='text' label='Support Number' placeholder='R32938' variant='filled' />
               </Grid>
               {/* <Grid item xs={12} sm={4}>
                 <TextField fullWidth label='Support Period' placeholder='Q1 2022' variant='filled' />
@@ -540,7 +558,7 @@ const CreateSupportPackage = ({
                 <Autocomplete
                   multiple
                   id='tags-filled'
-                  options={['']}
+                  options={[]}
                   freeSolo
                   renderTags={(value: readonly string[]) =>
                     value.map((option: string, index: number) => <Chip variant='outlined' label={option} key={index} />)
@@ -657,7 +675,7 @@ const CreateSupportPackage = ({
                     <MenuItem
                       onClick={() => {
                         handleSheetMenuClose()
-                        handleJournalModalOpen()
+                        handleUploadSPFileOpen()
                       }}
                     >
                       Upload File
@@ -869,7 +887,7 @@ const CreateSupportPackage = ({
                         aria-label='Upload'
                         className='card-more-options'
                         sx={{ color: 'blue', fontSize: 100, marginRight: '40px !important' }}
-                        onClick={handleJournalModalOpen}
+                        onClick={handleUploadSPFileOpen}
                       >
                         <CloudUploadIcon sx={{ color: 'blue', fontSize: 60 }} />
                       </IconButton>
@@ -919,7 +937,7 @@ const CreateSupportPackage = ({
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position='end'>
-                          <IconButton color='primary'>
+                          <IconButton color='primary' onClick={handleUploadNotesFileOpen}>
                             <AttachFileIcon />
                           </IconButton>
 
@@ -930,12 +948,13 @@ const CreateSupportPackage = ({
                               setSPNotes(
                                 SPNotes.concat({
                                   message: currentSPNote,
-                                  files: [],
+                                  file: notesFile,
                                   user: activeUser.details,
                                   createdAt: DateTime.now()
                                 })
                               )
                               setCurrentSPNote('')
+                              setNotesFile(null)
                             }}
                           >
                             <SendIcon />
@@ -944,9 +963,33 @@ const CreateSupportPackage = ({
                       )
                     }}
                   />
+                  {notesFile ? (
+                    <Chip
+                      color='primary'
+                      label={`${notesFile.originalname} (${(notesFile.size / 1024).toFixed(1)} KB)`}
+                      variant={masterFile === notesFile.originalname ? 'filled' : 'outlined'}
+                      avatar={
+                        isSupportedMimeType(notesFile.mimetype) ? (
+                          <Avatar
+                            alt='Flora'
+                            src={`${
+                              process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                            }${mimetypeToIconImage(notesFile.mimetype)}`}
+                          />
+                        ) : undefined
+                      }
+                      onDelete={() => {
+                        // TODO: CALL API TO DELETE THE ATTACHED FILE
+                        setNotesFile(null)
+                      }}
+                      sx={{ marginLeft: 3 }}
+                    />
+                  ) : (
+                    <></>
+                  )}
                 </Grid>
               </Paper>
-              {SPNotes.map((note, index) => (
+              {SPNotes.sort((a, b) => b.createdAt.diff(a.createdAt).as('millisecond')).map((note, index) => (
                 <>
                   <Grid container wrap='nowrap' spacing={2} key={index}>
                     <Grid item>
@@ -957,6 +1000,27 @@ const CreateSupportPackage = ({
                       <p style={{ textAlign: 'left' }}>{note.message}</p>
                       <p style={{ textAlign: 'left', color: 'gray' }}>
                         {note.createdAt.toFormat('dd MMM, yyyy hh:mm a')}
+                        {note.file ? (
+                          <Chip
+                            key={index}
+                            color='primary'
+                            label={`${note.file.originalname} (${(note.file.size / 1024).toFixed(1)} KB)`}
+                            variant={masterFile === note.file.originalname ? 'filled' : 'outlined'}
+                            avatar={
+                              isSupportedMimeType(note.file.mimetype) ? (
+                                <Avatar
+                                  alt='Flora'
+                                  src={`${
+                                    process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                                  }${mimetypeToIconImage(note.file.mimetype)}`}
+                                />
+                              ) : undefined
+                            }
+                            sx={{ marginLeft: 3 }}
+                          />
+                        ) : (
+                          <></>
+                        )}
                       </p>
                     </Grid>
                   </Grid>
@@ -1178,8 +1242,9 @@ const CreateSupportPackage = ({
                 fullWidth
                 onKeyDown={async event => {
                   if (event.key === 'Enter') {
-                    setPersonnel([])
+                    setLoading(true)
                     const users = await searchUsers(personnelSearchQuery)
+                    setLoading(false)
                     setPersonnel(users)
                   }
                 }}
@@ -1188,8 +1253,9 @@ const CreateSupportPackage = ({
                 type='submit'
                 aria-label='search'
                 onClick={async () => {
-                  setPersonnel([])
+                  setLoading(true)
                   const users = await searchUsers(personnelSearchQuery)
+                  setLoading(false)
                   setPersonnel(users)
                 }}
               >
@@ -1254,8 +1320,9 @@ const CreateSupportPackage = ({
                 fullWidth
                 onKeyDown={async event => {
                   if (event.key === 'Enter') {
-                    setPersonnel([])
+                    setLoading(true)
                     const users = await searchUsers(personnelSearchQuery)
+                    setLoading(false)
                     setPersonnel(users)
                   }
                 }}
@@ -1264,8 +1331,9 @@ const CreateSupportPackage = ({
                 type='submit'
                 aria-label='search'
                 onClick={async () => {
-                  setPersonnel([])
+                  setLoading(true)
                   const users = await searchUsers(personnelSearchQuery)
+                  setLoading(false)
                   setPersonnel(users)
                 }}
               >
@@ -1313,12 +1381,10 @@ const CreateSupportPackage = ({
                 size='large'
                 type='submit'
                 variant='contained'
-                onClick={() => {
-                  setParticipants(Array.from(new Set(multiPersonnelSelection)))
-                  handleMultiPersonnelModalClose()
-                }}
+                color='error'
+                onClick={handleMultiPersonnelModalClose}
               >
-                Ok
+                Cancel
               </Button>
             </Grid>
             <Grid container justifyContent='flex-end'>
@@ -1326,10 +1392,12 @@ const CreateSupportPackage = ({
                 size='large'
                 type='submit'
                 variant='contained'
-                color='warning'
-                onClick={handleMultiPersonnelModalClose}
+                onClick={() => {
+                  setParticipants(Array.from(new Set(multiPersonnelSelection)))
+                  handleMultiPersonnelModalClose()
+                }}
               >
-                Close
+                Ok
               </Button>
             </Grid>
           </CardActions>
@@ -1343,9 +1411,8 @@ const CreateSupportPackage = ({
       >
         <Box sx={styles.modalStyle}>
           <Card>
-            <CardHeader title='Select a Personnel' sx={{ textAlign: 'center' }}></CardHeader>
+            <CardHeader title='Choose a Master File' sx={{ textAlign: 'center' }}></CardHeader>
             <CardContent>
-              <FormLabel id='demo-radio-buttons-group-label'>Choose Master File</FormLabel>
               <RadioGroup
                 aria-labelledby='demo-radio-buttons-group-label'
                 name='radio-buttons-group'
@@ -1369,7 +1436,15 @@ const CreateSupportPackage = ({
             </CardContent>
             <CardActions>
               <Grid container justifyContent='flex-start'>
-                <Button size='large' type='reset' variant='outlined' onClick={() => setMasterFile(null)}>
+                <Button
+                  size='large'
+                  type='reset'
+                  variant='outlined'
+                  onClick={() => {
+                    setMasterFile(null)
+                    handleChooseMaterFileModalClose()
+                  }}
+                >
                   Clear
                 </Button>
               </Grid>
@@ -1403,8 +1478,8 @@ const CreateSupportPackage = ({
         </Grid>
       </Dialog>
       <Dialog
-        open={journalModalOpen}
-        onClose={handleJournalModalClose}
+        open={uploadSPFileOpen}
+        onClose={handleUploadSPFileClose}
         aria-labelledby='modal-modal-journal'
         aria-describedby='modal-modal-journal'
         sx={{
@@ -1413,9 +1488,34 @@ const CreateSupportPackage = ({
         }}
       >
         <Box sx={styles.sheetModalStyle}>
-          <FileUpload {...fileUploadProp} />
+          <FileUpload
+            {...fileUploadProp({
+              filesCollection: attachments,
+              setFileMethod: setAttachments,
+              handleModalClose: handleUploadSPFileClose
+            })}
+          />
         </Box>
       </Dialog>
+      <Dialog
+        open={uploadNotesFileOpen}
+        onClose={handleUploadNotesFileClose}
+        aria-labelledby='modal-modal-journal'
+        aria-describedby='modal-modal-journal'
+        sx={{
+          msOverflowX: 'scroll',
+          paddingTop: 2
+        }}
+      >
+        <Box sx={styles.sheetModalStyle}>
+          <FileUpload
+            {...fileUploadProp({ setFileMethod: setNotesFile, handleModalClose: handleUploadNotesFileClose })}
+          />
+        </Box>
+      </Dialog>
+      <Backdrop sx={{ color: '#fff', zIndex: 9999999 }} open={loading}>
+        <CircularProgress color='inherit' />
+      </Backdrop>
     </Grid>
   )
 }

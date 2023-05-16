@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { UploadedFileProps, User } from './types'
+import { Account, Customer, Department, Location, UploadedFileProps, User } from './types'
+import { DropDownRow } from 'src/@core/utils'
 
 const api = axios.create({
   baseURL: 'http://localhost:3000/api/'
@@ -15,108 +16,48 @@ export const getAllCategories = async () => {
   return categories.data
 }
 
-export const getAllAccounts = async () => {
-  return Promise.resolve([
-    {
-      label: 'Account 1',
-      key: 1,
-      id: '1'
-    },
-    {
-      label: 'Account 2',
-      key: 2,
-      id: '2'
-    },
-    {
-      label: 'Account 3',
-      key: 3,
-      id: '3'
-    },
-    {
-      label: 'Account 4',
-      key: 4,
-      id: '4'
-    }
-  ])
+export const getAllAccounts = async (): Promise<DropDownRow[]> => {
+  const accounts = await api.get<Account[]>(`/${customerXRefID}/accounts`)
+
+  return accounts.data.map(account => ({
+    label: account.label,
+    id: account.uuid,
+    key: account.uuid
+  }))
 }
 
-export const getAllDepartments = async () => {
-  return Promise.resolve([
-    {
-      label: 'Department 1',
-      key: 1,
-      id: '1'
-    },
-    {
-      label: 'Department 2',
-      key: 2,
-      id: '2'
-    },
-    {
-      label: 'Department 3',
-      key: 3,
-      id: '3'
-    },
-    {
-      label: 'Department 4',
-      key: 4,
-      id: '4'
-    }
-  ])
+export const getAllDepartments = async (): Promise<DropDownRow[]> => {
+  const departments = await api.get<Department[]>(`/${customerXRefID}/departments`)
+
+  return departments.data.map(department => ({
+    label: department.label,
+    id: department.uuid,
+    key: department.uuid
+  }))
 }
 
 export const getAllLocations = async () => {
-  return Promise.resolve([
-    {
-      label: 'Location 1',
-      key: 1,
-      id: '1'
-    },
-    {
-      label: 'Location 2',
-      key: 2,
-      id: '2'
-    },
-    {
-      label: 'Location 3',
-      key: 3,
-      id: '3'
-    },
-    {
-      label: 'Location 4',
-      key: 4,
-      id: '4'
-    }
-  ])
+  const locations = await api.get<Location[]>(`/${customerXRefID}/locations`)
+
+  return locations.data.map(location => ({
+    label: location.label,
+    id: location.uuid,
+    key: location.uuid
+  }))
 }
 
 export const getAllCustomers = async () => {
-  return Promise.resolve([
-    {
-      label: 'Customer 1',
-      key: 1,
-      id: '1'
-    },
-    {
-      label: 'Customer 2',
-      key: 2,
-      id: '2'
-    },
-    {
-      label: 'Customer 3',
-      key: 3,
-      id: '3'
-    },
-    {
-      label: 'Customer 4',
-      key: 4,
-      id: '4'
-    }
-  ])
+  const customers = await api.get<Customer[]>(`/${customerXRefID}/customers`)
+
+  return customers.data.map(customer => ({
+    label: customer.label,
+    id: customer.uuid,
+    key: customer.uuid
+  }))
 }
 
-export const searchUsers = async (str: string): Promise<User[]> => {
-  const users = await api.get<User[]>(`/${customerXRefID}/users?search=${str}`)
+export const searchUsers = async (str?: string): Promise<User[]> => {
+  const users = await api.get<User[]>(`/${customerXRefID}/users${str ? `?search=${str}` : ''}`)
 
   return users.data
 }

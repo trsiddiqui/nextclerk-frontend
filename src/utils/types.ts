@@ -16,3 +16,40 @@ export type UploadedFileProps = {
   /** Size of the file in bytes. */
   size: number
 }
+
+export interface Account {
+  id: number
+  internalID: string
+  integrationID: string
+  entityID: string
+  accountNumber: string
+  uuid: string
+  label: string
+}
+
+export interface Department {
+  id: number
+  internalID: string
+  integrationID: string
+  entityID: string
+  uuid: string
+  label: string
+}
+
+export interface Customer {
+  id: number
+  internalID: string
+  integrationID: string
+  entityID: string
+  uuid: string
+  label: string
+}
+
+export interface Location {
+  id: number
+  internalID: string
+  integrationID: string
+  entityID: string
+  uuid: string
+  label: string
+}
