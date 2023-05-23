@@ -7,7 +7,6 @@ import { DateTime } from 'luxon'
 import CloseIcon from '@mui/icons-material/Close'
 import BorderColorIcon from '@mui/icons-material/BorderColor'
 import MessageIcon from '@mui/icons-material/Message'
-import DownloadIcon from '@mui/icons-material/Download'
 import SendIcon from '@mui/icons-material/Send'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import LaunchIcon from '@mui/icons-material/Launch'
@@ -97,12 +96,19 @@ import {
   AutocompleteRow,
   DropDownRow,
   TabPanel,
+  columnAddressToIndex,
+  getCellsFromRangeAddress,
   getInitials,
   isSupportedMimeType,
   mimetypeToIconImage
 } from 'src/@core/utils'
 import { UploadedFileProps, User } from 'src/utils/types'
 import { FileUpload, FileUploadProps } from 'src/@core/components/custom/file-upload'
+
+enum ActionItemState {
+  TODO = 'TODO',
+  COMPLETED = 'COMPLETED'
+}
 
 const styles = {
   modalStyle: {
@@ -153,6 +159,11 @@ export async function getServerSideProps() {
   return { props: { categories, accounts, departments, locations, customers, activeUser, users } }
 }
 
+type SpreadsheetRange = {
+  range: string
+  sheet: number
+}
+
 const CreateSupportPackage = ({
   categories,
   accounts,
@@ -174,7 +185,7 @@ const CreateSupportPackage = ({
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
-  const [jESpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
+  const [journalEntrySpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
   const [allCategories] = useState(categories)
   const [date, setDate] = useState<Dayjs | null>(dayjs())
   const [personnel, setPersonnel] = useState<Array<User>>(users)
@@ -189,10 +200,10 @@ const CreateSupportPackage = ({
   const handleUploadSPFileOpen = () => setUploadSPFileOpen(true)
   const handleUploadSPFileClose = () => setUploadSPFileOpen(false)
   const [uploadNotesFileOpen, setUploadNotesFileOpen] = React.useState(false)
+  const [uploadMasterFileCommentFileOpen, setUploadMasterFileCommentFileOpen] = React.useState(false)
   const [notesFile, setNotesFile] = React.useState<UploadedFileProps | null>(null)
-  const handleUploadNotesFileOpen = () => setUploadNotesFileOpen(true)
-  const handleUploadNotesFileClose = () => setUploadNotesFileOpen(false)
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [saveAnchorEl, setSaveAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [anchorMasterSheetMenuEl, setMasterSheetEntryMenuEl] = React.useState<null | HTMLElement>(null)
   const [rightDrawerVisible, setRightDrawerVisible] = React.useState(false)
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
@@ -201,7 +212,216 @@ const CreateSupportPackage = ({
   const [SPNotes, setSPNotes] = useState<
     Array<{ message: string; file: UploadedFileProps | null; user: { id: string; name: string }; createdAt: DateTime }>
   >([])
+  const [currentMasterFileComment, setCurrentMasterFileComment] = useState('')
+  const [masterFileCommentFile, setMasterFileCommentFile] = React.useState<UploadedFileProps | null>(null)
+  const [masterFileComments, setMasterFileComments] = useState<
+    Array<{
+      message: string
+      file: UploadedFileProps | null
+      user: { id: string; name: string }
+      createdAt: DateTime
+      cellRange: SpreadsheetRange
+    }>
+  >([])
   const [masterFile, setMasterFile] = React.useState<string | null>()
+  const [attachments, setAttachments] = React.useState<UploadedFileProps[]>([])
+  const [highlightedCells, sethighlightedCells] = React.useState<string[]>([])
+  const [masterFileSelectedRange, setMasterFileSelectedRange] = useState<SpreadsheetRange | null>(null)
+  const [currentActionItem, setCurrentActionItem] = useState('')
+  const [actionItems, setActionItems] = useState<
+    Array<{
+      message: string
+      user: { id: string; name: string }
+      createdAt: DateTime
+      cellRange: SpreadsheetRange
+      state: ActionItemState
+    }>
+  >([])
+
+  const handleUploadNotesFileOpen = () => setUploadNotesFileOpen(true)
+  const handleUploadNotesFileClose = () => setUploadNotesFileOpen(false)
+
+  const handleUploadMasterFileCommentFileOpen = () => setUploadMasterFileCommentFileOpen(true)
+  const handleUploadMasterFileCommentFileClose = () => setUploadMasterFileCommentFileOpen(false)
+
+  const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
+  const handleMultiPersonnelModalOpen = () => setMultiPersonnelModalOpen(true)
+  const handleMultiPersonnelModalClose = () => {
+    setMultiPersonnelModalOpen(false)
+    setMultiPersonnelSelection([])
+  }
+  const handleChooseMaterFileModalOpen = () => setChooseMaterFileModalOpen(true)
+  const handleChooseMaterFileModalClose = () => {
+    setChooseMaterFileModalOpen(false)
+  }
+
+  const journalEntrySpreadsheetCreated = () => {
+    if (!journalEntrySpreadsheetRef) {
+      return
+    }
+    journalEntrySpreadsheetRef.addDataValidation(
+      { type: 'Decimal', isHighlighted: true, ignoreBlank: true },
+      'B2:B1000'
+    )
+    journalEntrySpreadsheetRef.addDataValidation(
+      { type: 'Decimal', isHighlighted: true, ignoreBlank: true },
+      'C2:C1000'
+    )
+  }
+
+  const fileUploadProp = (params: {
+    setFileMethod: any
+    filesCollection?: unknown[]
+    handleModalClose: any
+  }): FileUploadProps => ({
+    accept: '*/*',
+    onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.files !== null && event.target?.files?.length > 0) {
+        console.log(`Saving ${event.target.value}`)
+        setLoading(true)
+        const resp = await uploadFile(event.target.files[0])
+        setLoading(false)
+        params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
+        params.handleModalClose()
+      }
+    },
+    onDrop: async (event: React.DragEvent<HTMLElement>) => {
+      console.log(`Drop ${event.dataTransfer.files[0].name}`)
+      setLoading(true)
+      const resp = await uploadFile(event.dataTransfer.files[0])
+      setLoading(false)
+      params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
+      params.handleModalClose()
+    }
+  })
+
+  // #region Master File / Spreadsheet
+  function contextMenuBeforeOpen(): void {
+    if (spreadsheet) {
+      spreadsheet.removeContextMenuItems(['Cut', 'Copy', 'Paste', 'Paste Special', 'Add Comment', 'Add File'], false)
+      spreadsheet.addContextMenuItems([{ text: 'Add Comment' }, { text: 'Add File' }], '', false) //To pass the items, Item before / after that the element to be inserted, Set false if the items need to be inserted before the text.
+
+      // Dont need now, hidden through CSS
+      // spreadsheet.hideRibbonTabs(['File', 'Insert', 'Formulas', 'Data', 'View'], true)
+      // spreadsheet.hideFileMenuItems(['File', 'Insert', 'Formulas', 'Data', 'View'], true)
+      setSpreadsheet(spreadsheet)
+    }
+  }
+
+  function oncreated(): void {
+    if (spreadsheet) {
+      // fetch('http://localhost:3000/customerXRefID/supporting-packages/123/lineItems/sheet') // fetch the remote url
+      //   .then(response => {
+      //     response.blob().then(fileBlob => {
+      //       const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
+      //       spreadsheet.open({ file: file }) // open the file into Spreadsheet
+      //     })
+      //   })
+      fetch('/excel5') // fetch the remote url
+        .then(response => {
+          response.blob().then(fileBlob => {
+            const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
+            spreadsheet.open({ file: file }) // open the file into Spreadsheet
+            spreadsheet.hideFileMenuItems(['File'], true)
+            spreadsheet.hideToolbarItems('Home', [19])
+          })
+        })
+    }
+  }
+
+  // When you click on a comment inside Master file, it selects takes you to the cells in the master file
+  function onMasterSheetCommentClick(range: SpreadsheetRange) {
+    if (spreadsheet) {
+      const ri = getRangeIndexes(range.range)
+      const cells = getCellsFromRangeAddress(
+        ri[0] < ri[2] ? ri[0] : ri[2],
+        ri[1] < ri[3] ? ri[1] : ri[3],
+        ri[0] > ri[2] ? ri[0] : ri[2],
+        ri[1] > ri[3] ? ri[1] : ri[3]
+      )
+
+      // const middleCell = cells[Math.floor(cells.length / 2)]
+      spreadsheet.activeSheetIndex = range.sheet - 1
+      spreadsheet.goTo(cells[0])
+      spreadsheet.selectRange(range.range)
+    }
+  }
+
+  // When you right click on a cell, then select an option inside the menu
+  function contextMenuItemSelect(args: MenuSelectEventArgs) {
+    if (spreadsheet) {
+      switch (args.item.text) {
+        case 'Add Comment':
+          setRightDrawerVisible(true)
+          debugger
+          spreadsheet.selectRange(String(spreadsheet.getActiveSheet().selectedRange))
+          setMasterFileSelectedRange({
+            range: String(spreadsheet.getActiveSheet().selectedRange),
+            sheet: spreadsheet.getActiveSheet().id!
+          })
+          spreadsheet.hideFileMenuItems(['File'], true)
+          setSpreadsheet(spreadsheet)
+          break
+        case 'Add File':
+          setRightDrawerVisible(true)
+          break
+      }
+    }
+  }
+
+  function onHighlightClick() {
+    if (spreadsheet) {
+      if (spreadsheet.getActiveSheet().selectedRange) {
+        const ri = getRangeIndexes(String(spreadsheet.getActiveSheet().selectedRange))
+        const cells = getCellsFromRangeAddress(
+          ri[0] < ri[2] ? ri[0] : ri[2],
+          ri[1] < ri[3] ? ri[1] : ri[3],
+          ri[0] > ri[2] ? ri[0] : ri[2],
+          ri[1] > ri[3] ? ri[1] : ri[3]
+        )
+
+        cells.forEach(cell => {
+          const columnIndex = columnAddressToIndex(cell.replace(/[^A-Za-z]/g, ''))
+          const rowIndex = parseInt(cell.replace(/^\D+/g, ''))
+          const existingFormat = spreadsheet.getCellStyleValue(
+            ['backgroundColor', 'color'],
+            [rowIndex - 1, columnIndex - 1]
+          )
+          if (cellPreviousState[cell] == null) {
+            cellPreviousState[cell] = existingFormat
+            setCellPreviousState(cellPreviousState)
+          }
+          if (existingFormat.backgroundColor === '#FFFF01') {
+            // TODO: In edit screen, set `default` format (come up with one)
+            spreadsheet.cellFormat(cellPreviousState[cell], cell)
+            sethighlightedCells(highlightedCells.filter(c => c != cell))
+          } else {
+            spreadsheet.cellFormat({ backgroundColor: '#FFFF01', color: '#000000' }, cell)
+            highlightedCells.push(cell)
+          }
+        })
+      }
+    }
+  }
+  // #endregion
+
+  // #region Multiple Option Buttons
+  const masterSheetMenuOpen = Boolean(anchorMasterSheetMenuEl)
+  const handleMasterSheetMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setMasterSheetEntryMenuEl(event.currentTarget)
+  }
+  const handleMasterSheetMenuClose = () => {
+    setMasterSheetEntryMenuEl(null)
+  }
+
+  const saveMenuOpen = Boolean(saveAnchorEl)
+  const handleSaveMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setSaveAnchorEl(event.currentTarget)
+  }
+  const handleClose = () => {
+    setSaveAnchorEl(null)
+  }
+  // #endregion
 
   const autoCompleteAccountComponent = () => {
     return (
@@ -254,202 +474,6 @@ const CreateSupportPackage = ({
       </div>
     )
   }
-
-  const jESpreadsheetCreated = () => {
-    if (!jESpreadsheetRef) {
-      return
-    }
-    jESpreadsheetRef.addDataValidation({ type: 'Decimal', isHighlighted: true, ignoreBlank: true }, 'B2:B1000')
-    jESpreadsheetRef.addDataValidation({ type: 'Decimal', isHighlighted: true, ignoreBlank: true }, 'C2:C1000')
-  }
-
-  const saveMenuOpen = Boolean(anchorEl)
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
-
-  const [attachments, setAttachments] = React.useState<UploadedFileProps[]>([])
-
-  // const handlePersonnelModalOpen = () => setPersonnelModalOpen(true)
-  const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
-  const handleMultiPersonnelModalOpen = () => setMultiPersonnelModalOpen(true)
-  const handleMultiPersonnelModalClose = () => {
-    setMultiPersonnelModalOpen(false)
-    setMultiPersonnelSelection([])
-  }
-  const handleChooseMaterFileModalOpen = () => setChooseMaterFileModalOpen(true)
-  const handleChooseMaterFileModalClose = () => {
-    setChooseMaterFileModalOpen(false)
-  }
-
-  function contextMenuBeforeOpen(): void {
-    if (spreadsheet) {
-      spreadsheet.removeContextMenuItems(['Cut', 'Copy', 'Paste', 'Paste Special', 'Add Comment', 'Add File'], false)
-      spreadsheet.addContextMenuItems([{ text: 'Add Comment' }, { text: 'Add File' }], '', false) //To pass the items, Item before / after that the element to be inserted, Set false if the items need to be inserted before the text.
-
-      // Dont need now, hidden through CSS
-      // spreadsheet.hideRibbonTabs(['File', 'Insert', 'Formulas', 'Data', 'View'], true)
-      // spreadsheet.hideFileMenuItems(['File', 'Insert', 'Formulas', 'Data', 'View'], true)
-      setSpreadsheet(spreadsheet)
-    }
-  }
-
-  function oncreated(): void {
-    if (spreadsheet) {
-      // fetch('http://localhost:3000/customerXRefID/supporting-packages/123/lineItems/sheet') // fetch the remote url
-      //   .then(response => {
-      //     response.blob().then(fileBlob => {
-      //       const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
-      //       spreadsheet.open({ file: file }) // open the file into Spreadsheet
-      //     })
-      //   })
-      fetch('/excel5') // fetch the remote url
-        .then(response => {
-          response.blob().then(fileBlob => {
-            const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
-            spreadsheet.open({ file: file }) // open the file into Spreadsheet
-            spreadsheet.hideFileMenuItems(['File'], true)
-            spreadsheet.hideToolbarItems('Home', [19])
-          })
-        })
-    }
-  }
-
-  function onCommentClick(range: string) {
-    if (spreadsheet) {
-      const ri = getRangeIndexes(range)
-      const cells = getCellsFromRangeAddress(
-        ri[0] < ri[2] ? ri[0] : ri[2],
-        ri[1] < ri[3] ? ri[1] : ri[3],
-        ri[0] > ri[2] ? ri[0] : ri[2],
-        ri[1] > ri[3] ? ri[1] : ri[3]
-      )
-
-      // const middleCell = cells[Math.floor(cells.length / 2)]
-      spreadsheet.goTo(cells[0])
-      spreadsheet.selectRange(range)
-    }
-  }
-
-  function contextMenuItemSelect(args: MenuSelectEventArgs) {
-    if (spreadsheet) {
-      switch (args.item.text) {
-        case 'Add Comment':
-          // spreadsheet.cellFormat({ backgroundColor: '#453423' }, 'A50')
-          // spreadsheet.selectRange(getRangeAddress([1, 2, 3, 4]))
-          setRightDrawerVisible(true)
-          spreadsheet.selectRange(String(spreadsheet.getActiveSheet().selectedRange))
-          spreadsheet.hideFileMenuItems(['File'], true)
-          setSpreadsheet(spreadsheet)
-          break
-        case 'Add File':
-          setRightDrawerVisible(true)
-          break
-      }
-    }
-  }
-
-  const columnIndexToAddress = (n: number): string => {
-    const a = Math.floor(n / 26)
-
-    return a >= 0 ? columnIndexToAddress(a - 1) + String.fromCharCode(65 + (n % 26)) : ''
-  }
-
-  const columnAddressToIndex = (index: string): number => {
-    const base = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    let i,
-      j,
-      result = 0
-
-    for (i = 0, j = index.length - 1; i < index.length; i += 1, j -= 1) {
-      result += Math.pow(base.length, j) * (base.indexOf(index[i]) + 1)
-    }
-
-    return result
-  }
-
-  function getCellsFromRangeAddress(a: number, b: number, c: number, d: number): string[] {
-    const cells = []
-    for (let i = a; i <= c; i++) {
-      for (let j = b; j <= d; j++) {
-        const colLetters = columnIndexToAddress(j)
-        cells.push(colLetters + (i + 1))
-      }
-    }
-
-    return cells
-  }
-
-  function onHighlightClick() {
-    if (spreadsheet) {
-      if (spreadsheet.getActiveSheet().selectedRange) {
-        const ri = getRangeIndexes(String(spreadsheet.getActiveSheet().selectedRange))
-        const cells = getCellsFromRangeAddress(
-          ri[0] < ri[2] ? ri[0] : ri[2],
-          ri[1] < ri[3] ? ri[1] : ri[3],
-          ri[0] > ri[2] ? ri[0] : ri[2],
-          ri[1] > ri[3] ? ri[1] : ri[3]
-        )
-        debugger
-        cells.forEach(cell => {
-          const columnIndex = columnAddressToIndex(cell.replace(/[^A-Za-z]/g, ''))
-          const rowIndex = parseInt(cell.replace(/^\D+/g, ''))
-          const existingFormat = spreadsheet.getCellStyleValue(
-            ['backgroundColor', 'color'],
-            [rowIndex - 1, columnIndex - 1]
-          )
-          if (cellPreviousState[cell] == null) {
-            cellPreviousState[cell] = existingFormat
-            setCellPreviousState(cellPreviousState)
-          }
-          if (existingFormat.backgroundColor === '#FFFF01') {
-            spreadsheet.cellFormat(cellPreviousState[cell], cell)
-          } else {
-            spreadsheet.cellFormat({ backgroundColor: '#FFFF01', color: '#000000' }, cell)
-          }
-        })
-      }
-
-      // TODO: find a way to unhighlight a cell as well
-    }
-  }
-
-  const [anchorSheetMenuEl, setAnchorSheetMenuEl] = React.useState<null | HTMLElement>(null)
-  const menuOpen = Boolean(anchorSheetMenuEl)
-  const handleSheetMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorSheetMenuEl(event.currentTarget)
-  }
-  const handleSheetMenuClose = () => {
-    setAnchorSheetMenuEl(null)
-  }
-  const fileUploadProp = (params: {
-    setFileMethod: any
-    filesCollection?: unknown[]
-    handleModalClose: any
-  }): FileUploadProps => ({
-    accept: '*/*',
-    onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (event.target.files !== null && event.target?.files?.length > 0) {
-        console.log(`Saving ${event.target.value}`)
-        setLoading(true)
-        const resp = await uploadFile(event.target.files[0])
-        setLoading(false)
-        params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
-        params.handleModalClose()
-      }
-    },
-    onDrop: async (event: React.DragEvent<HTMLElement>) => {
-      console.log(`Drop ${event.dataTransfer.files[0].name}`)
-      setLoading(true)
-      const resp = await uploadFile(event.dataTransfer.files[0])
-      setLoading(false)
-      params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
-      params.handleModalClose()
-    }
-  })
 
   return (
     <Grid container spacing={5}>
@@ -585,14 +609,14 @@ const CreateSupportPackage = ({
               aria-controls={saveMenuOpen ? 'basic-menu' : undefined}
               aria-haspopup='true'
               aria-expanded={saveMenuOpen ? 'true' : undefined}
-              onClick={handleClick}
+              onClick={handleSaveMenuClick}
               variant='outlined'
               sx={{ marginLeft: 'auto' }}
               endIcon={<ExpandMoreIcon />}
             >
               Save
             </Button>
-            <Menu id='basic-menu' open={saveMenuOpen} onClose={handleClose}>
+            <Menu id='basic-menu' anchorEl={saveAnchorEl} open={saveMenuOpen} onClose={handleClose}>
               <MenuItem onClick={handleClose}>Save Draft</MenuItem>
               <MenuItem onClick={handleClose}>Save</MenuItem>
             </Menu>
@@ -656,25 +680,25 @@ const CreateSupportPackage = ({
                   <IconButton
                     aria-label='more'
                     id='long-button'
-                    aria-controls={menuOpen ? 'long-menu' : undefined}
-                    aria-expanded={menuOpen ? 'true' : undefined}
+                    aria-controls={masterSheetMenuOpen ? 'long-menu' : undefined}
+                    aria-expanded={masterSheetMenuOpen ? 'true' : undefined}
                     aria-haspopup='true'
-                    onClick={handleSheetMenuClick}
+                    onClick={handleMasterSheetMenuClick}
                   >
                     <MoreVertIcon />
                   </IconButton>
                   <Menu
-                    id='basic-menu-2'
-                    anchorEl={anchorSheetMenuEl}
-                    open={menuOpen}
-                    onClose={handleSheetMenuClose}
+                    id='mastersheet-menu'
+                    anchorEl={anchorMasterSheetMenuEl}
+                    open={masterSheetMenuOpen}
+                    onClose={handleMasterSheetMenuClose}
                     MenuListProps={{
                       'aria-labelledby': 'basic-button'
                     }}
                   >
                     <MenuItem
                       onClick={() => {
-                        handleSheetMenuClose()
+                        handleMasterSheetMenuClose()
                         handleUploadSPFileOpen()
                       }}
                     >
@@ -683,7 +707,7 @@ const CreateSupportPackage = ({
                     <MenuItem
                       onClick={() => {
                         handleChooseMaterFileModalOpen()
-                        handleSheetMenuClose()
+                        handleMasterSheetMenuClose()
                       }}
                     >
                       Choose Master File
@@ -696,8 +720,24 @@ const CreateSupportPackage = ({
             )}
 
             {rightDrawerVisible ? (
-              <Drawer anchor='right' variant='permanent' sx={{ zIndex: 1300 }}>
+              <Drawer
+                anchor='right'
+                variant='permanent'
+                sx={{ zIndex: 1300 }}
+                PaperProps={{
+                  sx: { width: '400px' }
+                }}
+              >
                 <Toolbar>
+                  <Tabs
+                    value={commentsTab}
+                    onChange={(_e, v) => setCommentsTab(v)}
+                    variant='fullWidth'
+                    aria-label='full width tabs example'
+                  >
+                    <Tab label='Comments' />
+                    <Tab label='Action Items' />
+                  </Tabs>
                   <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'></Typography>
                   <IconButton
                     edge='start'
@@ -710,81 +750,140 @@ const CreateSupportPackage = ({
                     <CloseIcon />
                   </IconButton>
                 </Toolbar>
-                <Tabs
-                  value={commentsTab}
-                  onChange={(_e, v) => setCommentsTab(v)}
-                  variant='fullWidth'
-                  aria-label='full width tabs example'
-                >
-                  <Tab label='Comments' />
-                  <Tab label='Action Items' />
-                </Tabs>
+
                 <TabPanel value={commentsTab} index={0} dir={theme.direction}>
                   <Grid container sx={{ padding: '0 1rem' }}>
                     <TextField
                       fullWidth
                       id='outlined-multiline-flexible'
-                      label='Comments'
+                      label={
+                        masterFileSelectedRange
+                          ? `Add Comments for ${masterFileSelectedRange.range}`
+                          : 'Select a cell/range to Add Comments'
+                      }
+                      disabled={masterFileSelectedRange == null}
                       multiline
                       variant='standard'
+                      value={currentMasterFileComment}
+                      onChange={event => setCurrentMasterFileComment(event.target.value)}
                       maxRows={4}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position='end'>
-                            <IconButton color='primary'>
+                            <IconButton
+                              disabled={masterFileSelectedRange == null}
+                              color='primary'
+                              onClick={handleUploadMasterFileCommentFileOpen}
+                            >
                               <AttachFileIcon />
                             </IconButton>
 
-                            <IconButton edge='end' color='primary'>
+                            <IconButton
+                              edge='end'
+                              color='primary'
+                              disabled={masterFileSelectedRange == null}
+                              onClick={() => {
+                                setMasterFileComments(
+                                  masterFileComments.concat({
+                                    message: currentMasterFileComment,
+                                    file: masterFileCommentFile,
+                                    user: activeUser.details,
+                                    createdAt: DateTime.now(),
+                                    cellRange: masterFileSelectedRange!
+                                  })
+                                )
+                                setCurrentMasterFileComment('')
+                                setMasterFileCommentFile(null)
+                                setMasterFileSelectedRange(null)
+                              }}
+                            >
                               <SendIcon />
                             </IconButton>
                           </InputAdornment>
                         )
                       }}
                     />
+                    {masterFileCommentFile ? (
+                      <Chip
+                        color='primary'
+                        label={`${masterFileCommentFile.originalname} (${(masterFileCommentFile.size / 1024).toFixed(
+                          1
+                        )} KB)`}
+                        variant={masterFile === masterFileCommentFile.originalname ? 'filled' : 'outlined'}
+                        avatar={
+                          isSupportedMimeType(masterFileCommentFile.mimetype) ? (
+                            <Avatar
+                              alt='Flora'
+                              src={`${
+                                process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                              }${mimetypeToIconImage(masterFileCommentFile.mimetype)}`}
+                            />
+                          ) : undefined
+                        }
+                        onDelete={() => {
+                          // TODO: CALL API TO DELETE THE ATTACHED FILE
+                          setMasterFileCommentFile(null)
+                        }}
+                        sx={{ marginLeft: 3 }}
+                      />
+                    ) : (
+                      <></>
+                    )}
                   </Grid>
                   <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 4 }}>
-                    <Grid item>
-                      <Avatar alt='Remy Sharp'>RS</Avatar>
-                    </Grid>
-                    <Grid
-                      justifyContent='left'
-                      item
-                      sx={{ cursor: 'pointer' }}
-                      onClick={() => {
-                        onCommentClick('A100:C130')
-                      }}
-                    >
-                      <h4 style={{ margin: 0, textAlign: 'left' }}>Michel Michel</h4>
-                      <Typography sx={{ ml: 2, width: '17rem' }} variant='body1' component='div'>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus. Duis
-                        bibendum ac ex vehicula laoreet. Suspendisse congue vulputate lobortis. Pellentesque at interdum
-                        tortor. Quisque arcu quam, malesuada vel mauris et, posuere sagittis ipsum. Aliquam ultricies a
-                        ligula nec faucibus. In elit metus, efficitur lobortis nisi quis, molestie porttitor metus.
-                        Pellentesque et neque risus. Aliquam vulputate, mauris vitae tincidunt interdum, mauris mi
-                        vehicula urna, nec feugiat quam lectus vitae ex.
-                      </Typography>
-                      <h4 style={{ marginTop: 5, marginBottom: 5, marginLeft: -50, marginRight: 0, textAlign: 'left' }}>
-                        12th December, 2022 1:23PM
-                      </h4>
-                      <Chip
-                        label='Attachment1'
-                        color='primary'
-                        avatar={<Avatar color='secondary'>PDF</Avatar>}
-                        onClick={() => alert('Download This')}
-                        onDelete={() => alert('Download This')}
-                        deleteIcon={<DownloadIcon />}
-                        sx={{ marginLeft: -12 }}
-                      />
-                      <Chip
-                        label='Attachment2'
-                        color='primary'
-                        avatar={<Avatar color='secondary'>XLS</Avatar>}
-                        onClick={() => alert('Download This')}
-                        onDelete={() => alert('Download This')}
-                        deleteIcon={<DownloadIcon />}
-                        sx={{ marginLeft: 2 }}
-                      />
+                    <Grid justifyContent='left' item sx={{ cursor: 'pointer' }}>
+                      {masterFileComments
+                        .sort((a, b) => b.createdAt.diff(a.createdAt).as('millisecond'))
+                        .map((masterFileComment, index) => (
+                          <>
+                            <Grid
+                              container
+                              wrap='nowrap'
+                              spacing={2}
+                              key={index}
+                              onClick={() => {
+                                onMasterSheetCommentClick(masterFileComment.cellRange)
+                              }}
+                            >
+                              <Grid item>
+                                <Avatar alt={masterFileComment.user.name}>
+                                  {getInitials(masterFileComment.user.name)}
+                                </Avatar>
+                              </Grid>
+                              <Grid justifyContent='left' item xs zeroMinWidth>
+                                <h4 style={{ margin: 0, textAlign: 'left' }}>{masterFileComment.user.name}</h4>
+                                <p style={{ textAlign: 'left' }}>{masterFileComment.message}</p>
+                                <p style={{ textAlign: 'left', color: 'gray' }}>
+                                  {masterFileComment.createdAt.toFormat('dd MMM, yyyy hh:mm a')}
+                                  {masterFileComment.file ? (
+                                    <Chip
+                                      key={index}
+                                      color='primary'
+                                      label={`${masterFileComment.file.originalname} (${(
+                                        masterFileComment.file.size / 1024
+                                      ).toFixed(1)} KB)`}
+                                      variant={'filled'}
+                                      avatar={
+                                        isSupportedMimeType(masterFileComment.file.mimetype) ? (
+                                          <Avatar
+                                            alt='Flora'
+                                            src={`${
+                                              process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                                            }${mimetypeToIconImage(masterFileComment.file.mimetype)}`}
+                                          />
+                                        ) : undefined
+                                      }
+                                      sx={{ marginLeft: 3 }}
+                                    />
+                                  ) : (
+                                    <></>
+                                  )}
+                                </p>
+                              </Grid>
+                            </Grid>
+                            <Divider />
+                          </>
+                        ))}
                     </Grid>
                   </Grid>
                 </TabPanel>
@@ -793,18 +892,38 @@ const CreateSupportPackage = ({
                     <TextField
                       fullWidth
                       id='outlined-multiline-flexible'
-                      label='Action Item'
+                      label={
+                        masterFileSelectedRange
+                          ? `Add Action Item for ${masterFileSelectedRange}`
+                          : 'Select a cell/range to Add Action Item'
+                      }
                       multiline
                       variant='standard'
                       maxRows={4}
+                      disabled={masterFileSelectedRange == null}
+                      value={currentActionItem}
+                      onChange={event => setCurrentActionItem(event.target.value)}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position='end'>
-                            <IconButton color='primary'>
-                              <AttachFileIcon />
-                            </IconButton>
-
-                            <IconButton edge='end' color='primary'>
+                            <IconButton
+                              disabled={masterFileSelectedRange == null}
+                              edge='end'
+                              color='primary'
+                              onClick={() => {
+                                setActionItems(
+                                  actionItems.concat({
+                                    message: currentActionItem,
+                                    user: activeUser.details,
+                                    createdAt: DateTime.now(),
+                                    cellRange: masterFileSelectedRange!,
+                                    state: ActionItemState.TODO
+                                  })
+                                )
+                                setCurrentActionItem('')
+                                setMasterFileSelectedRange(null)
+                              }}
+                            >
                               <SendIcon />
                             </IconButton>
                           </InputAdornment>
@@ -812,55 +931,55 @@ const CreateSupportPackage = ({
                       }}
                     />
                   </Grid>
-                  <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 4 }}>
-                    <Card sx={{ maxWidth: 385 }}>
-                      <CardContent>
-                        <Typography variant='body2' color='text.secondary'>
-                          Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across
-                          all continents except Antarctica
-                        </Typography>
-                      </CardContent>
-                      <CardActions>
-                        <Button size='small'>Mark as Completed</Button>
-                        <Button size='small'>Delete</Button>
-                      </CardActions>
-                    </Card>
-                  </Grid>
-                  <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 2 }}>
-                    <Card sx={{ maxWidth: 385 }}>
-                      <CardContent>
-                        <Typography variant='body2' color='text.secondary'>
-                          Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across
-                          all continents except Antarctica
-                        </Typography>
-                      </CardContent>
-                      <CardActions>
-                        <Button size='small'>Mark as Completed</Button>
-                        <Button size='small'>Delete</Button>
-                      </CardActions>
-                    </Card>
-                  </Grid>
-                  <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 2 }}>
-                    <Card sx={{ maxWidth: 385 }}>
-                      <CardContent>
-                        <Typography variant='body2' color='text.secondary'>
-                          Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across
-                          all continents except Antarctica
-                        </Typography>
-                      </CardContent>
-                      <CardActions>
-                        <Button size='small'>Mark as Completed</Button>
-                        <Button size='small'>Delete</Button>
-                      </CardActions>
-                    </Card>
-                  </Grid>
+
+                  {actionItems
+                    .sort((a, b) => b.createdAt.diff(a.createdAt).as('millisecond'))
+                    .map((actionItem, index) => (
+                      <>
+                        <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 4 }} key={index}>
+                          <Card
+                            sx={{
+                              minWidth: '100%',
+                              backgroundColor: actionItem.state === ActionItemState.COMPLETED ? 'green' : '#ffe595'
+                            }}
+                          >
+                            <CardContent>
+                              <Typography variant='body2' color='text.secondary'>
+                                {actionItem.message}
+                              </Typography>
+                            </CardContent>
+                            <CardActions>
+                              <Button
+                                size='small'
+                                disabled={actionItem.state === ActionItemState.COMPLETED}
+                                onClick={() => {
+                                  const thisActionItem = actionItems.find(item => item.message === actionItem.message)
+                                  if (!thisActionItem) throw Error('Should not happen')
+                                  thisActionItem.state = ActionItemState.COMPLETED
+                                  setActionItems([...actionItems])
+                                }}
+                              >
+                                Mark as Completed
+                              </Button>
+                              <Button
+                                size='small'
+                                onClick={() => {
+                                  const tempActionItems = actionItems.filter(item => item.message != actionItem.message)
+                                  setActionItems([...tempActionItems])
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </CardActions>
+                          </Card>
+                        </Grid>
+                      </>
+                    ))}
                 </TabPanel>
               </Drawer>
             ) : (
               <></>
             )}
-            {/* <Card sx={{ height: 400, textAlign: 'center', verticalAlign: 'middle' }}>
-            <CardContent> */}
             <Grid container sx={{ pl: 1, pt: 1, height: masterFile ? '600px' : '300px' }} width='100%'>
               {masterFile ? (
                 <SpreadsheetComponent
@@ -1042,7 +1161,7 @@ const CreateSupportPackage = ({
                     setJESpreadsheetRef(ssObj)
                   }
                 }}
-                created={jESpreadsheetCreated.bind(this)}
+                created={journalEntrySpreadsheetCreated.bind(this)}
                 allowDataValidation
                 allowFreezePane
                 cellEdit={args => {
@@ -1062,9 +1181,6 @@ const CreateSupportPackage = ({
               >
                 <SheetsDirective>
                   <SheetDirective frozenRows={1} frozenColumns={7}>
-                    {/* <RangesDirective>
-                                    <RangeDirective dataSource={data}></RangeDirective>
-                                </RangesDirective> */}
                     <ColumnsDirective>
                       <ColumnDirective width={200}></ColumnDirective>
                       <ColumnDirective width={80}></ColumnDirective>
@@ -1510,6 +1626,25 @@ const CreateSupportPackage = ({
         <Box sx={styles.sheetModalStyle}>
           <FileUpload
             {...fileUploadProp({ setFileMethod: setNotesFile, handleModalClose: handleUploadNotesFileClose })}
+          />
+        </Box>
+      </Dialog>
+      <Dialog
+        open={uploadMasterFileCommentFileOpen}
+        onClose={handleUploadMasterFileCommentFileClose}
+        aria-labelledby='modal-modal-journal'
+        aria-describedby='modal-modal-journal'
+        sx={{
+          msOverflowX: 'scroll',
+          paddingTop: 2
+        }}
+      >
+        <Box sx={styles.sheetModalStyle}>
+          <FileUpload
+            {...fileUploadProp({
+              setFileMethod: setMasterFileCommentFile,
+              handleModalClose: handleUploadMasterFileCommentFileClose
+            })}
           />
         </Box>
       </Dialog>

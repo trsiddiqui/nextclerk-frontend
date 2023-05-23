@@ -68,3 +68,34 @@ export const mimetypeToIconImage = (type: string) => {
 
   return mimetypeImageKey ? mimetypeImageMap[mimetypeImageKey as keyof typeof mimetypeImageMap] : undefined
 }
+
+const columnIndexToAddress = (n: number): string => {
+  const a = Math.floor(n / 26)
+
+  return a >= 0 ? columnIndexToAddress(a - 1) + String.fromCharCode(65 + (n % 26)) : ''
+}
+
+export const columnAddressToIndex = (index: string): number => {
+  const base = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  let i,
+    j,
+    result = 0
+
+  for (i = 0, j = index.length - 1; i < index.length; i += 1, j -= 1) {
+    result += Math.pow(base.length, j) * (base.indexOf(index[i]) + 1)
+  }
+
+  return result
+}
+
+export function getCellsFromRangeAddress(a: number, b: number, c: number, d: number): string[] {
+  const cells = []
+  for (let i = a; i <= c; i++) {
+    for (let j = b; j <= d; j++) {
+      const colLetters = columnIndexToAddress(j)
+      cells.push(colLetters + (i + 1))
+    }
+  }
+
+  return cells
+}
