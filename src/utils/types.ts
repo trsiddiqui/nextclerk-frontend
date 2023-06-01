@@ -15,6 +15,19 @@ export type UploadedFileProps = {
 
   /** Size of the file in bytes. */
   size: number
+
+  uploaded: {
+    uuid: string
+  }
+}
+
+export type MasterFileUploaded = UploadedFileProps & {
+  downloadUrl: string
+  sharingLink?: string
+}
+
+export type ServerFileAddress = {
+  content: string
 }
 
 export interface Account {

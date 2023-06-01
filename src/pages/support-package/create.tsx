@@ -66,6 +66,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
 import { StyledTableCell, StyledTableRow } from 'src/views/tables/TableCustomized'
 import {
+  BeforeSaveEventArgs,
   CellDirective,
   CellsDirective,
   CellStyleModel,
@@ -77,6 +78,7 @@ import {
   RangesDirective,
   RowDirective,
   RowsDirective,
+  SaveCompleteEventArgs,
   SheetDirective,
   SheetsDirective,
   SpreadsheetComponent
@@ -90,7 +92,11 @@ import {
   getAllLocations,
   searchUsers,
   getActiveUser,
-  uploadFile
+  uploadFile,
+  chooseMasterFile,
+  createMasterFile,
+  getLatestMasterFile,
+  uploadUpdatedFile
 } from 'src/utils/apiClient'
 import {
   AutocompleteRow,
@@ -102,7 +108,7 @@ import {
   isSupportedMimeType,
   mimetypeToIconImage
 } from 'src/@core/utils'
-import { UploadedFileProps, User } from 'src/utils/types'
+import { MasterFileUploaded, UploadedFileProps, User } from 'src/utils/types'
 import { FileUpload, FileUploadProps } from 'src/@core/components/custom/file-upload'
 
 enum ActionItemState {
@@ -223,7 +229,7 @@ const CreateSupportPackage = ({
       cellRange: SpreadsheetRange
     }>
   >([])
-  const [masterFile, setMasterFile] = React.useState<string | null>()
+  const [masterFile, setMasterFile] = React.useState<MasterFileUploaded | null>()
   const [attachments, setAttachments] = React.useState<UploadedFileProps[]>([])
   const [highlightedCells, sethighlightedCells] = React.useState<string[]>([])
   const [masterFileSelectedRange, setMasterFileSelectedRange] = useState<SpreadsheetRange | null>(null)
@@ -259,14 +265,14 @@ const CreateSupportPackage = ({
     if (!journalEntrySpreadsheetRef) {
       return
     }
-    journalEntrySpreadsheetRef.addDataValidation(
-      { type: 'Decimal', isHighlighted: true, ignoreBlank: true },
-      'B2:B1000'
-    )
-    journalEntrySpreadsheetRef.addDataValidation(
-      { type: 'Decimal', isHighlighted: true, ignoreBlank: true },
-      'C2:C1000'
-    )
+    // journalEntrySpreadsheetRef.addDataValidation(
+    //   { type: 'Decimal', isHighlighted: true, ignoreBlank: true },
+    //   'B2:B1000'
+    // )
+    // journalEntrySpreadsheetRef.addDataValidation(
+    //   { type: 'Decimal', isHighlighted: true, ignoreBlank: true },
+    //   'C2:C1000'
+    // )
   }
 
   const fileUploadProp = (params: {
@@ -277,21 +283,23 @@ const CreateSupportPackage = ({
     accept: '*/*',
     onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.files !== null && event.target?.files?.length > 0) {
-        console.log(`Saving ${event.target.value}`)
         setLoading(true)
         const resp = await uploadFile(event.target.files[0])
         setLoading(false)
-        params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
-        params.handleModalClose()
+        if (resp != null) {
+          params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
+          params.handleModalClose()
+        }
       }
     },
     onDrop: async (event: React.DragEvent<HTMLElement>) => {
-      console.log(`Drop ${event.dataTransfer.files[0].name}`)
       setLoading(true)
       const resp = await uploadFile(event.dataTransfer.files[0])
       setLoading(false)
-      params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
-      params.handleModalClose()
+      if (resp != null) {
+        params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
+        params.handleModalClose()
+      }
     }
   })
 
@@ -317,15 +325,18 @@ const CreateSupportPackage = ({
       //       spreadsheet.open({ file: file }) // open the file into Spreadsheet
       //     })
       //   })
-      fetch('/excel5') // fetch the remote url
-        .then(response => {
-          response.blob().then(fileBlob => {
-            const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
-            spreadsheet.open({ file: file }) // open the file into Spreadsheet
-            spreadsheet.hideFileMenuItems(['File'], true)
-            spreadsheet.hideToolbarItems('Home', [19])
+      setLoading(true)
+      if (masterFile) {
+        fetch(masterFile?.downloadUrl) // fetch the remote url
+          .then(response => {
+            response.blob().then(fileBlob => {
+              const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
+              spreadsheet.open({ file: file }) // open the file into Spreadsheet
+              spreadsheet.hideFileMenuItems(['File'], true)
+              spreadsheet.hideToolbarItems('Home', [19])
+            })
           })
-        })
+      }
     }
   }
 
@@ -353,7 +364,6 @@ const CreateSupportPackage = ({
       switch (args.item.text) {
         case 'Add Comment':
           setRightDrawerVisible(true)
-          debugger
           spreadsheet.selectRange(String(spreadsheet.getActiveSheet().selectedRange))
           setMasterFileSelectedRange({
             range: String(spreadsheet.getActiveSheet().selectedRange),
@@ -418,8 +428,14 @@ const CreateSupportPackage = ({
   const handleSaveMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setSaveAnchorEl(event.currentTarget)
   }
-  const handleClose = () => {
+  const handleSaveSupportingPackage = () => {
     setSaveAnchorEl(null)
+    if (spreadsheet) {
+      spreadsheet?.save({
+        saveType: 'Xlsx',
+        fileName: masterFile?.originalname
+      })
+    }
   }
   // #endregion
 
@@ -431,6 +447,7 @@ const CreateSupportPackage = ({
           dataSource={accounts.map(a => a.label)}
           className='abc'
           showPopupButton
+          autofill
         ></AutoCompleteComponent>
       </div>
     )
@@ -444,6 +461,7 @@ const CreateSupportPackage = ({
           dataSource={departments.map(a => a.label)}
           className='abc'
           showPopupButton
+          autofill
         ></AutoCompleteComponent>
       </div>
     )
@@ -457,6 +475,7 @@ const CreateSupportPackage = ({
           dataSource={locations.map(a => a.label)}
           className='abc'
           showPopupButton
+          autofill
         ></AutoCompleteComponent>
       </div>
     )
@@ -470,9 +489,38 @@ const CreateSupportPackage = ({
           dataSource={customers.map(a => a.label)}
           className='abc'
           showPopupButton
+          autofill
         ></AutoCompleteComponent>
       </div>
     )
+  }
+
+  const selectMasterFile = async (uuid: string) => {
+    setLoading(true)
+    const masterFileObject = attachments.find(attachment => attachment.uploaded.uuid === uuid)!
+    // TODO: Call API to Upload master file to excel
+    // Then open the new file with the spreadsheet component
+    const resp = await chooseMasterFile(masterFileObject.uploaded.uuid)
+    const downloadUrl = resp['@microsoft.graph.downloadUrl']
+    const sharingLink = resp['sharingLink']
+
+    setMasterFile({
+      ...masterFileObject,
+      downloadUrl,
+      sharingLink
+    })
+    // fetch(downloadUrl) // fetch the remote url
+    //   .then(response => {
+    //     response.blob().then(fileBlob => {
+    //       debugger
+    //       const file = new File([fileBlob], masterFileObject.originalname) //convert the blob into file
+    //       if (spreadsheet) {
+    //         spreadsheet.open({ file: file }) // open the file into Spreadsheet
+    //         // spreadsheet.hideFileMenuItems(['File'], true)
+    //         // spreadsheet.hideToolbarItems('Home', [19])
+    //       }
+    //     })
+    //   })
   }
 
   return (
@@ -616,9 +664,15 @@ const CreateSupportPackage = ({
             >
               Save
             </Button>
-            <Menu id='basic-menu' anchorEl={saveAnchorEl} open={saveMenuOpen} onClose={handleClose}>
-              <MenuItem onClick={handleClose}>Save Draft</MenuItem>
-              <MenuItem onClick={handleClose}>Save</MenuItem>
+            <Menu id='basic-menu' anchorEl={saveAnchorEl} open={saveMenuOpen} onClose={handleSaveSupportingPackage}>
+              <MenuItem onClick={handleSaveSupportingPackage}>Save Draft</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleSaveSupportingPackage()
+                }}
+              >
+                Save
+              </MenuItem>
             </Menu>
           </CardActions>
         </form>
@@ -669,10 +723,7 @@ const CreateSupportPackage = ({
                     endIcon={<LaunchIcon />}
                     onClick={() => {
                       setFileOpenedInExcel(true)
-                      window.open(
-                        'https://2l2vbz.sharepoint.com/:x:/g/EfT9Nn4Dbr1PsEKQiY8NBSABqvfg9srEaji3uJr1dJsH0A?e=AnOv0i',
-                        '_default'
-                      )
+                      window.open(masterFile.sharingLink, '_default')
                     }}
                   >
                     View in Excel Online
@@ -809,7 +860,9 @@ const CreateSupportPackage = ({
                         label={`${masterFileCommentFile.originalname} (${(masterFileCommentFile.size / 1024).toFixed(
                           1
                         )} KB)`}
-                        variant={masterFile === masterFileCommentFile.originalname ? 'filled' : 'outlined'}
+                        variant={
+                          masterFile?.originalname === masterFileCommentFile.originalname ? 'filled' : 'outlined'
+                        }
                         avatar={
                           isSupportedMimeType(masterFileCommentFile.mimetype) ? (
                             <Avatar
@@ -995,6 +1048,21 @@ const CreateSupportPackage = ({
                     }
                   }}
                   openUrl='https://ej2services.syncfusion.com/production/web-services/api/spreadsheet/open'
+                  allowOpen={true}
+                  openComplete={() => {
+                    setLoading(false)
+                  }}
+                  saveUrl='https://ej2services.syncfusion.com/production/web-services/api/spreadsheet/save'
+                  beforeSave={(args: BeforeSaveEventArgs) => {
+                    args.needBlobData = true
+                    args.fileName = masterFile.originalname
+                  }}
+                  saveComplete={async (args: SaveCompleteEventArgs) => {
+                    const blob = args.blobData
+                    const file = new File([blob], masterFile.originalname)
+                    // TODO: Need to call a different endpoint to save this file in S3 and Sharepoint
+                    await uploadUpdatedFile(file, masterFile.uploaded.uuid)
+                  }}
                   created={oncreated.bind(this)}
                 ></SpreadsheetComponent>
               ) : (
@@ -1020,11 +1088,14 @@ const CreateSupportPackage = ({
                         aria-label='Upload'
                         className='card-more-options'
                         sx={{ color: 'text.secondary', fontSize: 100, marginLeft: '90px', padding: '22px' }}
-                        onClick={() =>
+                        onClick={async () => {
                           // TODO: Call API to create a master excel file
                           // Then set the response filename to attachments as well as set as master file
-                          setMasterFile('abc.pdf')
-                        }
+                          setLoading(true)
+                          const masterFileUploaded = await createMasterFile()
+                          setMasterFile(masterFileUploaded)
+                          setAttachments(attachments.concat(masterFileUploaded))
+                        }}
                       >
                         <Avatar
                           alt='Flora'
@@ -1086,7 +1157,7 @@ const CreateSupportPackage = ({
                     <Chip
                       color='primary'
                       label={`${notesFile.originalname} (${(notesFile.size / 1024).toFixed(1)} KB)`}
-                      variant={masterFile === notesFile.originalname ? 'filled' : 'outlined'}
+                      variant={masterFile?.originalname === notesFile.originalname ? 'filled' : 'outlined'}
                       avatar={
                         isSupportedMimeType(notesFile.mimetype) ? (
                           <Avatar
@@ -1124,7 +1195,7 @@ const CreateSupportPackage = ({
                             key={index}
                             color='primary'
                             label={`${note.file.originalname} (${(note.file.size / 1024).toFixed(1)} KB)`}
-                            variant={masterFile === note.file.originalname ? 'filled' : 'outlined'}
+                            variant={masterFile?.originalname === note.file.originalname ? 'filled' : 'outlined'}
                             avatar={
                               isSupportedMimeType(note.file.mimetype) ? (
                                 <Avatar
@@ -1318,7 +1389,7 @@ const CreateSupportPackage = ({
                   key={index}
                   color='primary'
                   label={`${attachment.originalname} (${(attachment.size / 1024).toFixed(1)} KB)`}
-                  variant={masterFile === attachment.originalname ? 'filled' : 'outlined'}
+                  variant={masterFile?.originalname === attachment.originalname ? 'filled' : 'outlined'}
                   avatar={
                     isSupportedMimeType(attachment.mimetype) ? (
                       <Avatar
@@ -1331,7 +1402,15 @@ const CreateSupportPackage = ({
                   }
                   onDelete={() => {
                     // TODO: CALL API TO DELETE THE ATTACHED FILE
-                    setAttachments(attachments.filter(x => x.originalname !== attachment.originalname))
+                    const updatedAttachments = attachments.filter(x => x.originalname !== attachment.originalname)
+                    setAttachments(updatedAttachments)
+                    // see if master file has been deleted
+                    const masterFileAttachment = updatedAttachments.find(
+                      x => x.uploaded.uuid === masterFile?.uploaded.uuid
+                    )
+                    if (!masterFileAttachment) {
+                      setMasterFile(null)
+                    }
                   }}
                   sx={{ marginLeft: 3 }}
                 />
@@ -1532,18 +1611,16 @@ const CreateSupportPackage = ({
               <RadioGroup
                 aria-labelledby='demo-radio-buttons-group-label'
                 name='radio-buttons-group'
-                onChange={event => {
-                  // TODO: Call API to Upload master file to excel
-                  // Then open the new file with the spreadsheet component
-                  setMasterFile(event.target.value)
+                onChange={async event => {
+                  await selectMasterFile(event.target.value)
                   handleChooseMaterFileModalClose()
                 }}
-                defaultValue={masterFile}
+                defaultValue={masterFile?.uploaded.uuid}
               >
                 {attachments.map((attachment, index) => (
                   <FormControlLabel
                     key={index}
-                    value={attachment.originalname}
+                    value={attachment.uploaded.uuid}
                     control={<Radio />}
                     label={attachment.originalname}
                   />
@@ -1586,7 +1663,22 @@ const CreateSupportPackage = ({
         <Grid container sx={{ pl: 1, padding: 30 }} width='100%'>
           <Grid item xs={12} sm={12} textAlign='center' justifyContent='center'>
             <Box sx={{}}>
-              <Button color='primary' variant='contained' onClick={() => setFileOpenedInExcel(false)}>
+              <Button
+                color='primary'
+                variant='contained'
+                onClick={async () => {
+                  if (masterFile) {
+                    setLoading(true)
+                    await getLatestMasterFile(masterFile?.uploaded.uuid)
+                    const tempMasterFile = masterFile
+                    setMasterFile(null)
+                    setTimeout(() => {
+                      setMasterFile(tempMasterFile)
+                    }, 1000)
+                  }
+                  setFileOpenedInExcel(false)
+                }}
+              >
                 Finish Editing Master Sheet
               </Button>
             </Box>

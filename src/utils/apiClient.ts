@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Account, Customer, Department, Location, UploadedFileProps, User } from './types'
+import { Account, Customer, Department, Location, MasterFileUploaded, UploadedFileProps, User } from './types'
 import { DropDownRow } from 'src/@core/utils'
 
 const api = axios.create({
@@ -75,20 +75,59 @@ export const getActiveUser = async () => {
   })
 }
 
-export const uploadFile = async (file: File) => {
+export const uploadFile = async (file: File): Promise<UploadedFileProps> => {
   const formData = new FormData()
   formData.append('file', file)
 
-  const response = await api.post<UploadedFileProps>('/global/actions/upload-file', formData, {
+  const response = await api.post<UploadedFileProps>(`/global/${customerXRefID}/actions/upload-file`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
   })
 
-  if (response.status === 200) {
-    return response.data
-  } else {
-    // TODO: Find a way to handle error in a better way
-    throw new Error('An error occurred')
-  }
+  return response.data
+}
+
+export const chooseMasterFile = async (
+  fileUuid: string
+): Promise<{
+  '@microsoft.graph.downloadUrl': string
+  sharingLink: string
+}> => {
+  const response = await api.post<{
+    '@microsoft.graph.downloadUrl': string
+    sharingLink: string
+  }>(`/global/${customerXRefID}/files/${fileUuid}`, {})
+
+  return response.data
+}
+
+export const createMasterFile = async (): Promise<MasterFileUploaded> => {
+  const response = await api.post<MasterFileUploaded>(`/global/${customerXRefID}/files`, {})
+  debugger
+
+  return response.data
+}
+
+export const getLatestMasterFile = async (
+  fileUuid: string
+): Promise<{
+  '@microsoft.graph.downloadUrl': string
+}> => {
+  const response = await api.get<{
+    '@microsoft.graph.downloadUrl': string
+  }>(`/global/${customerXRefID}/files/${fileUuid}`, {})
+
+  return response.data
+}
+
+export const uploadUpdatedFile = async (file: File, fileUuid: string): Promise<void> => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  await api.put(`/global/${customerXRefID}/files/${fileUuid}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
 }
