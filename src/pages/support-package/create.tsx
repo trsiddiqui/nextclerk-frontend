@@ -189,6 +189,8 @@ const CreateSupportPackage = ({
 }) => {
   const theme = useTheme()
   const [name, setName] = useState('')
+  const [number, setNumber] = useState('')
+  const [categoryUuid, setCategoryUuid] = useState<string | null>('')
   const [loading, setLoading] = useState(false)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
   const [journalEntrySpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
@@ -436,6 +438,7 @@ const CreateSupportPackage = ({
         fileName: masterFile?.originalname
       })
     }
+    const number = numb
   }
   // #endregion
 
@@ -550,7 +553,15 @@ const CreateSupportPackage = ({
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth type='text' label='Support Number' placeholder='R32938' variant='filled' />
+                <TextField
+                  fullWidth
+                  type='text'
+                  label='Support Number'
+                  placeholder='R32938'
+                  variant='filled'
+                  onChange={e => setNumber(e.target.value)}
+                  value={number}
+                />
               </Grid>
               {/* <Grid item xs={12} sm={4}>
                 <TextField fullWidth label='Support Period' placeholder='Q1 2022' variant='filled' />
@@ -559,8 +570,12 @@ const CreateSupportPackage = ({
                 <FormControl fullWidth>
                   <Autocomplete
                     id='tags-outlined'
-                    options={allCategories}
-                    getOptionLabel={option => option.name}
+                    options={allCategories.map(category => category.name)}
+                    value={categoryUuid}
+                    onChange={(event: any, newValue: string | null) => {
+                      debugger
+                      setCategoryUuid(newValue)
+                    }}
                     filterSelectedOptions
                     renderInput={params => (
                       <TextField variant='filled' {...params} label='Support Category' placeholder='Support Category' />
