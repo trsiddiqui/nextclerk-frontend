@@ -56,6 +56,17 @@ export const getAllCustomers = async () => {
   }))
 }
 
+export const getAllLabels = async () => {
+  const labels = await api.get<Customer[]>(`/${customerXRefID}/labels`)
+  console.log(labels)
+
+  return labels.data.map(label => ({
+    label: label.label,
+    id: label.uuid,
+    key: label.uuid
+  }))
+}
+
 export const searchUsers = async (str?: string): Promise<User[]> => {
   const users = await api.get<User[]>(`/${customerXRefID}/users${str ? `?search=${str}` : ''}`)
 
@@ -104,7 +115,6 @@ export const chooseMasterFile = async (
 
 export const createMasterFile = async (): Promise<MasterFileUploaded> => {
   const response = await api.post<MasterFileUploaded>(`/global/${customerXRefID}/files`, {})
-  debugger
 
   return response.data
 }
@@ -130,4 +140,8 @@ export const uploadUpdatedFile = async (file: File, fileUuid: string): Promise<v
       'Content-Type': 'multipart/form-data'
     }
   })
+}
+
+export const createSupportingPackage = async (supportingPackage: unknown): Promise<void> => {
+  await api.post(`/global/${customerXRefID}/supporting-packages`, supportingPackage)
 }

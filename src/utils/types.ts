@@ -66,3 +66,8 @@ export interface Location {
   uuid: string
   label: string
 }
+
+export enum SupportingPackageUserType {
+  PARTICIPANT = 'PARTICIPANT',
+  APPROVER = 'APPROVER'
+}

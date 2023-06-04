@@ -96,7 +96,9 @@ import {
   chooseMasterFile,
   createMasterFile,
   getLatestMasterFile,
-  uploadUpdatedFile
+  uploadUpdatedFile,
+  getAllLabels,
+  createSupportingPackage
 } from 'src/utils/apiClient'
 import {
   AutocompleteRow,
@@ -108,7 +110,7 @@ import {
   isSupportedMimeType,
   mimetypeToIconImage
 } from 'src/@core/utils'
-import { MasterFileUploaded, UploadedFileProps, User } from 'src/utils/types'
+import { MasterFileUploaded, SupportingPackageUserType, UploadedFileProps, User } from 'src/utils/types'
 import { FileUpload, FileUploadProps } from 'src/@core/components/custom/file-upload'
 
 enum ActionItemState {
@@ -158,11 +160,12 @@ export async function getServerSideProps() {
   const departments = await getAllDepartments()
   const locations = await getAllLocations()
   const customers = await getAllCustomers()
+  const labels = await getAllLabels()
   const users = await searchUsers()
   const activeUser = await getActiveUser()
 
   // Pass data to the page via props
-  return { props: { categories, accounts, departments, locations, customers, activeUser, users } }
+  return { props: { categories, accounts, departments, locations, customers, activeUser, users, labels } }
 }
 
 type SpreadsheetRange = {
@@ -177,24 +180,29 @@ const CreateSupportPackage = ({
   locations,
   customers,
   activeUser,
-  users
+  users,
+  labels
 }: {
   categories: Array<AutocompleteRow>
   accounts: Array<DropDownRow>
   departments: Array<DropDownRow>
   locations: Array<DropDownRow>
   customers: Array<DropDownRow>
+  labels: Array<DropDownRow>
   users: User[]
   activeUser: { details: { id: string; name: string }; manager: { id: string; name: string } }
 }) => {
   const theme = useTheme()
   const [name, setName] = useState('')
   const [number, setNumber] = useState('')
-  const [categoryUuid, setCategoryUuid] = useState<string | null>('')
+  const [isConfidential, setIsConfidential] = useState<boolean>(false)
+  const [category, setCategory] = useState<{ label: string; uuid: string } | null>(null)
   const [loading, setLoading] = useState(false)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
   const [journalEntrySpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
   const [allCategories] = useState(categories)
+  const [allLabels] = useState(labels)
+  const [label, setLabel] = useState<{ label: string; uuid: string } | null>(null)
   const [date, setDate] = useState<Dayjs | null>(dayjs())
   const [personnel, setPersonnel] = useState<Array<User>>(users)
   const [tab, setTab] = useState(0)
@@ -430,7 +438,7 @@ const CreateSupportPackage = ({
   const handleSaveMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setSaveAnchorEl(event.currentTarget)
   }
-  const handleSaveSupportingPackage = () => {
+  const handleSaveSupportingPackage = async (isDraft: boolean) => {
     setSaveAnchorEl(null)
     if (spreadsheet) {
       spreadsheet?.save({
@@ -438,7 +446,64 @@ const CreateSupportPackage = ({
         fileName: masterFile?.originalname
       })
     }
-    const number = numb
+
+    let communications: Array<{
+      users: string[]
+      text: string
+      createdAt: DateTime
+      attachments?: string[]
+      cellLink?: SpreadsheetRange
+      isCellLinkValid?: boolean
+      status?: string
+    }> = []
+
+    communications = SPNotes.map(note => ({
+      attachments: note.file ? [note.file?.uploaded.uuid] : [],
+      users: [note.user.id],
+      text: note.message,
+      createdAt: note.createdAt
+    }))
+
+    communications = communications.concat(
+      masterFileComments.map(comment => ({
+        attachments: comment.file ? [comment.file?.uploaded.uuid] : [],
+        users: [comment.user.id],
+        text: comment.message,
+        createdAt: comment.createdAt,
+        cellLink: comment.cellRange,
+        isCellLinkValid: true
+      }))
+    )
+
+    communications = communications.concat(
+      actionItems.map(actionItem => ({
+        users: [actionItem.user.id],
+        text: actionItem.message,
+        createdAt: actionItem.createdAt,
+        cellLink: actionItem.cellRange,
+        status: actionItem.state
+      }))
+    )
+
+    const supportingPackage = {
+      number,
+      title: name,
+      categoryUUID: category?.uuid,
+      labelUUID: label?.uuid,
+      isConfidential,
+      date,
+      isDraft,
+      // TODO: Fill this when linked with a Journal Entry
+      journalNumber: undefined,
+      users: participants.map(user => ({ uuid: user.uuid, type: SupportingPackageUserType.PARTICIPANT })),
+      files: attachments.map(file => ({
+        uuid: file.uploaded.uuid,
+        isMaster: file.uploaded.uuid === masterFile?.uploaded.uuid
+      })),
+      communications
+    }
+
+    await createSupportingPackage(supportingPackage)
   }
   // #endregion
 
@@ -534,7 +599,17 @@ const CreateSupportPackage = ({
           <Divider sx={{ margin: 0 }} />
           <CardContent>
             <Grid item xs={12} sm={12} sx={{ marginTop: -2 }} textAlign='right'>
-              <FormControlLabel control={<Switch defaultChecked />} label='Confidential' />
+              <FormControlLabel
+                control={
+                  <Switch
+                    defaultChecked={isConfidential}
+                    onChange={event => {
+                      setIsConfidential(event.currentTarget.checked)
+                    }}
+                  />
+                }
+                label='Confidential'
+              />
             </Grid>
             <Grid container spacing={5} sx={{ marginTop: -13 }}>
               <Grid item xs={12} sm={12} sx={{ marginTop: 1 }}>
@@ -570,11 +645,10 @@ const CreateSupportPackage = ({
                 <FormControl fullWidth>
                   <Autocomplete
                     id='tags-outlined'
-                    options={allCategories.map(category => category.name)}
-                    value={categoryUuid}
-                    onChange={(event: any, newValue: string | null) => {
-                      debugger
-                      setCategoryUuid(newValue)
+                    options={allCategories.map(category => ({ label: category.name, uuid: category.uuid }))}
+                    value={category}
+                    onChange={(event: any, newValue: { label: string; uuid: string } | null) => {
+                      setCategory(newValue)
                     }}
                     filterSelectedOptions
                     renderInput={params => (
@@ -584,7 +658,7 @@ const CreateSupportPackage = ({
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField variant='filled' fullWidth label='Journal Number' placeholder='Name of Support Package' />
+                <TextField variant='filled' fullWidth label='Journal Number' placeholder='Journal Number (To Do)' />
               </Grid>
               <Grid item xs={12} sm={3}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -642,18 +716,18 @@ const CreateSupportPackage = ({
                 )}
               </Grid>
               <Grid item xs={12} sm={12}>
-                <Autocomplete
-                  multiple
-                  id='tags-filled'
-                  options={[]}
-                  freeSolo
-                  renderTags={(value: readonly string[]) =>
-                    value.map((option: string, index: number) => <Chip variant='outlined' label={option} key={index} />)
-                  }
-                  renderInput={params => (
-                    <TextField {...params} variant='filled' label='Labels' placeholder='Assign Labels' />
-                  )}
-                />
+                <FormControl fullWidth>
+                  <Autocomplete
+                    id='tags-outlined'
+                    options={allLabels.map(label => ({ label: label.label, uuid: label.id }))}
+                    value={label}
+                    onChange={(event: any, newValue: { label: string; uuid: string } | null) => {
+                      setLabel(newValue)
+                    }}
+                    filterSelectedOptions
+                    renderInput={params => <TextField variant='filled' {...params} label='Label' placeholder='Label' />}
+                  />
+                </FormControl>
               </Grid>
 
               {/* <Grid item xs={12}>
@@ -680,10 +754,10 @@ const CreateSupportPackage = ({
               Save
             </Button>
             <Menu id='basic-menu' anchorEl={saveAnchorEl} open={saveMenuOpen} onClose={handleSaveSupportingPackage}>
-              <MenuItem onClick={handleSaveSupportingPackage}>Save Draft</MenuItem>
+              <MenuItem onClick={() => handleSaveSupportingPackage(true)}>Save Draft</MenuItem>
               <MenuItem
                 onClick={() => {
-                  handleSaveSupportingPackage()
+                  handleSaveSupportingPackage(false)
                 }}
               >
                 Save
@@ -962,7 +1036,7 @@ const CreateSupportPackage = ({
                       id='outlined-multiline-flexible'
                       label={
                         masterFileSelectedRange
-                          ? `Add Action Item for ${masterFileSelectedRange}`
+                          ? `Add Action Item for ${masterFileSelectedRange.range}`
                           : 'Select a cell/range to Add Action Item'
                       }
                       multiline
