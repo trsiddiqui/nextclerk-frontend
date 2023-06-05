@@ -57,7 +57,8 @@ import {
   TableBody,
   Checkbox,
   Backdrop,
-  CircularProgress
+  CircularProgress,
+  Snackbar
 } from '@mui/material'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import dayjs, { Dayjs } from 'dayjs'
@@ -85,20 +86,14 @@ import {
 } from '@syncfusion/ej2-react-spreadsheet'
 import { AutoCompleteComponent } from '@syncfusion/ej2-react-dropdowns'
 import {
-  getAllAccounts,
-  getAllCategories,
-  getAllCustomers,
-  getAllDepartments,
-  getAllLocations,
   searchUsers,
-  getActiveUser,
   uploadFile,
   chooseMasterFile,
   createMasterFile,
   getLatestMasterFile,
   uploadUpdatedFile,
-  getAllLabels,
-  createSupportingPackage
+  createSupportingPackage,
+  getOnlineViewLink
 } from 'src/utils/apiClient'
 import {
   AutocompleteRow,
@@ -110,7 +105,13 @@ import {
   isSupportedMimeType,
   mimetypeToIconImage
 } from 'src/@core/utils'
-import { MasterFileUploaded, SupportingPackageUserType, UploadedFileProps, User } from 'src/utils/types'
+import {
+  MasterFileUploaded,
+  SupportingPackageResponse,
+  SupportingPackageUserType,
+  UploadedFileProps,
+  User
+} from 'src/utils/types'
 import { FileUpload, FileUploadProps } from 'src/@core/components/custom/file-upload'
 
 enum ActionItemState {
@@ -153,27 +154,12 @@ const styles = {
   }
 }
 
-export async function getServerSideProps() {
-  // Fetch data from external API
-  const categories = await getAllCategories()
-  const accounts = await getAllAccounts()
-  const departments = await getAllDepartments()
-  const locations = await getAllLocations()
-  const customers = await getAllCustomers()
-  const labels = await getAllLabels()
-  const users = await searchUsers()
-  const activeUser = await getActiveUser()
-
-  // Pass data to the page via props
-  return { props: { categories, accounts, departments, locations, customers, activeUser, users, labels } }
-}
-
 type SpreadsheetRange = {
   range: string
   sheet: number
 }
 
-const CreateSupportPackage = ({
+const SupportingPackageForm = ({
   categories,
   accounts,
   departments,
@@ -181,7 +167,8 @@ const CreateSupportPackage = ({
   customers,
   activeUser,
   users,
-  labels
+  labels,
+  supportingPackage
 }: {
   categories: Array<AutocompleteRow>
   accounts: Array<DropDownRow>
@@ -191,23 +178,32 @@ const CreateSupportPackage = ({
   labels: Array<DropDownRow>
   users: User[]
   activeUser: { details: { id: string; name: string }; manager: { id: string; name: string } }
+  supportingPackage?: SupportingPackageResponse
 }) => {
   const theme = useTheme()
-  const [name, setName] = useState('')
-  const [number, setNumber] = useState('')
-  const [isConfidential, setIsConfidential] = useState<boolean>(false)
-  const [category, setCategory] = useState<{ label: string; uuid: string } | null>(null)
+  const [name, setName] = useState(supportingPackage?.title ?? '')
+  const [number, setNumber] = useState(supportingPackage?.number ?? '')
+  const [isConfidential, setIsConfidential] = useState<boolean>(supportingPackage?.isConfidential ?? false)
+  const [category, setCategory] = useState<{ label: string; uuid: string } | null>(
+    supportingPackage?.categoryName && supportingPackage?.categoryUUID
+      ? { label: supportingPackage?.categoryName, uuid: supportingPackage.categoryUUID }
+      : null
+  )
   const [loading, setLoading] = useState(false)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
   const [journalEntrySpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
   const [allCategories] = useState(categories)
   const [allLabels] = useState(labels)
-  const [label, setLabel] = useState<{ label: string; uuid: string } | null>(null)
-  const [date, setDate] = useState<Dayjs | null>(dayjs())
+  const [label, setLabel] = useState<{ label: string; uuid: string } | null>(
+    supportingPackage?.label && supportingPackage?.labelUUID
+      ? { label: supportingPackage?.label, uuid: supportingPackage.labelUUID }
+      : null
+  )
+  const [date, setDate] = useState<Dayjs | null>(dayjs(supportingPackage?.date))
   const [personnel, setPersonnel] = useState<Array<User>>(users)
   const [tab, setTab] = useState(0)
   const [multiPersonnelSelection, setMultiPersonnelSelection] = useState<User[]>([])
-  const [participants, setParticipants] = useState<User[]>([])
+  const [participants, setParticipants] = useState<User[]>(supportingPackage?.users ?? [])
   const [commentsTab, setCommentsTab] = useState(0)
   const [chooseMaterFileModalOpen, setChooseMaterFileModalOpen] = React.useState(false)
   const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false)
@@ -239,8 +235,29 @@ const CreateSupportPackage = ({
       cellRange: SpreadsheetRange
     }>
   >([])
-  const [masterFile, setMasterFile] = React.useState<MasterFileUploaded | null>()
-  const [attachments, setAttachments] = React.useState<UploadedFileProps[]>([])
+  const existingAttachments: UploadedFileProps[] | undefined = supportingPackage?.files.map(file => ({
+    mimetype: file.mimeType,
+    originalname: file.name,
+    size: file.size,
+    uploaded: {
+      uuid: file.uuid
+    }
+  }))
+  const [attachments, setAttachments] = React.useState<UploadedFileProps[]>(existingAttachments ?? [])
+  let existingMasterFile: MasterFileUploaded | null = null
+  const temp = supportingPackage?.files.find(file => file.isMaster === true)
+  if (temp) {
+    existingMasterFile = {
+      originalname: temp.name,
+      mimetype: temp.mimeType,
+      size: temp.size,
+      uploaded: {
+        uuid: temp.uuid
+      },
+      downloadUrl: temp.downloadUrl
+    }
+  }
+  const [masterFile, setMasterFile] = React.useState<MasterFileUploaded | null>(existingMasterFile)
   const [highlightedCells, sethighlightedCells] = React.useState<string[]>([])
   const [masterFileSelectedRange, setMasterFileSelectedRange] = useState<SpreadsheetRange | null>(null)
   const [currentActionItem, setCurrentActionItem] = useState('')
@@ -253,6 +270,17 @@ const CreateSupportPackage = ({
       state: ActionItemState
     }>
   >([])
+  const [openSnackBar, setOpenSnackBar] = useState(false)
+  const [snackBarMessage, setSnackBarMessage] = useState('')
+  const handleSnackBarClose = () => {
+    setSnackBarMessage('')
+    setOpenSnackBar(false)
+  }
+
+  // const showError = (message: string) => {
+  //   setSnackBarMessage(message)
+  //   setOpenSnackBar(true)
+  // }
 
   const handleUploadNotesFileOpen = () => setUploadNotesFileOpen(true)
   const handleUploadNotesFileClose = () => setUploadNotesFileOpen(false)
@@ -316,8 +344,11 @@ const CreateSupportPackage = ({
   // #region Master File / Spreadsheet
   function contextMenuBeforeOpen(): void {
     if (spreadsheet) {
-      spreadsheet.removeContextMenuItems(['Cut', 'Copy', 'Paste', 'Paste Special', 'Add Comment', 'Add File'], false)
-      spreadsheet.addContextMenuItems([{ text: 'Add Comment' }, { text: 'Add File' }], '', false) //To pass the items, Item before / after that the element to be inserted, Set false if the items need to be inserted before the text.
+      spreadsheet.removeContextMenuItems(
+        ['Cut', 'Copy', 'Paste', 'Paste Special', 'Add Comments/Attachments', 'Add Action Items'],
+        false
+      )
+      spreadsheet.addContextMenuItems([{ text: 'Add Comments/Attachments' }, { text: 'Add Action Items' }], '', false) //To pass the items, Item before / after that the element to be inserted, Set false if the items need to be inserted before the text.
 
       // Dont need now, hidden through CSS
       // spreadsheet.hideRibbonTabs(['File', 'Insert', 'Formulas', 'Data', 'View'], true)
@@ -336,7 +367,7 @@ const CreateSupportPackage = ({
       //     })
       //   })
       setLoading(true)
-      if (masterFile) {
+      if (masterFile?.downloadUrl) {
         fetch(masterFile?.downloadUrl) // fetch the remote url
           .then(response => {
             response.blob().then(fileBlob => {
@@ -372,8 +403,9 @@ const CreateSupportPackage = ({
   function contextMenuItemSelect(args: MenuSelectEventArgs) {
     if (spreadsheet) {
       switch (args.item.text) {
-        case 'Add Comment':
+        case 'Add Comments/Attachments':
           setRightDrawerVisible(true)
+          setCommentsTab(0)
           spreadsheet.selectRange(String(spreadsheet.getActiveSheet().selectedRange))
           setMasterFileSelectedRange({
             range: String(spreadsheet.getActiveSheet().selectedRange),
@@ -382,8 +414,16 @@ const CreateSupportPackage = ({
           spreadsheet.hideFileMenuItems(['File'], true)
           setSpreadsheet(spreadsheet)
           break
-        case 'Add File':
+        case 'Add Action Items':
           setRightDrawerVisible(true)
+          setCommentsTab(1)
+          spreadsheet.selectRange(String(spreadsheet.getActiveSheet().selectedRange))
+          setMasterFileSelectedRange({
+            range: String(spreadsheet.getActiveSheet().selectedRange),
+            sheet: spreadsheet.getActiveSheet().id!
+          })
+          spreadsheet.hideFileMenuItems(['File'], true)
+          setSpreadsheet(spreadsheet)
           break
       }
     }
@@ -570,25 +610,22 @@ const CreateSupportPackage = ({
     // Then open the new file with the spreadsheet component
     const resp = await chooseMasterFile(masterFileObject.uploaded.uuid)
     const downloadUrl = resp['@microsoft.graph.downloadUrl']
-    const sharingLink = resp['sharingLink']
 
     setMasterFile({
       ...masterFileObject,
-      downloadUrl,
-      sharingLink
+      downloadUrl
     })
-    // fetch(downloadUrl) // fetch the remote url
-    //   .then(response => {
-    //     response.blob().then(fileBlob => {
-    //       debugger
-    //       const file = new File([fileBlob], masterFileObject.originalname) //convert the blob into file
-    //       if (spreadsheet) {
-    //         spreadsheet.open({ file: file }) // open the file into Spreadsheet
-    //         // spreadsheet.hideFileMenuItems(['File'], true)
-    //         // spreadsheet.hideToolbarItems('Home', [19])
-    //       }
-    //     })
-    //   })
+    fetch(downloadUrl) // fetch the remote url
+      .then(response => {
+        response.blob().then(fileBlob => {
+          const file = new File([fileBlob], masterFileObject.originalname) //convert the blob into file
+          if (spreadsheet) {
+            spreadsheet.open({ file: file }) // open the file into Spreadsheet
+            // spreadsheet.hideFileMenuItems(['File'], true)
+            // spreadsheet.hideToolbarItems('Home', [19])
+          }
+        })
+      })
   }
 
   return (
@@ -810,9 +847,10 @@ const CreateSupportPackage = ({
                   <Button
                     variant='text'
                     endIcon={<LaunchIcon />}
-                    onClick={() => {
+                    onClick={async () => {
+                      const link = await getOnlineViewLink(masterFile.uploaded.uuid)
                       setFileOpenedInExcel(true)
-                      window.open(masterFile.sharingLink, '_default')
+                      window.open(link, '_default')
                     }}
                   >
                     View in Excel Online
@@ -1078,15 +1116,26 @@ const CreateSupportPackage = ({
                     .sort((a, b) => b.createdAt.diff(a.createdAt).as('millisecond'))
                     .map((actionItem, index) => (
                       <>
-                        <Grid container spacing={2} sx={{ padding: '0 1rem', mt: 4 }} key={index}>
+                        <Grid
+                          container
+                          spacing={2}
+                          sx={{ padding: '0 1rem', mt: 4, cursor: 'pointer' }}
+                          key={index}
+                          onClick={() => {
+                            onMasterSheetCommentClick(actionItem.cellRange)
+                          }}
+                        >
                           <Card
                             sx={{
                               minWidth: '100%',
-                              backgroundColor: actionItem.state === ActionItemState.COMPLETED ? 'green' : '#ffe595'
+                              backgroundColor: actionItem.state === ActionItemState.COMPLETED ? '#70c570' : '#ffe595'
                             }}
                           >
                             <CardContent>
-                              <Typography variant='body2' color='text.secondary'>
+                              <Typography
+                                variant='body2'
+                                color={actionItem.state === ActionItemState.COMPLETED ? 'white' : 'text.secondary'}
+                              >
                                 {actionItem.message}
                               </Typography>
                             </CardContent>
@@ -1109,6 +1158,7 @@ const CreateSupportPackage = ({
                                   const tempActionItems = actionItems.filter(item => item.message != actionItem.message)
                                   setActionItems([...tempActionItems])
                                 }}
+                                color='error'
                               >
                                 Delete
                               </Button>
@@ -1136,12 +1186,12 @@ const CreateSupportPackage = ({
                       setSpreadsheet(ssObj)
                     }
                   }}
-                  openUrl='https://ej2services.syncfusion.com/production/web-services/api/spreadsheet/open'
+                  openUrl='http://localhost:8080/api/spreadsheet/open'
                   allowOpen={true}
                   openComplete={() => {
                     setLoading(false)
                   }}
-                  saveUrl='https://ej2services.syncfusion.com/production/web-services/api/spreadsheet/save'
+                  saveUrl='http://localhost:8080/api/spreadsheet/save'
                   beforeSave={(args: BeforeSaveEventArgs) => {
                     args.needBlobData = true
                     args.fileName = masterFile.originalname
@@ -1201,73 +1251,73 @@ const CreateSupportPackage = ({
             </Grid>
           </TabPanel>
           <TabPanel value={tab} index={1} dir={theme.direction}>
-            <Container sx={{ padding: '20px 0px' }}>
-              <Paper sx={{ margin: '0px 0 30px 0' }}>
-                <Grid container sx={{ padding: '1rem 1rem' }}>
-                  <TextField
-                    fullWidth
-                    id='outlined-multiline-flexible'
-                    label='Add Comment(s)'
-                    multiline
-                    variant='standard'
-                    value={currentSPNote}
-                    onChange={event => setCurrentSPNote(event.target.value)}
-                    maxRows={4}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position='end'>
-                          <IconButton color='primary' onClick={handleUploadNotesFileOpen}>
-                            <AttachFileIcon />
-                          </IconButton>
+            <Container sx={{ padding: '10px 0px' }}>
+              {/* <Paper sx={{ margin: '0px 0 30px 0' }}> */}
+              <Grid container sx={{ padding: '1rem 1rem', marginBottom: '20px' }}>
+                <TextField
+                  fullWidth
+                  id='outlined-multiline-flexible'
+                  label='Add Comment(s)'
+                  multiline
+                  variant='standard'
+                  value={currentSPNote}
+                  onChange={event => setCurrentSPNote(event.target.value)}
+                  maxRows={4}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton color='primary' onClick={handleUploadNotesFileOpen}>
+                          <AttachFileIcon />
+                        </IconButton>
 
-                          <IconButton
-                            edge='end'
-                            color='primary'
-                            onClick={() => {
-                              setSPNotes(
-                                SPNotes.concat({
-                                  message: currentSPNote,
-                                  file: notesFile,
-                                  user: activeUser.details,
-                                  createdAt: DateTime.now()
-                                })
-                              )
-                              setCurrentSPNote('')
-                              setNotesFile(null)
-                            }}
-                          >
-                            <SendIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      )
+                        <IconButton
+                          edge='end'
+                          color='primary'
+                          onClick={() => {
+                            setSPNotes(
+                              SPNotes.concat({
+                                message: currentSPNote,
+                                file: notesFile,
+                                user: activeUser.details,
+                                createdAt: DateTime.now()
+                              })
+                            )
+                            setCurrentSPNote('')
+                            setNotesFile(null)
+                          }}
+                        >
+                          <SendIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                />
+                {notesFile ? (
+                  <Chip
+                    color='primary'
+                    label={`${notesFile.originalname} (${(notesFile.size / 1024).toFixed(1)} KB)`}
+                    variant={masterFile?.originalname === notesFile.originalname ? 'filled' : 'outlined'}
+                    avatar={
+                      isSupportedMimeType(notesFile.mimetype) ? (
+                        <Avatar
+                          alt='Flora'
+                          src={`${
+                            process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                          }${mimetypeToIconImage(notesFile.mimetype)}`}
+                        />
+                      ) : undefined
+                    }
+                    onDelete={() => {
+                      // TODO: CALL API TO DELETE THE ATTACHED FILE
+                      setNotesFile(null)
                     }}
+                    sx={{ marginLeft: 3 }}
                   />
-                  {notesFile ? (
-                    <Chip
-                      color='primary'
-                      label={`${notesFile.originalname} (${(notesFile.size / 1024).toFixed(1)} KB)`}
-                      variant={masterFile?.originalname === notesFile.originalname ? 'filled' : 'outlined'}
-                      avatar={
-                        isSupportedMimeType(notesFile.mimetype) ? (
-                          <Avatar
-                            alt='Flora'
-                            src={`${
-                              process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-                            }${mimetypeToIconImage(notesFile.mimetype)}`}
-                          />
-                        ) : undefined
-                      }
-                      onDelete={() => {
-                        // TODO: CALL API TO DELETE THE ATTACHED FILE
-                        setNotesFile(null)
-                      }}
-                      sx={{ marginLeft: 3 }}
-                    />
-                  ) : (
-                    <></>
-                  )}
-                </Grid>
-              </Paper>
+                ) : (
+                  <></>
+                )}
+              </Grid>
+              {/* </Paper> */}
               {SPNotes.sort((a, b) => b.createdAt.diff(a.createdAt).as('millisecond')).map((note, index) => (
                 <>
                   <Grid container wrap='nowrap' spacing={2} key={index}>
@@ -1763,7 +1813,7 @@ const CreateSupportPackage = ({
                     setMasterFile(null)
                     setTimeout(() => {
                       setMasterFile(tempMasterFile)
-                    }, 1000)
+                    }, 100)
                   }
                   setFileOpenedInExcel(false)
                 }}
@@ -1832,8 +1882,16 @@ const CreateSupportPackage = ({
       <Backdrop sx={{ color: '#fff', zIndex: 9999999 }} open={loading}>
         <CircularProgress color='inherit' />
       </Backdrop>
+
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        open={openSnackBar}
+        autoHideDuration={10000}
+        onClose={handleSnackBarClose}
+        message={snackBarMessage}
+      />
     </Grid>
   )
 }
 
-export default CreateSupportPackage
+export default SupportingPackageForm

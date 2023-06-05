@@ -1,5 +1,14 @@
 import axios from 'axios'
-import { Account, Customer, Department, Location, MasterFileUploaded, UploadedFileProps, User } from './types'
+import {
+  Account,
+  Customer,
+  Department,
+  Location,
+  MasterFileUploaded,
+  SupportingPackageResponse,
+  UploadedFileProps,
+  User
+} from './types'
 import { DropDownRow } from 'src/@core/utils'
 
 const api = axios.create({
@@ -58,7 +67,6 @@ export const getAllCustomers = async () => {
 
 export const getAllLabels = async () => {
   const labels = await api.get<Customer[]>(`/${customerXRefID}/labels`)
-  console.log(labels)
 
   return labels.data.map(label => ({
     label: label.label,
@@ -74,16 +82,18 @@ export const searchUsers = async (str?: string): Promise<User[]> => {
 }
 
 export const getActiveUser = async () => {
-  return Promise.resolve({
+  const users = (await api.get<User[]>(`/${customerXRefID}/users`)).data
+
+  return {
     details: {
-      id: 'xyz-asd-vnkd',
-      name: 'Taha Siddiqui'
+      id: users[0].uuid,
+      name: `${users[0].firstName} ${users[0].lastName}`
     },
     manager: {
-      id: 'abcd-efg-hijkl',
-      name: 'Majid Razmjoo'
+      id: users[1].uuid,
+      name: `${users[1].firstName} ${users[1].lastName}`
     }
-  })
+  }
 }
 
 export const uploadFile = async (file: File): Promise<UploadedFileProps> => {
@@ -143,5 +153,19 @@ export const uploadUpdatedFile = async (file: File, fileUuid: string): Promise<v
 }
 
 export const createSupportingPackage = async (supportingPackage: unknown): Promise<void> => {
-  await api.post(`/global/${customerXRefID}/supporting-packages`, supportingPackage)
+  await api.post(`/${customerXRefID}/supporting-packages`, supportingPackage)
+}
+
+export const getSupportingPackage = async (supportingPackageXRefID: string): Promise<SupportingPackageResponse> => {
+  const response = await api.get<SupportingPackageResponse>(
+    `/${customerXRefID}/supporting-packages/${supportingPackageXRefID}`
+  )
+
+  return response.data
+}
+
+export const getOnlineViewLink = async (fileUuid: string): Promise<string> => {
+  const response = await api.get<string>(`/global/${customerXRefID}/files/${fileUuid}/online-link`, {})
+
+  return response.data
 }
