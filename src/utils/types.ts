@@ -5,6 +5,11 @@ export type User = {
   uuid: string
 }
 
+export enum ActionItemState {
+  TODO = 'TODO',
+  COMPLETED = 'COMPLETED'
+}
+
 export type UploadedFileProps = {
   // eslint-disable-next-line lines-around-comment
   /** Name of the file on the uploader's computer. */
@@ -100,5 +105,39 @@ export type SupportingPackageResponse = {
     // only available for masterFile
     downloadUrl?: string
   }[]
-  communications: []
+  communications: [
+    {
+      uuid: string
+      text: string
+      cellLink: {
+        range: string
+        sheet: string
+      }
+      isCellLinkValid: boolean
+      replyToCommunicationUUID: string | null
+      isChangeRequest: false
+      status: ActionItemState
+      createdBy: string
+      createdAt: string
+      updatedBy: string
+      updatedAt: string
+      archivedBy: string | null
+      archivedAt: string | null
+      users: [
+        {
+          firstName: string
+          lastName: string
+          type: 'PARTICIPANTS'
+          uuid: string
+        }
+      ]
+      attachments: [
+        {
+          mimeType: string
+          name: string
+          uuid: string
+        }
+      ]
+    }
+  ]
 }

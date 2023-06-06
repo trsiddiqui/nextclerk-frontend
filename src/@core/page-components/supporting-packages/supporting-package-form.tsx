@@ -60,6 +60,7 @@ import {
   CircularProgress,
   Snackbar
 } from '@mui/material'
+import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import dayjs, { Dayjs } from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -92,7 +93,6 @@ import {
   createMasterFile,
   getLatestMasterFile,
   uploadUpdatedFile,
-  createSupportingPackage,
   getOnlineViewLink
 } from 'src/utils/apiClient'
 import {
@@ -106,6 +106,7 @@ import {
   mimetypeToIconImage
 } from 'src/@core/utils'
 import {
+  ActionItemState,
   MasterFileUploaded,
   SupportingPackageResponse,
   SupportingPackageUserType,
@@ -113,11 +114,6 @@ import {
   User
 } from 'src/utils/types'
 import { FileUpload, FileUploadProps } from 'src/@core/components/custom/file-upload'
-
-enum ActionItemState {
-  TODO = 'TODO',
-  COMPLETED = 'COMPLETED'
-}
 
 const styles = {
   modalStyle: {
@@ -159,6 +155,10 @@ type SpreadsheetRange = {
   sheet: number
 }
 
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
+})
+
 const SupportingPackageForm = ({
   categories,
   accounts,
@@ -168,6 +168,7 @@ const SupportingPackageForm = ({
   activeUser,
   users,
   labels,
+  saveSupportingPackageMethod,
   supportingPackage
 }: {
   categories: Array<AutocompleteRow>
@@ -178,8 +179,10 @@ const SupportingPackageForm = ({
   labels: Array<DropDownRow>
   users: User[]
   activeUser: { details: { id: string; name: string }; manager: { id: string; name: string } }
+  saveSupportingPackageMethod: (...args: any) => Promise<any>
   supportingPackage?: SupportingPackageResponse
 }) => {
+  console.log(supportingPackage)
   const theme = useTheme()
   const [name, setName] = useState(supportingPackage?.title ?? '')
   const [number, setNumber] = useState(supportingPackage?.number ?? '')
@@ -221,9 +224,96 @@ const SupportingPackageForm = ({
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
   const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
   const [currentSPNote, setCurrentSPNote] = useState('')
+
+  const supportingPackageNotes: Array<{
+    message: string
+    file: UploadedFileProps | null
+    user: { id: string; name: string }
+    createdAt: DateTime
+  }> =
+    supportingPackage?.communications
+      .filter(comm => comm.cellLink == null || comm.cellLink.range == null)
+      .map(comm => ({
+        // TODO: Return name of creator user
+        user: { id: comm.createdBy, name: '' },
+        createdAt: DateTime.fromISO(comm.createdAt),
+        message: comm.text,
+        ...(comm.attachments.length > 0
+          ? {
+              file: {
+                mimetype: comm.attachments[0].mimeType,
+                originalname: comm.attachments[0].name,
+                uploaded: { uuid: comm.attachments[0].uuid },
+                size: 0
+                // TODO: Return size in the API
+              }
+            }
+          : { file: null })
+      })) ?? []
+
+  const supportingPackageMasterFileComments: Array<{
+    message: string
+    file: UploadedFileProps | null
+    user: {
+      id: string
+      name: string
+    }
+    createdAt: DateTime
+    cellRange: SpreadsheetRange
+  }> =
+    supportingPackage?.communications
+      .filter(comm => comm.cellLink != null && comm.cellLink.range != null && comm.status == null)
+      .map(comm => ({
+        // TODO: Return name of creator user
+        message: comm.text,
+        user: { id: comm.createdBy, name: '' },
+        createdAt: DateTime.fromISO(comm.createdAt),
+        ...(comm.attachments.length > 0
+          ? {
+              file: {
+                mimetype: comm.attachments[0].mimeType,
+                originalname: comm.attachments[0].name,
+                uploaded: { uuid: comm.attachments[0].uuid },
+                size: 0
+                // TODO: Return size in the API
+              }
+            }
+          : { file: null }),
+        cellRange: {
+          range: comm.cellLink.range,
+          sheet: parseInt(comm.cellLink.sheet)
+        }
+      })) ?? []
+
+  const supportingPackageActionItems: Array<{
+    message: string
+    user: { id: string; name: string }
+    createdAt: DateTime
+    cellRange: SpreadsheetRange
+    state: ActionItemState
+  }> =
+    supportingPackage?.communications
+      .filter(comm => comm.status != null)
+      .map(comm => ({
+        // TODO: Return name of creator user
+        user: { id: comm.createdBy, name: 'Dummy User' },
+        createdAt: DateTime.fromISO(comm.createdAt),
+        message: comm.text,
+        state: comm.status,
+        cellRange: {
+          range: comm.cellLink.range,
+          sheet: parseInt(comm.cellLink.sheet)
+        }
+      })) ?? []
+
   const [SPNotes, setSPNotes] = useState<
-    Array<{ message: string; file: UploadedFileProps | null; user: { id: string; name: string }; createdAt: DateTime }>
-  >([])
+    Array<{
+      message: string
+      file: UploadedFileProps | null
+      user: { id: string; name: string }
+      createdAt: DateTime
+    }>
+  >(supportingPackageNotes)
   const [currentMasterFileComment, setCurrentMasterFileComment] = useState('')
   const [masterFileCommentFile, setMasterFileCommentFile] = React.useState<UploadedFileProps | null>(null)
   const [masterFileComments, setMasterFileComments] = useState<
@@ -234,7 +324,7 @@ const SupportingPackageForm = ({
       createdAt: DateTime
       cellRange: SpreadsheetRange
     }>
-  >([])
+  >(supportingPackageMasterFileComments)
   const existingAttachments: UploadedFileProps[] | undefined = supportingPackage?.files.map(file => ({
     mimetype: file.mimeType,
     originalname: file.name,
@@ -269,18 +359,37 @@ const SupportingPackageForm = ({
       cellRange: SpreadsheetRange
       state: ActionItemState
     }>
-  >([])
+  >(supportingPackageActionItems)
+  enum SnackBarType {
+    Success = 'success',
+    Error = 'error',
+    Info = 'info'
+  }
   const [openSnackBar, setOpenSnackBar] = useState(false)
   const [snackBarMessage, setSnackBarMessage] = useState('')
+  const [snackBarType, setSnackBarType] = useState<SnackBarType>(SnackBarType.Success)
   const handleSnackBarClose = () => {
     setSnackBarMessage('')
     setOpenSnackBar(false)
   }
 
-  // const showError = (message: string) => {
-  //   setSnackBarMessage(message)
-  //   setOpenSnackBar(true)
-  // }
+  const showMessage = (message: string, type: SnackBarType) => {
+    setSnackBarMessage(message)
+    setSnackBarType(type)
+    setOpenSnackBar(true)
+  }
+
+  const APICallWrapper = async (method: (...args: any[]) => any, args?: any, errorMessage?: string): Promise<any> => {
+    try {
+      const resp = await method(...args)
+
+      return resp
+    } catch (err) {
+      console.error(err)
+      setLoading(false)
+      showMessage(errorMessage ?? 'An error occurred', SnackBarType.Error)
+    }
+  }
 
   const handleUploadNotesFileOpen = () => setUploadNotesFileOpen(true)
   const handleUploadNotesFileClose = () => setUploadNotesFileOpen(false)
@@ -322,7 +431,11 @@ const SupportingPackageForm = ({
     onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.files !== null && event.target?.files?.length > 0) {
         setLoading(true)
-        const resp = await uploadFile(event.target.files[0])
+        const resp = await APICallWrapper(
+          uploadFile,
+          [event.target.files[0]],
+          'An error occurred while attempting to upload the file. Please contact support.'
+        )
         setLoading(false)
         if (resp != null) {
           params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
@@ -332,7 +445,11 @@ const SupportingPackageForm = ({
     },
     onDrop: async (event: React.DragEvent<HTMLElement>) => {
       setLoading(true)
-      const resp = await uploadFile(event.dataTransfer.files[0])
+      const resp = await APICallWrapper(
+        uploadFile,
+        [event.dataTransfer.files[0]],
+        'An error occurred while attempting to upload the file. Please contact support.'
+      )
       setLoading(false)
       if (resp != null) {
         params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
@@ -524,7 +641,7 @@ const SupportingPackageForm = ({
         status: actionItem.state
       }))
     )
-
+    debugger
     const supportingPackage = {
       number,
       title: name,
@@ -543,7 +660,16 @@ const SupportingPackageForm = ({
       communications
     }
 
-    await createSupportingPackage(supportingPackage)
+    await APICallWrapper(
+      saveSupportingPackageMethod,
+      [supportingPackage],
+      'An error occurred while attempting to upload the file. Please contact support.'
+    )
+
+    showMessage(
+      'The Supporting Package has been saved successfully. (TODO: Navigate to Supporting Package Dashboard when done)',
+      SnackBarType.Success
+    )
   }
   // #endregion
 
@@ -608,7 +734,8 @@ const SupportingPackageForm = ({
     const masterFileObject = attachments.find(attachment => attachment.uploaded.uuid === uuid)!
     // TODO: Call API to Upload master file to excel
     // Then open the new file with the spreadsheet component
-    const resp = await chooseMasterFile(masterFileObject.uploaded.uuid)
+    const resp = await APICallWrapper(chooseMasterFile, [masterFileObject.uploaded.uuid])
+    // const resp = await chooseMasterFile(masterFileObject.uploaded.uuid)
     const downloadUrl = resp['@microsoft.graph.downloadUrl']
 
     setMasterFile({
@@ -848,7 +975,8 @@ const SupportingPackageForm = ({
                     variant='text'
                     endIcon={<LaunchIcon />}
                     onClick={async () => {
-                      const link = await getOnlineViewLink(masterFile.uploaded.uuid)
+                      const link = await APICallWrapper(getOnlineViewLink, [masterFile.uploaded.uuid])
+                      // const link = await getOnlineViewLink(masterFile.uploaded.uuid)
                       setFileOpenedInExcel(true)
                       window.open(link, '_default')
                     }}
@@ -916,7 +1044,6 @@ const SupportingPackageForm = ({
                     <Tab label='Comments' />
                     <Tab label='Action Items' />
                   </Tabs>
-                  <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'></Typography>
                   <IconButton
                     edge='start'
                     color='inherit'
@@ -1200,7 +1327,8 @@ const SupportingPackageForm = ({
                     const blob = args.blobData
                     const file = new File([blob], masterFile.originalname)
                     // TODO: Need to call a different endpoint to save this file in S3 and Sharepoint
-                    await uploadUpdatedFile(file, masterFile.uploaded.uuid)
+                    await APICallWrapper(uploadUpdatedFile, [file, masterFile.uploaded.uuid])
+                    // await uploadUpdatedFile(file, masterFile.uploaded.uuid)
                   }}
                   created={oncreated.bind(this)}
                 ></SpreadsheetComponent>
@@ -1217,7 +1345,7 @@ const SupportingPackageForm = ({
                       >
                         <CloudUploadIcon sx={{ color: 'blue', fontSize: 60 }} />
                       </IconButton>
-                      <Typography>Upload File(s) to Start</Typography>
+                      <Typography component='div'>Upload File(s) to Start</Typography>
                     </Box>
                   </Grid>
                   <Grid item xs={6} textAlign='left' paddingLeft='30px' style={{ marginTop: 80 }}>
@@ -1231,7 +1359,8 @@ const SupportingPackageForm = ({
                           // TODO: Call API to create a master excel file
                           // Then set the response filename to attachments as well as set as master file
                           setLoading(true)
-                          const masterFileUploaded = await createMasterFile()
+                          const masterFileUploaded = await APICallWrapper(createMasterFile, [])
+                          // const masterFileUploaded = await createMasterFile()
                           setMasterFile(masterFileUploaded)
                           setAttachments(attachments.concat(masterFileUploaded))
                         }}
@@ -1243,7 +1372,7 @@ const SupportingPackageForm = ({
                           }/images/icons/excel.png`}
                         />
                       </IconButton>
-                      <Typography>Create a Master Microsoft Excel File</Typography>
+                      <Typography component='div'>Create a Master Microsoft Excel File</Typography>
                     </Box>
                   </Grid>
                 </>
@@ -1511,7 +1640,7 @@ const SupportingPackageForm = ({
           </Grid>
           {attachments.length > 0 ? (
             <Grid item xs={12} sm={4} alignContent='end' textAlign='right'>
-              <Typography variant='body2' sx={{ fontWeight: 600 }}>
+              <Typography component={'span'} variant='body2' sx={{ fontWeight: 600 }}>
                 <Link onClick={handleChooseMaterFileModalOpen}>Choose Master File</Link>
               </Typography>
             </Grid>
@@ -1577,7 +1706,8 @@ const SupportingPackageForm = ({
                 onKeyDown={async event => {
                   if (event.key === 'Enter') {
                     setLoading(true)
-                    const users = await searchUsers(personnelSearchQuery)
+                    const users = await APICallWrapper(searchUsers, [personnelSearchQuery])
+                    // const users = await searchUsers(personnelSearchQuery)
                     setLoading(false)
                     setPersonnel(users)
                   }
@@ -1588,7 +1718,8 @@ const SupportingPackageForm = ({
                 aria-label='search'
                 onClick={async () => {
                   setLoading(true)
-                  const users = await searchUsers(personnelSearchQuery)
+                  const users = await APICallWrapper(searchUsers, [personnelSearchQuery])
+                  // const users = await searchUsers(personnelSearchQuery)
                   setLoading(false)
                   setPersonnel(users)
                 }}
@@ -1655,7 +1786,8 @@ const SupportingPackageForm = ({
                 onKeyDown={async event => {
                   if (event.key === 'Enter') {
                     setLoading(true)
-                    const users = await searchUsers(personnelSearchQuery)
+                    const users = await APICallWrapper(searchUsers, [personnelSearchQuery])
+                    // const users = await searchUsers(personnelSearchQuery)
                     setLoading(false)
                     setPersonnel(users)
                   }
@@ -1666,7 +1798,8 @@ const SupportingPackageForm = ({
                 aria-label='search'
                 onClick={async () => {
                   setLoading(true)
-                  const users = await searchUsers(personnelSearchQuery)
+                  const users = await APICallWrapper(searchUsers, [personnelSearchQuery])
+                  // const users = await searchUsers(personnelSearchQuery)
                   setLoading(false)
                   setPersonnel(users)
                 }}
@@ -1751,7 +1884,8 @@ const SupportingPackageForm = ({
                 aria-labelledby='demo-radio-buttons-group-label'
                 name='radio-buttons-group'
                 onChange={async event => {
-                  await selectMasterFile(event.target.value)
+                  await APICallWrapper(selectMasterFile, [event.target.value])
+                  // await selectMasterFile(event.target.value)
                   handleChooseMaterFileModalClose()
                 }}
                 defaultValue={masterFile?.uploaded.uuid}
@@ -1808,7 +1942,8 @@ const SupportingPackageForm = ({
                 onClick={async () => {
                   if (masterFile) {
                     setLoading(true)
-                    await getLatestMasterFile(masterFile?.uploaded.uuid)
+                    await APICallWrapper(getLatestMasterFile, [masterFile?.uploaded.uuid])
+                    // await getLatestMasterFile(masterFile?.uploaded.uuid)
                     const tempMasterFile = masterFile
                     setMasterFile(null)
                     setTimeout(() => {
@@ -1884,12 +2019,15 @@ const SupportingPackageForm = ({
       </Backdrop>
 
       <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         open={openSnackBar}
         autoHideDuration={10000}
         onClose={handleSnackBarClose}
-        message={snackBarMessage}
-      />
+      >
+        <Alert onClose={handleSnackBarClose} severity={snackBarType} sx={{ width: '100%' }}>
+          {snackBarMessage}
+        </Alert>
+      </Snackbar>
     </Grid>
   )
 }

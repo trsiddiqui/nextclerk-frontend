@@ -153,7 +153,11 @@ export const uploadUpdatedFile = async (file: File, fileUuid: string): Promise<v
 }
 
 export const createSupportingPackage = async (supportingPackage: unknown): Promise<void> => {
-  await api.post(`/${customerXRefID}/supporting-packages`, supportingPackage)
+  return await api.post(`/${customerXRefID}/supporting-packages`, supportingPackage)
+}
+
+export const updateSupportingPackage = async (supportingPackage: unknown): Promise<void> => {
+  return await api.put(`/${customerXRefID}/supporting-packages`, supportingPackage)
 }
 
 export const getSupportingPackage = async (supportingPackageXRefID: string): Promise<SupportingPackageResponse> => {

@@ -9,7 +9,8 @@ import {
   getAllLocations,
   searchUsers,
   getActiveUser,
-  getAllLabels
+  getAllLabels,
+  createSupportingPackage
 } from 'src/utils/apiClient'
 import { AutocompleteRow, DropDownRow } from 'src/@core/utils'
 import { User } from 'src/utils/types'
@@ -59,6 +60,7 @@ const CreateSupportPackage = ({
       labels={labels}
       locations={locations}
       users={users}
+      saveSupportingPackageMethod={createSupportingPackage}
     ></SupportingPackageForm>
   )
 }
