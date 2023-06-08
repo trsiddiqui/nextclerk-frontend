@@ -23,14 +23,14 @@ export async function getServerSideProps({
   params: { supportingPackageXRefID: string }
 }) {
   // Fetch data from external API
-  const categories = await getAllCategories()
-  const accounts = await getAllAccounts()
-  const departments = await getAllDepartments()
-  const locations = await getAllLocations()
-  const customers = await getAllCustomers()
-  const labels = await getAllLabels()
-  const users = await searchUsers()
-  const activeUser = await getActiveUser()
+  const categories = await getAllCategories(true)
+  const accounts = await getAllAccounts(true)
+  const departments = await getAllDepartments(true)
+  const locations = await getAllLocations(true)
+  const customers = await getAllCustomers(true)
+  const labels = await getAllLabels(true)
+  const users = await searchUsers(undefined, true)
+  const activeUser = await getActiveUser(true)
 
   const supportingPackage = await getSupportingPackage(supportingPackageXRefID)
 

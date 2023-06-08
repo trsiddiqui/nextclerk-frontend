@@ -15,18 +15,22 @@ const api = axios.create({
   baseURL: process.env.NODE_ENV === 'production' ? 'http://test.nextclerk.com:3000/api' : 'http://localhost:3000/api/'
 })
 
+const backendApi = axios.create({
+  baseURL: 'http://localhost:3000/api/'
+})
+
 // TODO: This should come from the JWT
 // Currently coming from backend seeds
 const customerXRefID = 'f590257b-a925-45d3-b980-26ff13faf64e'
 
-export const getAllCategories = async () => {
-  const categories = await api.get<User[]>(`/${customerXRefID}/categories`)
+export const getAllCategories = async (isBackend = false) => {
+  const categories = await (isBackend ? backendApi : api).get<User[]>(`/${customerXRefID}/categories`)
 
   return categories.data
 }
 
-export const getAllAccounts = async (): Promise<DropDownRow[]> => {
-  const accounts = await api.get<Account[]>(`/${customerXRefID}/accounts`)
+export const getAllAccounts = async (isBackend = false): Promise<DropDownRow[]> => {
+  const accounts = await (isBackend ? backendApi : api).get<Account[]>(`/${customerXRefID}/accounts`)
 
   return accounts.data.map(account => ({
     label: account.label,
@@ -35,8 +39,8 @@ export const getAllAccounts = async (): Promise<DropDownRow[]> => {
   }))
 }
 
-export const getAllDepartments = async (): Promise<DropDownRow[]> => {
-  const departments = await api.get<Department[]>(`/${customerXRefID}/departments`)
+export const getAllDepartments = async (isBackend = false): Promise<DropDownRow[]> => {
+  const departments = await (isBackend ? backendApi : api).get<Department[]>(`/${customerXRefID}/departments`)
 
   return departments.data.map(department => ({
     label: department.label,
@@ -45,8 +49,8 @@ export const getAllDepartments = async (): Promise<DropDownRow[]> => {
   }))
 }
 
-export const getAllLocations = async () => {
-  const locations = await api.get<Location[]>(`/${customerXRefID}/locations`)
+export const getAllLocations = async (isBackend = false) => {
+  const locations = await (isBackend ? backendApi : api).get<Location[]>(`/${customerXRefID}/locations`)
 
   return locations.data.map(location => ({
     label: location.label,
@@ -55,8 +59,8 @@ export const getAllLocations = async () => {
   }))
 }
 
-export const getAllCustomers = async () => {
-  const customers = await api.get<Customer[]>(`/${customerXRefID}/customers`)
+export const getAllCustomers = async (isBackend = false) => {
+  const customers = await (isBackend ? backendApi : api).get<Customer[]>(`/${customerXRefID}/customers`)
 
   return customers.data.map(customer => ({
     label: customer.label,
@@ -65,8 +69,8 @@ export const getAllCustomers = async () => {
   }))
 }
 
-export const getAllLabels = async () => {
-  const labels = await api.get<Customer[]>(`/${customerXRefID}/labels`)
+export const getAllLabels = async (isBackend = false) => {
+  const labels = await (isBackend ? backendApi : api).get<Customer[]>(`/${customerXRefID}/labels`)
 
   return labels.data.map(label => ({
     label: label.label,
@@ -75,14 +79,16 @@ export const getAllLabels = async () => {
   }))
 }
 
-export const searchUsers = async (str?: string): Promise<User[]> => {
-  const users = await api.get<User[]>(`/${customerXRefID}/users${str ? `?search=${str}` : ''}`)
+export const searchUsers = async (str?: string, isBackend = false): Promise<User[]> => {
+  const users = await (isBackend ? backendApi : api).get<User[]>(
+    `/${customerXRefID}/users${str ? `?search=${str}` : ''}`
+  )
 
   return users.data
 }
 
-export const getActiveUser = async () => {
-  const users = (await api.get<User[]>(`/${customerXRefID}/users`)).data
+export const getActiveUser = async (isBackend = false) => {
+  const users = (await (isBackend ? backendApi : api).get<User[]>(`/${customerXRefID}/users`)).data
 
   return {
     details: {
@@ -96,26 +102,31 @@ export const getActiveUser = async () => {
   }
 }
 
-export const uploadFile = async (file: File): Promise<UploadedFileProps> => {
+export const uploadFile = async (file: File, isBackend = false): Promise<UploadedFileProps> => {
   const formData = new FormData()
   formData.append('file', file)
 
-  const response = await api.post<UploadedFileProps>(`/global/${customerXRefID}/actions/upload-file`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
+  const response = await (isBackend ? backendApi : api).post<UploadedFileProps>(
+    `/global/${customerXRefID}/actions/upload-file`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     }
-  })
+  )
 
   return response.data
 }
 
 export const chooseMasterFile = async (
-  fileUuid: string
+  fileUuid: string,
+  isBackend = false
 ): Promise<{
   '@microsoft.graph.downloadUrl': string
   sharingLink: string
 }> => {
-  const response = await api.post<{
+  const response = await (isBackend ? backendApi : api).post<{
     '@microsoft.graph.downloadUrl': string
     sharingLink: string
   }>(`/global/${customerXRefID}/files/${fileUuid}`, {})
@@ -123,53 +134,60 @@ export const chooseMasterFile = async (
   return response.data
 }
 
-export const createMasterFile = async (): Promise<MasterFileUploaded> => {
-  const response = await api.post<MasterFileUploaded>(`/global/${customerXRefID}/files`, {})
+export const createMasterFile = async (isBackend = false): Promise<MasterFileUploaded> => {
+  const response = await (isBackend ? backendApi : api).post<MasterFileUploaded>(`/global/${customerXRefID}/files`, {})
 
   return response.data
 }
 
 export const getLatestMasterFile = async (
-  fileUuid: string
+  fileUuid: string,
+  isBackend = false
 ): Promise<{
   '@microsoft.graph.downloadUrl': string
 }> => {
-  const response = await api.get<{
+  const response = await (isBackend ? backendApi : api).get<{
     '@microsoft.graph.downloadUrl': string
   }>(`/global/${customerXRefID}/files/${fileUuid}`, {})
 
   return response.data
 }
 
-export const uploadUpdatedFile = async (file: File, fileUuid: string): Promise<void> => {
+export const uploadUpdatedFile = async (file: File, fileUuid: string, isBackend = false): Promise<void> => {
   const formData = new FormData()
   formData.append('file', file)
 
-  await api.put(`/global/${customerXRefID}/files/${fileUuid}`, formData, {
+  await (isBackend ? backendApi : api).put(`/global/${customerXRefID}/files/${fileUuid}`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
   })
 }
 
-export const createSupportingPackage = async (supportingPackage: unknown): Promise<void> => {
-  return await api.post(`/${customerXRefID}/supporting-packages`, supportingPackage)
+export const createSupportingPackage = async (supportingPackage: unknown, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).post(`/${customerXRefID}/supporting-packages`, supportingPackage)
 }
 
-export const updateSupportingPackage = async (supportingPackage: unknown): Promise<void> => {
-  return await api.put(`/${customerXRefID}/supporting-packages`, supportingPackage)
+export const updateSupportingPackage = async (supportingPackage: unknown, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).put(`/${customerXRefID}/supporting-packages`, supportingPackage)
 }
 
-export const getSupportingPackage = async (supportingPackageXRefID: string): Promise<SupportingPackageResponse> => {
-  const response = await api.get<SupportingPackageResponse>(
+export const getSupportingPackage = async (
+  supportingPackageXRefID: string,
+  isBackend = false
+): Promise<SupportingPackageResponse> => {
+  const response = await (isBackend ? backendApi : api).get<SupportingPackageResponse>(
     `/${customerXRefID}/supporting-packages/${supportingPackageXRefID}`
   )
 
   return response.data
 }
 
-export const getOnlineViewLink = async (fileUuid: string): Promise<string> => {
-  const response = await api.get<string>(`/global/${customerXRefID}/files/${fileUuid}/online-link`, {})
+export const getOnlineViewLink = async (fileUuid: string, isBackend = false): Promise<string> => {
+  const response = await (isBackend ? backendApi : api).get<string>(
+    `/global/${customerXRefID}/files/${fileUuid}/online-link`,
+    {}
+  )
 
   return response.data
 }
