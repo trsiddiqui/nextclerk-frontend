@@ -43,7 +43,7 @@
   ],
   "scripts": {
     "dev": "next dev -p 9004",
-    "start": "next start -p 9004",
+    "start": "next build && next start -p 9004",
     "build": "next build",
     "export": "next export",
     "lint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",

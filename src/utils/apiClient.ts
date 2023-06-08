@@ -12,7 +12,7 @@ import {
 import { DropDownRow } from 'src/@core/utils'
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api/'
+  baseURL: process.env.NODE_ENV === 'production' ? 'http://test.nextclerk.com:3000/api' : 'http://localhost:3000/api/'
 })
 
 // TODO: This should come from the JWT
