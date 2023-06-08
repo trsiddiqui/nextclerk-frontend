@@ -93,7 +93,8 @@ import {
   createMasterFile,
   getLatestMasterFile,
   uploadUpdatedFile,
-  getOnlineViewLink
+  getOnlineViewLink,
+  syncfusionWebApiUrls
 } from 'src/utils/apiClient'
 import {
   AutocompleteRow,
@@ -476,13 +477,6 @@ const SupportingPackageForm = ({
 
   function oncreated(): void {
     if (spreadsheet) {
-      // fetch('http://localhost:3000/customerXRefID/supporting-packages/123/lineItems/sheet') // fetch the remote url
-      //   .then(response => {
-      //     response.blob().then(fileBlob => {
-      //       const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
-      //       spreadsheet.open({ file: file }) // open the file into Spreadsheet
-      //     })
-      //   })
       setLoading(true)
       if (masterFile?.downloadUrl) {
         fetch(masterFile?.downloadUrl) // fetch the remote url
@@ -1313,12 +1307,12 @@ const SupportingPackageForm = ({
                       setSpreadsheet(ssObj)
                     }
                   }}
-                  openUrl='http://localhost:8080/api/spreadsheet/open'
+                  openUrl={syncfusionWebApiUrls().openUrl}
                   allowOpen={true}
                   openComplete={() => {
                     setLoading(false)
                   }}
-                  saveUrl='http://localhost:8080/api/spreadsheet/save'
+                  saveUrl={syncfusionWebApiUrls().saveUrl}
                   beforeSave={(args: BeforeSaveEventArgs) => {
                     args.needBlobData = true
                     args.fileName = masterFile.originalname

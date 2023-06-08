@@ -11,13 +11,27 @@ import {
 } from './types'
 import { DropDownRow } from 'src/@core/utils'
 
+const hostname = process.env.NODE_ENV === 'production' ? 'test.nextclerk.com' : 'localhost'
+
+// TODO: Add proxy to the api so we dont have to expose API
+
+const publicUrl = `http://${hostname}:3000/api`
+const backendUrl = 'http://localhost:3000/api/'
+
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' ? 'http://test.nextclerk.com:3000/api' : 'http://localhost:3000/api/'
+  baseURL: publicUrl
 })
 
 const backendApi = axios.create({
-  baseURL: 'http://localhost:3000/api/'
+  baseURL: backendUrl
 })
+
+export const syncfusionWebApiUrls = (): { openUrl: string; saveUrl: string } => {
+  return {
+    openUrl: `http://${hostname}:8080/api/spreadsheet/open`,
+    saveUrl: `http://${hostname}:8080/api/spreadsheet/save`
+  }
+}
 
 // TODO: This should come from the JWT
 // Currently coming from backend seeds
