@@ -123,7 +123,7 @@ const Navigation = (props: Props) => {
         sx={{ marginTop: 5, width: 40, marginLeft: 10, background: 'white', border: '1px solid lightgrey' }}
         color='primary'
         size='medium'
-        onClick={() => router.push('/support-package/create')}
+        onClick={() => router.push('/supporting-package/create')}
       >
         <AddIcon fontSize='inherit' />
       </IconButton>
@@ -131,7 +131,7 @@ const Navigation = (props: Props) => {
         sx={{ margin: '40px 10px 10px 10px' }}
         variant='outlined'
         startIcon={<AddIcon />}
-        onClick={() => router.push('/support-package/create')}
+        onClick={() => router.push('/supporting-package/create')}
       >
         Create
       </Button> */}
