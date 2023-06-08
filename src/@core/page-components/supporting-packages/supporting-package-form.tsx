@@ -477,6 +477,8 @@ const SupportingPackageForm = ({
 
   function oncreated(): void {
     if (spreadsheet) {
+      console.log('openUrl', spreadsheet.openUrl)
+      console.log('saveUrl', spreadsheet.saveUrl)
       setLoading(true)
       if (masterFile?.downloadUrl) {
         fetch(masterFile?.downloadUrl) // fetch the remote url
