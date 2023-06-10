@@ -28,8 +28,8 @@ const backendApi = axios.create({
 
 export const syncfusionWebApiUrls = (): { openUrl: string; saveUrl: string } => {
   return {
-    openUrl: `http://${hostname}:8080/api/spreadsheet/open`,
-    saveUrl: `http://${hostname}:8080/api/spreadsheet/save`
+    openUrl: `http://${hostname}:3002/api/spreadsheet/open`,
+    saveUrl: `http://${hostname}:3002/api/spreadsheet/save`
   }
 }
 
