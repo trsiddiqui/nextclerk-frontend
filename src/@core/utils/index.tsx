@@ -106,7 +106,7 @@ export function getSpreadsheetRows(spreadsheet: SpreadsheetComponent): Promise<R
     spreadsheet
       .saveAsJson()
       .then(data => {
-        const rows = data.jsonObject.Workbook.sheets[0].rows
+        const rows = (data as any).jsonObject.Workbook.sheets[0].rows
         resolve(rows.slice(1, rows.length - 1))
       })
       .catch(err => reject(err))
