@@ -85,7 +85,7 @@ import {
   SheetsDirective,
   SpreadsheetComponent
 } from '@syncfusion/ej2-react-spreadsheet'
-import { AutoCompleteComponent } from '@syncfusion/ej2-react-dropdowns'
+import { AutoCompleteComponent, ChangeEventArgs } from '@syncfusion/ej2-react-dropdowns'
 import {
   searchUsers,
   uploadFile,
@@ -103,6 +103,7 @@ import {
   columnAddressToIndex,
   getCellsFromRangeAddress,
   getInitials,
+  getSpreadsheetRows,
   isSupportedMimeType,
   mimetypeToIconImage
 } from 'src/@core/utils'
@@ -183,7 +184,6 @@ const SupportingPackageForm = ({
   saveSupportingPackageMethod: (...args: any) => Promise<any>
   supportingPackage?: SupportingPackageResponse
 }) => {
-  console.log(supportingPackage)
   const theme = useTheme()
   const [name, setName] = useState(supportingPackage?.title ?? '')
   const [number, setNumber] = useState(supportingPackage?.number ?? '')
@@ -477,8 +477,6 @@ const SupportingPackageForm = ({
 
   function oncreated(): void {
     if (spreadsheet) {
-      console.log('openUrl', spreadsheet.openUrl)
-      console.log('saveUrl', spreadsheet.saveUrl)
       setLoading(true)
       if (masterFile?.downloadUrl) {
         fetch(masterFile?.downloadUrl) // fetch the remote url
@@ -600,6 +598,23 @@ const SupportingPackageForm = ({
       })
     }
 
+    const journalEntries = []
+    if (journalEntrySpreadsheetRef) {
+      const rows = await getSpreadsheetRows(journalEntrySpreadsheetRef)
+      for (const row of rows) {
+        const obj = {
+          account: row.cells[0],
+          debit: row.cells[1],
+          credit: row.cells[2],
+          memo: row.cells[3],
+          department: row.cells[4],
+          location: row.cells[5],
+          customer: row.cells[6]
+        }
+        journalEntries.push(obj)
+      }
+    }
+
     let communications: Array<{
       users: string[]
       text: string
@@ -637,7 +652,6 @@ const SupportingPackageForm = ({
         status: actionItem.state
       }))
     )
-    debugger
     const supportingPackage = {
       number,
       title: name,
@@ -653,7 +667,8 @@ const SupportingPackageForm = ({
         uuid: file.uploaded.uuid,
         isMaster: file.uploaded.uuid === masterFile?.uploaded.uuid
       })),
-      communications
+      communications,
+      journalEntries
     }
 
     await APICallWrapper(
@@ -669,6 +684,13 @@ const SupportingPackageForm = ({
   }
   // #endregion
 
+  const autoCompleteOnChange = (args: ChangeEventArgs) => {
+    if (journalEntrySpreadsheetRef) {
+      const actCell = journalEntrySpreadsheetRef.getActiveSheet().activeCell
+      journalEntrySpreadsheetRef.updateCell({ value: args.value.toString() }, actCell)
+    }
+  }
+
   const autoCompleteAccountComponent = () => {
     return (
       <div className='auto-complete-inside-sheet'>
@@ -678,6 +700,7 @@ const SupportingPackageForm = ({
           className='abc'
           showPopupButton
           autofill
+          change={autoCompleteOnChange.bind(this)}
         ></AutoCompleteComponent>
       </div>
     )
@@ -692,6 +715,7 @@ const SupportingPackageForm = ({
           className='abc'
           showPopupButton
           autofill
+          change={autoCompleteOnChange.bind(this)}
         ></AutoCompleteComponent>
       </div>
     )
@@ -706,6 +730,7 @@ const SupportingPackageForm = ({
           className='abc'
           showPopupButton
           autofill
+          change={autoCompleteOnChange.bind(this)}
         ></AutoCompleteComponent>
       </div>
     )
@@ -720,6 +745,7 @@ const SupportingPackageForm = ({
           className='abc'
           showPopupButton
           autofill
+          change={autoCompleteOnChange.bind(this)}
         ></AutoCompleteComponent>
       </div>
     )
@@ -931,7 +957,21 @@ const SupportingPackageForm = ({
           <AppBar position='static' color='inherit'>
             <Tabs
               value={tab}
-              onChange={(_e, v) => setTab(v)}
+              onChange={(_e, v) => {
+                if (v !== 0) {
+                  if (spreadsheet) {
+                    spreadsheet?.save({
+                      saveType: 'Xlsx',
+                      fileName: masterFile?.originalname
+                    })
+                    window.saveCompleteFunction = () => {
+                      setTab(v)
+                    }
+                  }
+                } else {
+                  setTab(v)
+                }
+              }}
               variant='fullWidth'
               aria-label='full width tabs example'
               sx={{ margin: '0 200px' }}
@@ -939,7 +979,7 @@ const SupportingPackageForm = ({
               textColor='secondary'
             >
               <Tab label='Support' />
-              <Tab label='Notes' />
+              <Tab label='Supporting Package Memo' />
               <Tab label='Journal Entry' />
             </Tabs>
           </AppBar>
@@ -971,10 +1011,18 @@ const SupportingPackageForm = ({
                     variant='text'
                     endIcon={<LaunchIcon />}
                     onClick={async () => {
-                      const link = await APICallWrapper(getOnlineViewLink, [masterFile.uploaded.uuid])
-                      // const link = await getOnlineViewLink(masterFile.uploaded.uuid)
-                      setFileOpenedInExcel(true)
-                      window.open(link, '_default')
+                      if (spreadsheet) {
+                        spreadsheet?.save({
+                          saveType: 'Xlsx',
+                          fileName: masterFile?.originalname
+                        })
+                      }
+                      window.saveCompleteFunction = async () => {
+                        const link = await APICallWrapper(getOnlineViewLink, [masterFile.uploaded.uuid])
+                        // const link = await getOnlineViewLink(masterFile.uploaded.uuid)
+                        setFileOpenedInExcel(true)
+                        window.open(link, '_default')
+                      }
                     }}
                   >
                     View in Excel Online
@@ -1324,6 +1372,10 @@ const SupportingPackageForm = ({
                     const file = new File([blob], masterFile.originalname)
                     // TODO: Need to call a different endpoint to save this file in S3 and Sharepoint
                     await APICallWrapper(uploadUpdatedFile, [file, masterFile.uploaded.uuid])
+                    if (window.saveCompleteFunction) {
+                      await window.saveCompleteFunction()
+                      window.saveCompleteFunction = null
+                    }
                     // await uploadUpdatedFile(file, masterFile.uploaded.uuid)
                   }}
                   created={oncreated.bind(this)}
@@ -1601,7 +1653,7 @@ const SupportingPackageForm = ({
                             }}
                           ></CellDirective>
                           <CellDirective
-                            value='Customer'
+                            value='Name'
                             isLocked
                             style={{
                               color: 'grey',

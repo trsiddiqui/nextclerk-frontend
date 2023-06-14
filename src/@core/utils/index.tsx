@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material'
+import { Row, SpreadsheetComponent } from '@syncfusion/ej2-react-spreadsheet'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -98,4 +99,16 @@ export function getCellsFromRangeAddress(a: number, b: number, c: number, d: num
   }
 
   return cells
+}
+
+export function getSpreadsheetRows(spreadsheet: SpreadsheetComponent): Promise<Row[]> {
+  return new Promise((resolve, reject) => {
+    spreadsheet
+      .saveAsJson()
+      .then(data => {
+        const rows = data.jsonObject.Workbook.sheets[0].rows
+        resolve(rows.slice(1, rows.length - 1))
+      })
+      .catch(err => reject(err))
+  })
 }
