@@ -3,6 +3,11 @@
 import React, { useState } from 'react'
 import { DateTime } from 'luxon'
 
+declare const window: Window &
+  typeof globalThis & {
+    saveCompleteFunction: any
+  }
+
 // ** MUI Imports
 import CloseIcon from '@mui/icons-material/Close'
 import BorderColorIcon from '@mui/icons-material/BorderColor'
