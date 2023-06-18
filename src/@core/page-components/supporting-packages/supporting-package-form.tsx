@@ -608,13 +608,13 @@ const SupportingPackageForm = ({
       const rows = await getSpreadsheetRows(journalEntrySpreadsheetRef)
       for (const row of rows) {
         const obj = {
-          account: row.cells[0],
+          account: accounts.find(x => x.label === row.cells[0])?.id,
           debit: row.cells[1],
           credit: row.cells[2],
           memo: row.cells[3],
-          department: row.cells[4],
-          location: row.cells[5],
-          customer: row.cells[6]
+          department: departments.find(x => x.label === row.cells[4])?.id,
+          location: accounts.find(x => x.label === row.cells[5])?.id,
+          customer: customers.find(x => x.label === row.cells[6])?.id
         }
         journalEntries.push(obj)
       }
