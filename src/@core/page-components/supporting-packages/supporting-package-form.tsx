@@ -114,6 +114,7 @@ import {
 } from 'src/@core/utils'
 import {
   ActionItemState,
+  JournalEntry,
   MasterFileUploaded,
   SupportingPackageResponse,
   SupportingPackageUserType,
@@ -201,6 +202,7 @@ const SupportingPackageForm = ({
   const [loading, setLoading] = useState(false)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
   const [journalEntrySpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>()
   const [allCategories] = useState(categories)
   const [allLabels] = useState(labels)
   const [label, setLabel] = useState<{ label: string; uuid: string } | null>(
@@ -230,6 +232,7 @@ const SupportingPackageForm = ({
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
   const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
   const [currentSPNote, setCurrentSPNote] = useState('')
+  const [firstTime, setFirstTime] = useState(true)
 
   const supportingPackageNotes: Array<{
     message: string
@@ -418,6 +421,8 @@ const SupportingPackageForm = ({
     if (!journalEntrySpreadsheetRef) {
       return
     }
+    // TODO: Add code to load existing journal entries
+    // journalEntrySpreadsheetRef.insertRow(rowsModel)
     // journalEntrySpreadsheetRef.addDataValidation(
     //   { type: 'Decimal', isHighlighted: true, ignoreBlank: true },
     //   'B2:B1000'
@@ -602,24 +607,24 @@ const SupportingPackageForm = ({
         fileName: masterFile?.originalname
       })
     }
-
-    const journalEntries = []
+    const persistedJournalEntries = []
     if (journalEntrySpreadsheetRef) {
       const rows = await getSpreadsheetRows(journalEntrySpreadsheetRef)
       for (const row of rows) {
         const obj = {
-          account: accounts.find(x => x.label === row.cells[0])?.id,
-          debit: row.cells[1],
-          credit: row.cells[2],
-          memo: row.cells[3],
-          department: departments.find(x => x.label === row.cells[4])?.id,
-          location: accounts.find(x => x.label === row.cells[5])?.id,
-          customer: customers.find(x => x.label === row.cells[6])?.id
+          accountUUID: accounts.find(x => x.label === row.cells[0].value)?.id,
+          debitAmount: row.cells[1]?.value,
+          creditAmount: row.cells[2]?.value,
+          memo: row.cells[3]?.value,
+          departmentUUID: departments.find(x => x.label === row.cells[4]?.value)?.id,
+          locationUUID: locations.find(x => x.label === row.cells[5]?.value)?.id,
+          customerUUID: customers.find(x => x.label === row.cells[6]?.value)?.id
         }
-        journalEntries.push(obj)
+        console.log(obj)
+        persistedJournalEntries.push(obj)
       }
+      setJournalEntries(persistedJournalEntries)
     }
-
     let communications: Array<{
       users: string[]
       text: string
@@ -673,7 +678,7 @@ const SupportingPackageForm = ({
         isMaster: file.uploaded.uuid === masterFile?.uploaded.uuid
       })),
       communications,
-      journalEntries
+      journalEntries: persistedJournalEntries
     }
 
     await APICallWrapper(
@@ -962,19 +967,46 @@ const SupportingPackageForm = ({
           <AppBar position='static' color='inherit'>
             <Tabs
               value={tab}
-              onChange={(_e, v) => {
-                if (v !== 0) {
-                  if (spreadsheet) {
-                    spreadsheet?.save({
-                      saveType: 'Xlsx',
-                      fileName: masterFile?.originalname
-                    })
-                    window.saveCompleteFunction = () => {
-                      setTab(v)
-                    }
-                  }
-                } else {
-                  setTab(v)
+              onChange={async (_e, v) => {
+                // if (tab === 0 && v !== tab) {
+                //   if (spreadsheet) {
+                //     spreadsheet?.save({
+                //       saveType: 'Xlsx',
+                //       fileName: masterFile?.originalname
+                //     })
+                //     window.saveCompleteFunction = () => {
+                //       setTab(v)
+                //     }
+                //   } else {
+                //     setTab(v)
+                //   }
+                // }
+                // if (tab === 2 && v !== tab) {
+                //   const journalEntries = []
+                //   if (journalEntrySpreadsheetRef) {
+                //     const rows = await getSpreadsheetRows(journalEntrySpreadsheetRef)
+                //     for (const row of rows) {
+                //       const obj = {
+                //         accountUUID: accounts.find(x => x.label === row.cells[0].value)?.id,
+                //         debit: row.cells[1]?.value,
+                //         credit: row.cells[2]?.value,
+                //         memo: row.cells[3]?.value,
+                //         departmentUUID: departments.find(x => x.label === row.cells[4]?.value)?.id,
+                //         locationUUID: locations.find(x => x.label === row.cells[5]?.value)?.id,
+                //         customerUUID: customers.find(x => x.label === row.cells[6]?.value)?.id
+                //       }
+                //       journalEntries.push(obj)
+                //     }
+                //     debugger
+                //     setJournalEntries(journalEntries)
+                //     setTab(v)
+                //   }
+                // } else {
+                //   setTab(v)
+                // }
+                setTab(v)
+                if (v === 2 && firstTime) {
+                  setFirstTime(false)
                 }
               }}
               variant='fullWidth'
@@ -988,7 +1020,8 @@ const SupportingPackageForm = ({
               <Tab label='Journal Entry' />
             </Tabs>
           </AppBar>
-          <TabPanel value={tab} index={0} dir={theme.direction}>
+          {/* @ts-ignore */}
+          <TabPanel style={{ display: tab === 0 ? 'unset' : 'none' }} dir={theme.direction}>
             {masterFile ? (
               <Grid
                 justifyContent='space-between' // Add it here :)
@@ -1432,7 +1465,8 @@ const SupportingPackageForm = ({
               )}
             </Grid>
           </TabPanel>
-          <TabPanel value={tab} index={1} dir={theme.direction}>
+          {/* @ts-ignore */}
+          <TabPanel style={{ display: tab === 1 ? 'unset' : 'none' }} dir={theme.direction}>
             <Container sx={{ padding: '10px 0px' }}>
               {/* <Paper sx={{ margin: '0px 0 30px 0' }}> */}
               <Grid container sx={{ padding: '1rem 1rem', marginBottom: '20px' }}>
@@ -1540,7 +1574,14 @@ const SupportingPackageForm = ({
               ))}
             </Container>
           </TabPanel>
-          <TabPanel value={tab} index={2} dir={theme.direction}>
+          <TabPanel
+            style={{ display: tab === 2 ? 'unset' : 'none' }}
+            // @ts-ignore
+            value={firstTime ? tab : undefined}
+            // @ts-ignore
+            index={firstTime ? 2 : undefined}
+            dir={theme.direction}
+          >
             <Grid
               container
               sx={{ pl: 1, height: masterFile ? '600px' : '200px' }}
@@ -2081,6 +2122,7 @@ const SupportingPackageForm = ({
           {snackBarMessage}
         </Alert>
       </Snackbar>
+      {JSON.stringify(journalEntries)}
     </Grid>
   )
 }

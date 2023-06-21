@@ -76,6 +76,20 @@ export enum SupportingPackageUserType {
   APPROVER = 'APPROVER'
 }
 
+export type JournalEntry = {
+  account?: string
+  accountUUID?: string
+  debitAmount?: string
+  creditAmount?: string
+  memo?: string
+  department?: string
+  departmentUUID?: string
+  location?: string
+  locationUUID?: string
+  customer?: string
+  customerUUID?: string
+}
+
 export type SupportingPackageResponse = {
   uuid: string
   number: string
@@ -140,4 +154,5 @@ export type SupportingPackageResponse = {
       ]
     }
   ]
+  journalEntries: JournalEntry[]
 }
