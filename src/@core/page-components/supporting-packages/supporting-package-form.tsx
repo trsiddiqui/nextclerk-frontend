@@ -1046,24 +1046,24 @@ const SupportingPackageForm = ({
                 spacing={24}
               >
                 <Grid item>
-                  <ButtonGroup>
-                    {/* <Button endIcon={<BorderColorIcon />} onClick={onHighlightClick}>
+                  {/* <ButtonGroup>
+                    <Button endIcon={<BorderColorIcon />} onClick={onHighlightClick}>
                       Highlight
-                    </Button> */}
-                    <Button
-                      endIcon={<MessageIcon />}
-                      variant={rightDrawerVisible ? 'contained' : 'outlined'}
-                      onClick={() => {
-                        setRightDrawerVisible(!rightDrawerVisible)
-                      }}
-                    >
-                      Comments
                     </Button>
-                  </ButtonGroup>
+                  </ButtonGroup> */}
                 </Grid>
                 <Grid item>
                   <Button
-                    variant='contained'
+                    endIcon={<MessageIcon />}
+                    variant={rightDrawerVisible ? 'contained' : 'text'}
+                    onClick={() => {
+                      setRightDrawerVisible(!rightDrawerVisible)
+                    }}
+                  >
+                    Comments
+                  </Button>
+                  <Button
+                    variant='text'
                     onClick={() => {
                       handleMasterSheetMenuClose()
                       handleUploadSPFileOpen()
