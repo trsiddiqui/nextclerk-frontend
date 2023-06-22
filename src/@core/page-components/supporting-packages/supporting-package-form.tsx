@@ -10,7 +10,7 @@ declare const window: Window &
 
 // ** MUI Imports
 import CloseIcon from '@mui/icons-material/Close'
-import BorderColorIcon from '@mui/icons-material/BorderColor'
+// import BorderColorIcon from '@mui/icons-material/BorderColor'
 import MessageIcon from '@mui/icons-material/Message'
 import SendIcon from '@mui/icons-material/Send'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
@@ -76,7 +76,7 @@ import {
   BeforeSaveEventArgs,
   CellDirective,
   CellsDirective,
-  CellStyleModel,
+  // CellStyleModel,
   ColumnDirective,
   ColumnsDirective,
   getRangeIndexes,
@@ -105,7 +105,7 @@ import {
   AutocompleteRow,
   DropDownRow,
   TabPanel,
-  columnAddressToIndex,
+  // columnAddressToIndex,
   getCellsFromRangeAddress,
   getInitials,
   getSpreadsheetRows,
@@ -230,7 +230,7 @@ const SupportingPackageForm = ({
   const [rightDrawerVisible, setRightDrawerVisible] = React.useState(false)
   const [fileOpenedInExcel, setFileOpenedInExcel] = React.useState(false)
   const [spreadsheet, setSpreadsheet] = React.useState<SpreadsheetComponent>()
-  const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
+  // const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
   const [currentSPNote, setCurrentSPNote] = useState('')
   const [firstTime, setFirstTime] = useState(true)
 
@@ -357,7 +357,7 @@ const SupportingPackageForm = ({
     }
   }
   const [masterFile, setMasterFile] = React.useState<MasterFileUploaded | null>(existingMasterFile)
-  const [highlightedCells, sethighlightedCells] = React.useState<string[]>([])
+  // const [highlightedCells, sethighlightedCells] = React.useState<string[]>([])
   const [masterFileSelectedRange, setMasterFileSelectedRange] = useState<SpreadsheetRange | null>(null)
   const [currentActionItem, setCurrentActionItem] = useState('')
   const [actionItems, setActionItems] = useState<
@@ -473,7 +473,17 @@ const SupportingPackageForm = ({
   function contextMenuBeforeOpen(): void {
     if (spreadsheet) {
       spreadsheet.removeContextMenuItems(
-        ['Cut', 'Copy', 'Paste', 'Paste Special', 'Add Comments/Attachments', 'Add Action Items'],
+        [
+          'Cut',
+          'Copy',
+          'Paste',
+          'Paste Special',
+          'Add Comments/Attachments',
+          'Add Action Items',
+          'Filter',
+          'Sort',
+          'Hyperlink'
+        ],
         false
       )
       spreadsheet.addContextMenuItems([{ text: 'Add Comments/Attachments' }, { text: 'Add Action Items' }], '', false) //To pass the items, Item before / after that the element to be inserted, Set false if the items need to be inserted before the text.
@@ -495,7 +505,7 @@ const SupportingPackageForm = ({
               const file = new File([fileBlob], 'Sample.xlsx') //convert the blob into file
               spreadsheet.open({ file: file }) // open the file into Spreadsheet
               spreadsheet.hideFileMenuItems(['File'], true)
-              spreadsheet.hideToolbarItems('Home', [19])
+              // spreadsheet.hideToolbarItems('Home', [19])
             })
           })
       }
@@ -550,40 +560,40 @@ const SupportingPackageForm = ({
     }
   }
 
-  function onHighlightClick() {
-    if (spreadsheet) {
-      if (spreadsheet.getActiveSheet().selectedRange) {
-        const ri = getRangeIndexes(String(spreadsheet.getActiveSheet().selectedRange))
-        const cells = getCellsFromRangeAddress(
-          ri[0] < ri[2] ? ri[0] : ri[2],
-          ri[1] < ri[3] ? ri[1] : ri[3],
-          ri[0] > ri[2] ? ri[0] : ri[2],
-          ri[1] > ri[3] ? ri[1] : ri[3]
-        )
+  // function onHighlightClick() {
+  //   if (spreadsheet) {
+  //     if (spreadsheet.getActiveSheet().selectedRange) {
+  //       const ri = getRangeIndexes(String(spreadsheet.getActiveSheet().selectedRange))
+  //       const cells = getCellsFromRangeAddress(
+  //         ri[0] < ri[2] ? ri[0] : ri[2],
+  //         ri[1] < ri[3] ? ri[1] : ri[3],
+  //         ri[0] > ri[2] ? ri[0] : ri[2],
+  //         ri[1] > ri[3] ? ri[1] : ri[3]
+  //       )
 
-        cells.forEach(cell => {
-          const columnIndex = columnAddressToIndex(cell.replace(/[^A-Za-z]/g, ''))
-          const rowIndex = parseInt(cell.replace(/^\D+/g, ''))
-          const existingFormat = spreadsheet.getCellStyleValue(
-            ['backgroundColor', 'color'],
-            [rowIndex - 1, columnIndex - 1]
-          )
-          if (cellPreviousState[cell] == null) {
-            cellPreviousState[cell] = existingFormat
-            setCellPreviousState(cellPreviousState)
-          }
-          if (existingFormat.backgroundColor === '#FFFF01') {
-            // TODO: In edit screen, set `default` format (come up with one)
-            spreadsheet.cellFormat(cellPreviousState[cell], cell)
-            sethighlightedCells(highlightedCells.filter(c => c != cell))
-          } else {
-            spreadsheet.cellFormat({ backgroundColor: '#FFFF01', color: '#000000' }, cell)
-            highlightedCells.push(cell)
-          }
-        })
-      }
-    }
-  }
+  //       cells.forEach(cell => {
+  //         const columnIndex = columnAddressToIndex(cell.replace(/[^A-Za-z]/g, ''))
+  //         const rowIndex = parseInt(cell.replace(/^\D+/g, ''))
+  //         const existingFormat = spreadsheet.getCellStyleValue(
+  //           ['backgroundColor', 'color'],
+  //           [rowIndex - 1, columnIndex - 1]
+  //         )
+  //         if (cellPreviousState[cell] == null) {
+  //           cellPreviousState[cell] = existingFormat
+  //           setCellPreviousState(cellPreviousState)
+  //         }
+  //         if (existingFormat.backgroundColor === '#FFFF01') {
+  //           // TODO: In edit screen, set `default` format (come up with one)
+  //           spreadsheet.cellFormat(cellPreviousState[cell], cell)
+  //           sethighlightedCells(highlightedCells.filter(c => c != cell))
+  //         } else {
+  //           spreadsheet.cellFormat({ backgroundColor: '#FFFF01', color: '#000000' }, cell)
+  //           highlightedCells.push(cell)
+  //         }
+  //       })
+  //     }
+  //   }
+  // }
   // #endregion
 
   // #region Multiple Option Buttons
@@ -854,7 +864,7 @@ const SupportingPackageForm = ({
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField variant='filled' fullWidth label='Journal Number' placeholder='Journal Number (To Do)' />
+                <TextField variant='filled' fullWidth label='Journal Number' placeholder='Journal Number' />
               </Grid>
               <Grid item xs={12} sm={3}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -949,14 +959,21 @@ const SupportingPackageForm = ({
             >
               Save
             </Button>
-            <Menu id='basic-menu' anchorEl={saveAnchorEl} open={saveMenuOpen} onClose={handleSaveSupportingPackage}>
+            <Menu
+              id='basic-menu'
+              anchorEl={saveAnchorEl}
+              open={saveMenuOpen}
+              onClose={() => {
+                setSaveAnchorEl(null)
+              }}
+            >
               <MenuItem onClick={() => handleSaveSupportingPackage(true)}>Save Draft</MenuItem>
               <MenuItem
                 onClick={() => {
                   handleSaveSupportingPackage(false)
                 }}
               >
-                Save
+                Submit for Review
               </MenuItem>
             </Menu>
           </CardActions>
@@ -1016,7 +1033,7 @@ const SupportingPackageForm = ({
               textColor='secondary'
             >
               <Tab label='Support' />
-              <Tab label='Supporting Package Memo' />
+              <Tab label='Supporting Package Memo and Notes' />
               <Tab label='Journal Entry' />
             </Tabs>
           </AppBar>
@@ -1030,9 +1047,9 @@ const SupportingPackageForm = ({
               >
                 <Grid item>
                   <ButtonGroup>
-                    <Button endIcon={<BorderColorIcon />} onClick={onHighlightClick}>
+                    {/* <Button endIcon={<BorderColorIcon />} onClick={onHighlightClick}>
                       Highlight
-                    </Button>
+                    </Button> */}
                     <Button
                       endIcon={<MessageIcon />}
                       variant={rightDrawerVisible ? 'contained' : 'outlined'}
@@ -1045,6 +1062,16 @@ const SupportingPackageForm = ({
                   </ButtonGroup>
                 </Grid>
                 <Grid item>
+                  <Button
+                    variant='contained'
+                    onClick={() => {
+                      handleMasterSheetMenuClose()
+                      handleUploadSPFileOpen()
+                    }}
+                  >
+                    Upload File
+                  </Button>
+
                   <Button
                     variant='text'
                     endIcon={<LaunchIcon />}
@@ -1063,7 +1090,7 @@ const SupportingPackageForm = ({
                       }
                     }}
                   >
-                    View in Excel Online
+                    View in Microsoft Excel Online
                   </Button>
                   <IconButton
                     aria-label='more'
@@ -1084,14 +1111,14 @@ const SupportingPackageForm = ({
                       'aria-labelledby': 'basic-button'
                     }}
                   >
-                    <MenuItem
+                    {/* <MenuItem
                       onClick={() => {
                         handleMasterSheetMenuClose()
                         handleUploadSPFileOpen()
                       }}
                     >
                       Upload File
-                    </MenuItem>
+                    </MenuItem> */}
                     <MenuItem
                       onClick={() => {
                         handleChooseMaterFileModalOpen()
@@ -1283,20 +1310,20 @@ const SupportingPackageForm = ({
                       id='outlined-multiline-flexible'
                       label={
                         masterFileSelectedRange
-                          ? `Add Action Item for ${masterFileSelectedRange.range}`
-                          : 'Select a cell/range to Add Action Item'
+                          ? `Add an Action Item for ${masterFileSelectedRange.range}`
+                          : 'Add an Action Item'
                       }
                       multiline
                       variant='standard'
                       maxRows={4}
-                      disabled={masterFileSelectedRange == null}
+                      // disabled={masterFileSelectedRange == null}
                       value={currentActionItem}
                       onChange={event => setCurrentActionItem(event.target.value)}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position='end'>
                             <IconButton
-                              disabled={masterFileSelectedRange == null}
+                              // disabled={masterFileSelectedRange == null}
                               edge='end'
                               color='primary'
                               onClick={() => {
@@ -1331,7 +1358,9 @@ const SupportingPackageForm = ({
                           sx={{ padding: '0 1rem', mt: 4, cursor: 'pointer' }}
                           key={index}
                           onClick={() => {
-                            onMasterSheetCommentClick(actionItem.cellRange)
+                            if (actionItem.cellRange) {
+                              onMasterSheetCommentClick(actionItem.cellRange)
+                            }
                           }}
                         >
                           <Card
@@ -1340,6 +1369,8 @@ const SupportingPackageForm = ({
                               backgroundColor: actionItem.state === ActionItemState.COMPLETED ? '#70c570' : '#ffe595'
                             }}
                           >
+                            <CardHeader subheader={`Action Item #${index + 1}`} />
+
                             <CardContent>
                               <Typography
                                 variant='body2'
@@ -1458,7 +1489,7 @@ const SupportingPackageForm = ({
                           }/images/icons/excel.png`}
                         />
                       </IconButton>
-                      <Typography component='div'>Create a Master Microsoft Excel File</Typography>
+                      <Typography component='div'>Create a Microsoft Excel File</Typography>
                     </Box>
                   </Grid>
                 </>
