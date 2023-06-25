@@ -1050,7 +1050,6 @@ const SupportingPackageForm = ({
                 //       }
                 //       journalEntries.push(obj)
                 //     }
-                //     debugger
                 //     setJournalEntries(journalEntries)
                 //     setTab(v)
                 //   }
