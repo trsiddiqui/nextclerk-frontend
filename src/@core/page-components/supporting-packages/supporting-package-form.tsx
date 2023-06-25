@@ -12,6 +12,7 @@ declare const window: Window &
 import CloseIcon from '@mui/icons-material/Close'
 // import BorderColorIcon from '@mui/icons-material/BorderColor'
 import MessageIcon from '@mui/icons-material/Message'
+import TaskIcon from '@mui/icons-material/Task'
 import SendIcon from '@mui/icons-material/Send'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import LaunchIcon from '@mui/icons-material/Launch'
@@ -232,6 +233,7 @@ const SupportingPackageForm = ({
   // const [cellPreviousState, setCellPreviousState] = React.useState<{ [cellAddress: string]: CellStyleModel }>({})
   const [currentSPNote, setCurrentSPNote] = useState('')
   const [firstTime, setFirstTime] = useState(true)
+  const [isSpreadsheetFullScreen, setIsSpreadsheetFullScreen] = React.useState(false)
 
   const supportingPackageNotes: Array<{
     message: string
@@ -406,7 +408,7 @@ const SupportingPackageForm = ({
   const handleUploadMasterFileCommentFileClose = () => setUploadMasterFileCommentFileOpen(false)
 
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
-  const handleMultiPersonnelModalOpen = () => setMultiPersonnelModalOpen(true)
+  // const handleMultiPersonnelModalOpen = () => setMultiPersonnelModalOpen(true)
   const handleMultiPersonnelModalClose = () => {
     setMultiPersonnelModalOpen(false)
     setMultiPersonnelSelection([])
@@ -894,10 +896,45 @@ const SupportingPackageForm = ({
                 />
               </Grid>
               <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Link component='button' variant='body2' onClick={handleMultiPersonnelModalOpen}>
+                {/* <Link component='button' variant='body2' onClick={handleMultiPersonnelModalOpen}>
                   <FormLabel sx={{ cursor: 'pointer', color: 'blue' }}>Participants</FormLabel>
-                </Link>
-                {participants.length > 0 ? (
+                </Link> */}
+                <Autocomplete
+                  multiple
+                  id='tags-standard'
+                  fullWidth
+                  options={users}
+                  getOptionLabel={option => `${option.firstName} ${option.lastName}`}
+                  onChange={(event, updatedList) => {
+                    setParticipants(updatedList)
+                  }}
+                  renderTags={(tagValue, getTagProps) => {
+                    return tagValue.map((option, index) => (
+                      <Chip
+                        avatar={
+                          <Avatar>
+                            {option.firstName || option.lastName
+                              ? getInitials(`${option.firstName} ${option.lastName}`)
+                              : ''}
+                          </Avatar>
+                        }
+                        {...getTagProps({ index })}
+                        key={index}
+                        label={`${option.firstName} ${option.lastName}`}
+                      />
+                    ))
+                  }}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      variant='standard'
+                      fullWidth
+                      label='Participants'
+                      placeholder='Participants'
+                    />
+                  )}
+                />
+                {/* {participants.length > 0 ? (
                   participants.map((participant, index) => (
                     <Chip
                       key={index}
@@ -918,7 +955,7 @@ const SupportingPackageForm = ({
                   ))
                 ) : (
                   <></>
-                )}
+                )} */}
               </Grid>
               <Grid item xs={12} sm={12}>
                 <FormControl fullWidth>
@@ -1031,7 +1068,7 @@ const SupportingPackageForm = ({
               indicatorColor='primary'
               textColor='secondary'
             >
-              <Tab label='Support' />
+              <Tab label='Calculation' />
               <Tab label='Supporting Package Memo and Notes' />
               <Tab label='Journal Entry' />
             </Tabs>
@@ -1054,12 +1091,24 @@ const SupportingPackageForm = ({
                 <Grid item>
                   <Button
                     endIcon={<MessageIcon />}
-                    variant={rightDrawerVisible ? 'contained' : 'text'}
+                    variant={rightDrawerVisible && commentsTab === 0 ? 'contained' : 'text'}
                     onClick={() => {
-                      setRightDrawerVisible(!rightDrawerVisible)
+                      setRightDrawerVisible(true)
+                      setCommentsTab(0)
+                    }}
+                    sx={{ mr: 2 }}
+                  >
+                    Comments ({masterFileComments.length})
+                  </Button>
+                  <Button
+                    endIcon={<TaskIcon />}
+                    variant={rightDrawerVisible && commentsTab === 1 ? 'contained' : 'text'}
+                    onClick={() => {
+                      setRightDrawerVisible(true)
+                      setCommentsTab(1)
                     }}
                   >
-                    Comments
+                    Action List ({actionItems.length})
                   </Button>
                   <Button
                     variant='text'
@@ -1126,6 +1175,14 @@ const SupportingPackageForm = ({
                     >
                       Choose Master File
                     </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        setIsSpreadsheetFullScreen(!isSpreadsheetFullScreen)
+                        handleMasterSheetMenuClose()
+                      }}
+                    >
+                      Fullscreen
+                    </MenuItem>
                   </Menu>
                 </Grid>
               </Grid>
@@ -1146,11 +1203,11 @@ const SupportingPackageForm = ({
                   <Tabs
                     value={commentsTab}
                     onChange={(_e, v) => setCommentsTab(v)}
+                    sx={{ width: '100%' }}
                     variant='fullWidth'
-                    aria-label='full width tabs example'
                   >
-                    <Tab label='Comments' />
-                    <Tab label='Action Items' />
+                    <Tab label={`Comments (${masterFileComments.length})`} />
+                    <Tab label={`Action Items (${actionItems.length})`} />
                   </Tabs>
                   <IconButton
                     edge='start'
@@ -1159,6 +1216,7 @@ const SupportingPackageForm = ({
                       setRightDrawerVisible(false)
                     }}
                     aria-label='close'
+                    sx={{ marginLeft: 36 }}
                   >
                     <CloseIcon />
                   </IconButton>
@@ -1411,7 +1469,19 @@ const SupportingPackageForm = ({
             ) : (
               <></>
             )}
-            <Grid container sx={{ pl: 1, pt: 1, height: masterFile ? '600px' : '300px' }} width='100%'>
+            <Grid
+              container
+              sx={{
+                pl: 1,
+                pt: 1,
+                height: masterFile ? '600px' : '300px',
+                position: isSpreadsheetFullScreen ? 'fixed' : 'default',
+                top: isSpreadsheetFullScreen ? '0' : 'default',
+                bottom: isSpreadsheetFullScreen ? '0' : 'default'
+              }}
+              width='100%'
+              height='100%'
+            >
               {masterFile ? (
                 <SpreadsheetComponent
                   allowConditionalFormat
