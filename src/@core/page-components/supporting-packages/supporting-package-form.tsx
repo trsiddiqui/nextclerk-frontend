@@ -7,7 +7,7 @@ declare const window: Window &
   typeof globalThis & {
     saveCompleteFunction: any
   }
-
+import { Document, Page, pdfjs } from 'react-pdf'
 // ** MUI Imports
 import CloseIcon from '@mui/icons-material/Close'
 // import BorderColorIcon from '@mui/icons-material/BorderColor'
@@ -122,6 +122,24 @@ import {
   User
 } from 'src/utils/types'
 import { FileUpload, FileUploadProps } from 'src/@core/components/custom/file-upload'
+// import {
+//   PdfViewerComponent,
+//   Toolbar as PDFToolbar,
+//   Magnification,
+//   Navigation,
+//   LinkAnnotation,
+//   BookmarkView,
+//   ThumbnailView,
+//   Print,
+//   TextSelection,
+//   Annotation,
+//   TextSearch,
+//   FormFields,
+//   FormDesigner,
+//   Inject
+// } from '@syncfusion/ej2-react-pdfviewer'
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
 
 const styles = {
   modalStyle: {
@@ -234,6 +252,9 @@ const SupportingPackageForm = ({
   const [currentSPNote, setCurrentSPNote] = useState('')
   const [firstTime, setFirstTime] = useState(true)
   const [isSpreadsheetFullScreen, setIsSpreadsheetFullScreen] = React.useState(false)
+  const [activePDFURL, setActivePDFURL] = React.useState<string | null>(null)
+  const [numPagesOfActivePDF, setNumPagesOfActivePDF] = React.useState<number | null>()
+  const [pdfViewerOpen, setPdfViewerOpen] = React.useState(false)
 
   const supportingPackageNotes: Array<{
     message: string
@@ -406,6 +427,8 @@ const SupportingPackageForm = ({
 
   const handleUploadMasterFileCommentFileOpen = () => setUploadMasterFileCommentFileOpen(true)
   const handleUploadMasterFileCommentFileClose = () => setUploadMasterFileCommentFileOpen(false)
+
+  const handlePdfViewerClose = () => setPdfViewerOpen(false)
 
   const handlePersonnelModalClose = () => setPersonnelModalOpen(false)
   // const handleMultiPersonnelModalOpen = () => setMultiPersonnelModalOpen(true)
@@ -1874,6 +1897,12 @@ const SupportingPackageForm = ({
                     }
                   }}
                   sx={{ marginLeft: 3 }}
+                  onClick={() => {
+                    if (attachment.mimetype.includes('pdf')) {
+                      setPdfViewerOpen(true)
+                      setActivePDFURL(attachment.uploaded.downloadLink ?? '')
+                    }
+                  }}
                 />
                 <br />
               </>
@@ -2187,6 +2216,19 @@ const SupportingPackageForm = ({
             {...fileUploadProp({ setFileMethod: setNotesFile, handleModalClose: handleUploadNotesFileClose })}
           />
         </Box>
+      </Dialog>
+      <Dialog fullWidth open={pdfViewerOpen} onClose={handlePdfViewerClose}>
+        <Document
+          file={activePDFURL}
+          onLoadSuccess={document => {
+            setNumPagesOfActivePDF(document.numPages)
+          }}
+          renderMode='canvas'
+        >
+          {Array.from(new Array(numPagesOfActivePDF), (el, index) => (
+            <Page key={`page_${index + 1}`} pageNumber={index + 1} renderTextLayer={false} height={800} />
+          ))}
+        </Document>
       </Dialog>
       <Dialog
         open={uploadMasterFileCommentFileOpen}

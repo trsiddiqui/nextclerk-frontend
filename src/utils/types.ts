@@ -23,6 +23,7 @@ export type UploadedFileProps = {
 
   uploaded: {
     uuid: string
+    downloadLink?: string
   }
 }
 
