@@ -20,6 +20,8 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import SearchIcon from '@mui/icons-material/Search'
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
+import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import {
   Autocomplete,
   Avatar,
@@ -63,7 +65,8 @@ import {
   Checkbox,
   Backdrop,
   CircularProgress,
-  Snackbar
+  Snackbar,
+  Tooltip
 } from '@mui/material'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
@@ -122,22 +125,6 @@ import {
   User
 } from 'src/utils/types'
 import { FileUpload, FileUploadProps } from 'src/@core/components/custom/file-upload'
-// import {
-//   PdfViewerComponent,
-//   Toolbar as PDFToolbar,
-//   Magnification,
-//   Navigation,
-//   LinkAnnotation,
-//   BookmarkView,
-//   ThumbnailView,
-//   Print,
-//   TextSelection,
-//   Annotation,
-//   TextSearch,
-//   FormFields,
-//   FormDesigner,
-//   Inject
-// } from '@syncfusion/ej2-react-pdfviewer'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
 
@@ -1044,41 +1031,6 @@ const SupportingPackageForm = ({
             <Tabs
               value={tab}
               onChange={async (_e, v) => {
-                // if (tab === 0 && v !== tab) {
-                //   if (spreadsheet) {
-                //     spreadsheet?.save({
-                //       saveType: 'Xlsx',
-                //       fileName: masterFile?.originalname
-                //     })
-                //     window.saveCompleteFunction = () => {
-                //       setTab(v)
-                //     }
-                //   } else {
-                //     setTab(v)
-                //   }
-                // }
-                // if (tab === 2 && v !== tab) {
-                //   const journalEntries = []
-                //   if (journalEntrySpreadsheetRef) {
-                //     const rows = await getSpreadsheetRows(journalEntrySpreadsheetRef)
-                //     for (const row of rows) {
-                //       const obj = {
-                //         accountUUID: accounts.find(x => x.label === row.cells[0].value)?.id,
-                //         debit: row.cells[1]?.value,
-                //         credit: row.cells[2]?.value,
-                //         memo: row.cells[3]?.value,
-                //         departmentUUID: departments.find(x => x.label === row.cells[4]?.value)?.id,
-                //         locationUUID: locations.find(x => x.label === row.cells[5]?.value)?.id,
-                //         customerUUID: customers.find(x => x.label === row.cells[6]?.value)?.id
-                //       }
-                //       journalEntries.push(obj)
-                //     }
-                //     setJournalEntries(journalEntries)
-                //     setTab(v)
-                //   }
-                // } else {
-                //   setTab(v)
-                // }
                 setTab(v)
                 if (v === 2 && firstTime) {
                   setFirstTime(false)
@@ -1162,6 +1114,17 @@ const SupportingPackageForm = ({
                   >
                     View in Microsoft Excel Online
                   </Button>
+                  <Tooltip title='Fullscreen'>
+                    <IconButton
+                      onClick={() => {
+                        setIsSpreadsheetFullScreen(!isSpreadsheetFullScreen)
+                      }}
+                      size='large'
+                      color='primary'
+                    >
+                      <FullscreenIcon />
+                    </IconButton>
+                  </Tooltip>
                   <IconButton
                     aria-label='more'
                     id='long-button'
@@ -1496,10 +1459,12 @@ const SupportingPackageForm = ({
               sx={{
                 pl: 1,
                 pt: 1,
-                height: masterFile ? '600px' : '300px',
+                height: masterFile ? '100vh' : '300px',
                 position: isSpreadsheetFullScreen ? 'fixed' : 'default',
-                top: isSpreadsheetFullScreen ? '0' : 'default',
-                bottom: isSpreadsheetFullScreen ? '0' : 'default'
+                top: isSpreadsheetFullScreen ? '0px' : 'default',
+                bottom: isSpreadsheetFullScreen ? '0px' : 'default',
+                left: isSpreadsheetFullScreen ? '0px' : 'default',
+                zIndex: isSpreadsheetFullScreen ? 1200 : 'default'
               }}
               width='100%'
               height='100%'
@@ -2263,7 +2228,20 @@ const SupportingPackageForm = ({
           {snackBarMessage}
         </Alert>
       </Snackbar>
-      {JSON.stringify(journalEntries)}
+      {isSpreadsheetFullScreen ? (
+        <IconButton
+          style={{ position: 'fixed', top: 10, right: 10, zIndex: 999999, backgroundColor: 'Highlight' }}
+          onClick={() => {
+            setIsSpreadsheetFullScreen(!isSpreadsheetFullScreen)
+          }}
+          size='large'
+          color='primary'
+        >
+          <FullscreenExitIcon />
+        </IconButton>
+      ) : (
+        <></>
+      )}
     </Grid>
   )
 }

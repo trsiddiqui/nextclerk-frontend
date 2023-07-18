@@ -61,7 +61,6 @@
     "@mui/styles": "^5.12.3",
     "@mui/x-date-pickers": "^5.0.13",
     "@popperjs/core": "^2.11.2",
-    "@silevis/reactgrid": "^4.0.4",
     "@syncfusion/ej2-base": "^21.2.3",
     "@syncfusion/ej2-react-dropdowns": "^21.2.3",
     "@syncfusion/ej2-react-spreadsheet": "^21.2.3",
