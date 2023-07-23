@@ -157,3 +157,27 @@ export type SupportingPackageResponse = {
   ]
   journalEntries: JournalEntry[]
 }
+
+export type TaskResponse = {
+  uuid: string
+  number: string
+  title: string
+  description: string
+  entityUUID: string
+  entityName: string
+  categoryUUID: string
+  categoryName: string
+  labelUUID: string
+  label: string
+  isConfidential: boolean
+  date: Date
+  dueDate: Date
+  assignee: string | null
+  assigner: string | null
+  createdAt: Date
+  createdBy: string
+  updatedAt: Date
+  updatedBy: string
+  archivedBy: string | null
+  archivedAt: string | null
+}

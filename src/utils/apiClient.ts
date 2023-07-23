@@ -6,6 +6,7 @@ import {
   Location,
   MasterFileUploaded,
   SupportingPackageResponse,
+  TaskResponse,
   UploadedFileProps,
   User
 } from './types'
@@ -206,4 +207,22 @@ export const getOnlineViewLink = async (fileUuid: string, isBackend = false): Pr
   )
 
   return response.data
+}
+
+export const createTaskApi = async (task: unknown, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).post(`/${customerXRefID}/tasks`, task)
+}
+
+export const getTask = async (taskXRefID: string, isBackend = false): Promise<TaskResponse> => {
+  const response = await (isBackend ? backendApi : api).get<TaskResponse>(`/${customerXRefID}/tasks/${taskXRefID}`)
+
+  return response.data
+}
+export const updateTask = async (task: object, isBackend = false): Promise<void> => {
+  console.log(JSON.stringify(task))
+  const { uuid: taskXRefID, ...updateTask } = task
+  console.log(taskXRefID)
+  console.log(updateTask)
+
+  return await (isBackend ? backendApi : api).put(`/${customerXRefID}/tasks/${taskXRefID}`, updateTask)
 }
