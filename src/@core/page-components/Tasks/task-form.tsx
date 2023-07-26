@@ -47,6 +47,7 @@ import { AutocompleteRow, DropDownRow, getInitials } from 'src/@core/utils'
 import { TaskResponse, User } from 'src/utils/types'
 import { searchUsers } from 'src/utils/apiClient'
 import { StyledTableCell, StyledTableRow } from 'src/views/tables/TableCustomized'
+import { useRouter } from 'next/router'
 
 const styles = {
   modalStyle: {
@@ -102,6 +103,7 @@ const TaskForm = ({
     tab: 0,
     commentsSortedBy: 'dateAsc'
   })
+  const router = useRouter()
   enum SnackBarType {
     Success = 'success',
     Error = 'error',
@@ -115,6 +117,8 @@ const TaskForm = ({
   const [personnel, setPersonnel] = useState<Array<User>>(users)
 
   const [isConfidential, setIsConfidential] = useState<boolean>(task?.isConfidential ?? false)
+  const [isRecurring, setIsRecurring] = useState<boolean>(task?.isRecurring ?? false)
+
   const [category, setCategory] = useState<{ label: string; uuid: string } | null>(
     task?.categoryName && task?.categoryUUID ? { label: task?.categoryName, uuid: task.categoryUUID } : null
   )
@@ -165,6 +169,7 @@ const TaskForm = ({
     const taskObject = {
       title,
       isConfidential,
+      isRecurring,
       categoryUUID: category?.uuid,
       labelUUID: label?.uuid,
       description: description,
@@ -197,18 +202,33 @@ const TaskForm = ({
           <CardHeader title='Create a Task' titleTypographyProps={{ variant: 'h6' }}></CardHeader>
           <Divider sx={{ margin: 0 }} />
           <CardContent>
-            <Grid item xs={12} sm={12} sx={{ marginTop: -2 }} textAlign='right'>
-              <FormControlLabel
-                control={
-                  <Switch
-                    defaultChecked={isConfidential}
-                    onChange={event => {
-                      setIsConfidential(event.currentTarget.checked)
-                    }}
-                  />
-                }
-                label='Confidential'
-              />
+            <Grid container spacing={1} sx={{ marginTop: -2 }}>
+              <Grid item xs={12} sm={6} sx={{ marginTop: -2 }} textAlign='right'>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      defaultChecked={isConfidential}
+                      onChange={event => {
+                        setIsConfidential(event.currentTarget.checked)
+                      }}
+                    />
+                  }
+                  label='Confidential'
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} sx={{ marginTop: -2 }} textAlign='right'>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      defaultChecked={isRecurring}
+                      onChange={event => {
+                        setIsRecurring(event.currentTarget.checked)
+                      }}
+                    />
+                  }
+                  label='Recurring'
+                />
+              </Grid>
             </Grid>
             <Grid container spacing={5} sx={{ marginTop: -13 }}>
               <Grid item xs={12} sm={12} sx={{ marginTop: 1 }}>
@@ -395,6 +415,30 @@ const TaskForm = ({
             <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained' onClick={handleSaveTask}>
               Save
             </Button>
+            {task?.title ? (
+              task?.supportingPackageUUID ? (
+                <Button
+                  size='large'
+                  type='submit'
+                  sx={{ mr: 2 }}
+                  variant='contained'
+                  onClick={() => router.push(`/supporting-package/${task.supportingPackageUUID}/edit`)}
+                >
+                  CONTINUE ON SUPPORTING PACKAGE
+                </Button>
+              ) : (
+                <Button
+                  size='large'
+                  type='submit'
+                  sx={{ mr: 2 }}
+                  variant='contained'
+                  onClick={() => router.push('/supporting-package/create')}
+                >
+                  CREATE SUPPORTING PACKAGE
+                </Button>
+              )
+            ) : null}
+
             <Button size='large' color='secondary' variant='outlined'>
               Cancel
             </Button>
