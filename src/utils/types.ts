@@ -168,8 +168,10 @@ export type TaskResponse = {
   categoryUUID: string
   categoryName: string
   labelUUID: string
+  supportingPackageUUID: string
   label: string
   isConfidential: boolean
+  isRecurring: boolean
   date: Date
   dueDate: Date
   assignee: string | null
