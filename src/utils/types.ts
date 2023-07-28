@@ -157,3 +157,38 @@ export type SupportingPackageResponse = {
   ]
   journalEntries: JournalEntry[]
 }
+
+export type TaskResponse = {
+  uuid: string
+  number: string
+  title: string
+  description: string
+  entityUUID: string
+  entityName: string
+  categoryUUID: string
+  categoryName: string
+  labelUUID: string
+  supportingPackageUUID: string
+  label: string
+  isConfidential: boolean
+  isRecurring: boolean
+  date: Date
+  dueDate: Date
+  status: string | null
+  assigneeUUID: string | null
+  assigneeName: string | null
+  assignerUUID: string
+  assignerName: string
+  createdAt: Date
+  createdBy: string
+  updatedAt: Date
+  updatedBy: string
+  archivedBy: string | null
+  archivedAt: string | null
+}
+
+export enum Status {
+  SUBMITTED = 'SUBMITTED',
+  DONE = 'DONE',
+  INPROGRESS = 'INPROGRESS'
+}

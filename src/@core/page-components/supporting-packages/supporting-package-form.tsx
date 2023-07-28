@@ -1043,7 +1043,7 @@ const SupportingPackageForm = ({
               textColor='secondary'
             >
               <Tab label='Calculation' />
-              <Tab label='Supporting Package Memo and Notes' />
+              <Tab label='Memo and Notes' />
               <Tab label='Journal Entry' />
             </Tabs>
           </AppBar>
