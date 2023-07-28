@@ -187,6 +187,20 @@ export type TaskResponse = {
   archivedAt: string | null
 }
 
+export type TaskUpdate = {
+  uuid: string
+  labelUUID: string
+  isRecurring: boolean
+  isConfidential: boolean
+  dueDate: Date
+  date: Date
+  description: string
+  title: string
+  categoryUUID: string
+  assigneeUUID: string | null
+  assignerUUID: string
+}
+
 export enum Status {
   SUBMITTED = 'SUBMITTED',
   DONE = 'DONE',

@@ -7,6 +7,7 @@ import {
   MasterFileUploaded,
   SupportingPackageResponse,
   TaskResponse,
+  TaskUpdate,
   UploadedFileProps,
   User
 } from './types'
@@ -225,11 +226,8 @@ export const getTasks = async (isBackend = false): Promise<TaskResponse> => {
   return response.data
 }
 
-export const updateTask = async (task: object, isBackend = false): Promise<void> => {
-  console.log(JSON.stringify(task))
+export const updateTask = async (task: TaskUpdate, isBackend = false): Promise<void> => {
   const { uuid: taskXRefID, ...updateTask } = task
-  console.log(taskXRefID)
-  console.log(updateTask)
 
   return await (isBackend ? backendApi : api).put(`/${customerXRefID}/tasks/${taskXRefID}`, updateTask)
 }
