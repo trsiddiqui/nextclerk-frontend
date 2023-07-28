@@ -97,7 +97,7 @@ const TaskForm = ({
   saveTaskMethod: (...args: any) => Promise<any>
   task?: TaskResponse
 }) => {
-  const [values, setValues] = useState<State>({
+  const [values, setValues] = useState({
     name: '',
     date: dayjs(),
     tab: 0,
