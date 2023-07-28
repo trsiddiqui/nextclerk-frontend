@@ -24,10 +24,6 @@ export async function getServerSideProps() {
 }
 
 const TaskDashboard = ({ tasks }: { tasks: TaskResponse[] }) => {
-  const fabStyle = {
-    right: 10,
-    position: 'fixed'
-  }
   const [taskDate, setTaskDate] = useState<Date | null>(new Date())
 
   return (
@@ -86,9 +82,11 @@ const TaskDashboard = ({ tasks }: { tasks: TaskResponse[] }) => {
           <Table />
         </Grid> */}
       </Grid>
-      <Fab style={fabStyle} size='medium' color='success' aria-label='add' href='/task/create/'>
-        <AddIcon />
-      </Fab>
+      <Grid>
+        <Fab size='medium' color='success' aria-label='add' href='/task/create/'>
+          <AddIcon />
+        </Fab>
+      </Grid>
     </ApexChartWrapper>
   )
 }
