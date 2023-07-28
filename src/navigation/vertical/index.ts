@@ -25,9 +25,9 @@ const navigation = (): VerticalNavItemsType => {
       path: '/'
     },
     {
-      title: 'Tables',
+      title: 'Tasks',
       icon: Table,
-      path: '/tables'
+      path: '/task'
     },
 
     // {

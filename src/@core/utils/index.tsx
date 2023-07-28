@@ -113,3 +113,19 @@ export function getSpreadsheetRows(spreadsheet: SpreadsheetComponent): Promise<R
       .catch(err => reject(err))
   })
 }
+
+export function getDateWithoutTime(date: Date): string {
+  return new Date(date).toDateString()
+}
+
+export function getMonthFromDate(date: Date | null): number {
+  if (date) {
+    return new Date(date).getMonth()
+  }
+
+  return new Date().getMonth()
+}
+
+export function getYearFromDate(date: Date): number {
+  return new Date(date).getFullYear()
+}
