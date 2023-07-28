@@ -6,7 +6,7 @@ import AddIcon from '@mui/icons-material/Add'
 // ** Styled Component Import
 import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
 
-import { getTasks } from 'src/utils/apiClient'
+// import { getTasks } from 'src/utils/apiClient'
 import TaskList from 'src/@core/page-components/Tasks/task-list'
 import { Status, TaskResponse } from 'src/utils/types'
 import { DatePicker, LocalizationProvider } from '@mui/lab'
