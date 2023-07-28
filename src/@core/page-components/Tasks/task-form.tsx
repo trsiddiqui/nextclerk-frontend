@@ -111,8 +111,8 @@ const TaskForm = ({
   }
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
-  const [assignee, setAssignee] = useState(task?.assignee ?? null)
-  const [assigner, setAssigner] = useState(task?.assigner ?? null)
+  const [assignee, setAssignee] = useState(task?.assigneeUUID ?? null)
+  const [assigner, setAssigner] = useState(task?.assignerUUID ?? null)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
   const [personnel, setPersonnel] = useState<Array<User>>(users)
 
@@ -193,6 +193,7 @@ const TaskForm = ({
       'The Task has been saved successfully. (TODO: Navigate to Task Dashboard when done)',
       SnackBarType.Success
     )
+    router.push('/task')
   }
 
   return (
@@ -236,7 +237,7 @@ const TaskForm = ({
                   1. Task Details
                 </Typography>
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={7}>
                 <TextField
                   fullWidth
                   label='Task title'
@@ -246,7 +247,7 @@ const TaskForm = ({
                   value={title}
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              {/* <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePickerWrapper>
                     <DatePicker
@@ -258,7 +259,7 @@ const TaskForm = ({
                     />
                   </DatePickerWrapper>
                 </LocalizationProvider>
-              </Grid>
+              </Grid> */}
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePickerWrapper>
@@ -330,6 +331,41 @@ const TaskForm = ({
                   </CardContent>
                 </Card>
               </Grid>
+
+              <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center' }}>
+                {/* <Link component='button' variant='body2' onClick={handleMultiPersonnelModalOpen}>
+                  <FormLabel sx={{ cursor: 'pointer', color: 'blue' }}>Participants</FormLabel>
+                </Link> */}
+                <Autocomplete
+                  multiple
+                  id='tags-standard'
+                  fullWidth
+                  options={users}
+                  getOptionLabel={option => `${option.firstName} ${option.lastName}`}
+                  onChange={(event, updatedList) => {
+                    setAssigner(updatedList[0] ? updatedList[0].uuid : null)
+                  }}
+                  renderTags={(tagValue, getTagProps) => {
+                    return tagValue.map((option, index) => (
+                      <Chip
+                        avatar={
+                          <Avatar>
+                            {option.firstName || option.lastName
+                              ? getInitials(`${option.firstName} ${option.lastName}`)
+                              : ''}
+                          </Avatar>
+                        }
+                        {...getTagProps({ index })}
+                        key={index}
+                        label={`${option.firstName} ${option.lastName}`}
+                      />
+                    ))
+                  }}
+                  renderInput={params => (
+                    <TextField {...params} variant='standard' fullWidth label='Assignor' placeholder='Assignor' />
+                  )}
+                />
+              </Grid>
               <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center' }}>
                 {/* <Link component='button' variant='body2' onClick={handleMultiPersonnelModalOpen}>
                   <FormLabel sx={{ cursor: 'pointer', color: 'blue' }}>Participants</FormLabel>
@@ -364,44 +400,10 @@ const TaskForm = ({
                   )}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center' }}>
-                {/* <Link component='button' variant='body2' onClick={handleMultiPersonnelModalOpen}>
-                  <FormLabel sx={{ cursor: 'pointer', color: 'blue' }}>Participants</FormLabel>
-                </Link> */}
-                <Autocomplete
-                  multiple
-                  id='tags-standard'
-                  fullWidth
-                  options={users}
-                  getOptionLabel={option => `${option.firstName} ${option.lastName}`}
-                  onChange={(event, updatedList) => {
-                    setAssigner(updatedList[0] ? updatedList[0].uuid : null)
-                  }}
-                  renderTags={(tagValue, getTagProps) => {
-                    return tagValue.map((option, index) => (
-                      <Chip
-                        avatar={
-                          <Avatar>
-                            {option.firstName || option.lastName
-                              ? getInitials(`${option.firstName} ${option.lastName}`)
-                              : ''}
-                          </Avatar>
-                        }
-                        {...getTagProps({ index })}
-                        key={index}
-                        label={`${option.firstName} ${option.lastName}`}
-                      />
-                    ))
-                  }}
-                  renderInput={params => (
-                    <TextField {...params} variant='standard' fullWidth label='Assignee' placeholder='Assignee' />
-                  )}
-                />
-              </Grid>
               <Grid item xs={12}>
                 <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                  2. Attachment &nbsp;&nbsp;
-                  {/* <Link component='button' variant='body2' onClick={handleJournalModalOpen}>
+                  {/* 2. Attachment &nbsp;&nbsp;
+                  <Link component='button' variant='body2' onClick={handleJournalModalOpen}>
                     Link
                   </Link> */}
                 </Typography>
@@ -439,7 +441,7 @@ const TaskForm = ({
               )
             ) : null}
 
-            <Button size='large' color='secondary' variant='outlined'>
+            <Button size='large' color='secondary' variant='outlined' onClick={() => router.back()}>
               Cancel
             </Button>
           </CardActions>

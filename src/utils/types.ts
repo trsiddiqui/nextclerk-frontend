@@ -174,12 +174,21 @@ export type TaskResponse = {
   isRecurring: boolean
   date: Date
   dueDate: Date
-  assignee: string | null
-  assigner: string | null
+  status: string | null
+  assigneeUUID: string | null
+  assigneeName: string | null
+  assignerUUID: string
+  assignerName: string
   createdAt: Date
   createdBy: string
   updatedAt: Date
   updatedBy: string
   archivedBy: string | null
   archivedAt: string | null
+}
+
+export enum Status {
+  SUBMITTED = 'SUBMITTED',
+  DONE = 'DONE',
+  INPROGRESS = 'INPROGRESS'
 }
