@@ -220,8 +220,9 @@ export const getTask = async (taskXRefID: string, isBackend = false): Promise<Ta
   return response.data
 }
 
-export const getTasks = async (isBackend = false): Promise<TaskResponse> => {
-  const response = await (isBackend ? backendApi : api).get<TaskResponse>(`/${customerXRefID}/tasks`)
+export const getTasks = async (isBackend = false): Promise<TaskResponse[]> => {
+  const response = await (isBackend ? backendApi : api).get<TaskResponse[]>(`/${customerXRefID}/tasks`)
+  console.log(response.data)
 
   return response.data
 }
