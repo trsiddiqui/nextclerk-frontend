@@ -101,7 +101,7 @@ const TaskDashboard = ({ tasks }: { tasks: TaskResponse[] }) => {
         </LocalizationProvider>
       </Grid>
       <Grid container spacing={3} marginTop={5}>
-        <Grid item xs={12} md={3} lg={4}>
+        <Grid item xs={12} md={3} lg={3}>
           <TaskList
             tasks={tasks.filter(
               task => task.assigneeUUID === null && getMonthFromDate(task.dueDate) === getMonthFromDate(taskDate)
@@ -109,7 +109,7 @@ const TaskDashboard = ({ tasks }: { tasks: TaskResponse[] }) => {
             caption='ToDo'
           />
         </Grid>
-        <Grid item xs={12} md={3} lg={4}>
+        <Grid item xs={12} md={3} lg={3}>
           <TaskList
             tasks={tasks.filter(
               task => task.assigneeUUID !== null && getMonthFromDate(task.dueDate) === getMonthFromDate(taskDate)
@@ -117,7 +117,7 @@ const TaskDashboard = ({ tasks }: { tasks: TaskResponse[] }) => {
             caption='Assigned'
           />
         </Grid>
-        <Grid item xs={12} md={3} lg={4}>
+        <Grid item xs={12} md={3} lg={3}>
           <TaskList
             tasks={tasks.filter(
               task => task.status === Status.SUBMITTED && getMonthFromDate(task.dueDate) === getMonthFromDate(taskDate)
@@ -125,7 +125,7 @@ const TaskDashboard = ({ tasks }: { tasks: TaskResponse[] }) => {
             caption='In Progress'
           />
         </Grid>
-        <Grid item xs={12} md={3} lg={4}>
+        <Grid item xs={12} md={3} lg={3}>
           <TaskList
             tasks={tasks.filter(
               task => task.status === Status.DONE && getMonthFromDate(task.dueDate) === getMonthFromDate(taskDate)
