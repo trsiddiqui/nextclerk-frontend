@@ -221,7 +221,6 @@ export const getTask = async (taskXRefID: string, isBackend = false): Promise<Ta
 }
 
 export const getTasks = async (isBackend = false): Promise<TaskResponse[]> => {
-  console.log('Majid get tasks')
   const response = await (isBackend ? backendApi : api).get<TaskResponse[]>(`/${customerXRefID}/tasks`)
 
   return response.data
