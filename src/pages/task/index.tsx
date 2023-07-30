@@ -17,7 +17,7 @@ import { useState } from 'react'
 import { getMonthFromDate } from 'src/@core/utils'
 
 export async function getServerSideProps() {
-  const tasks = await getTasks()
+  const tasks = await getTasks(true)
 
   // const tasks = [
   //   {
