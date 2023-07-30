@@ -14,7 +14,7 @@ export async function getServerSideProps({ params: { taskXRefID } }: { params: {
   const users = await searchUsers(undefined, true)
   const activeUser = await getActiveUser(true)
 
-  const task = await getTask(taskXRefID)
+  const task = await getTask(taskXRefID, true)
 
   // Pass data to the page via props
   return { props: { categories, activeUser, users, labels, task } }
