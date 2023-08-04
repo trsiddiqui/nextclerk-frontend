@@ -17,6 +17,7 @@ import NotificationDropdown from 'src/@core/layouts/components/shared-components
 import { Avatar, Grid, InputAdornment, TextField, Typography } from '@mui/material'
 import { Magnify } from 'mdi-material-ui'
 import BusinessIcon from '@mui/icons-material/Business'
+import { signIn, signOut, useSession } from 'next-auth/react'
 
 interface Props {
   hidden: boolean
@@ -36,6 +37,7 @@ const AppBarContent = (props: Props) => {
 
   // ** Hook
   const hiddenSm = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
+  const { data: session, status } = useSession()
 
   return (
     <Box
@@ -85,6 +87,17 @@ const AppBarContent = (props: Props) => {
           </Grid>
         </Grid>
       </Box>
+      {session ? (
+        <>
+          Signed in as {JSON.stringify({ session, status })} <br />
+          <button onClick={() => signOut()}>Sign out</button>
+        </>
+      ) : (
+        <>
+          Not signed in <br />
+          <button onClick={() => signIn('keycloak')}>Sign in</button>
+        </>
+      )}
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
         {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
         <NotificationDropdown />

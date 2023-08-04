@@ -15,8 +15,20 @@ import {
 import { AutocompleteRow, DropDownRow } from 'src/@core/utils'
 import { User } from 'src/utils/types'
 import SupportingPackageForm from 'src/@core/page-components/supporting-packages/supporting-package-form'
+import { getSession } from 'next-auth/react'
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const session = await getSession(context)
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false
+      }
+    }
+  }
+
   // Fetch data from external API
   const categories = await getAllCategories(true)
   const accounts = await getAllAccounts(true)
@@ -28,7 +40,7 @@ export async function getServerSideProps() {
   const activeUser = await getActiveUser(true)
 
   // Pass data to the page via props
-  return { props: { categories, accounts, departments, locations, customers, activeUser, users, labels } }
+  return { props: { categories, accounts, departments, locations, customers, activeUser, users, labels, session } }
 }
 
 const CreateSupportPackage = ({
