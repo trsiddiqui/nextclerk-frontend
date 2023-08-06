@@ -19,6 +19,8 @@ import { Avatar, Grid, InputAdornment, TextField, Typography } from '@mui/materi
 import { Magnify } from 'mdi-material-ui'
 import BusinessIcon from '@mui/icons-material/Business'
 import { signIn, signOut, useSession } from 'next-auth/react'
+import { Session, User } from 'next-auth/core/types'
+import { JWT } from 'next-auth/jwt/types'
 
 interface Props {
   hidden: boolean
@@ -38,7 +40,8 @@ const AppBarContent = (props: Props) => {
 
   // ** Hook
   const hiddenSm = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
-  const { data: session } = useSession()
+  const { data } = useSession()
+  const session = data as unknown as Session & { token: JWT; user: User }
 
   return (
     <Box
@@ -93,7 +96,7 @@ const AppBarContent = (props: Props) => {
           <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
             {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
             <NotificationDropdown />
-            <UserDropdown name={session.token.name} email={session.token.email} signOut={signOut} />
+            <UserDropdown name={session.token.name as string} email={session.token.email as string} signOut={signOut} />
           </Box>
         </>
       ) : (

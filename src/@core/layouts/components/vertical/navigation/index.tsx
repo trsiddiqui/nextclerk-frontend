@@ -24,6 +24,9 @@ import VerticalNavHeader from './VerticalNavHeader'
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import { IconButton } from '@mui/material'
 import { useSession } from 'next-auth/react'
+import { Session } from 'next-auth'
+import { JWT } from 'next-auth/jwt'
+import { User } from 'next-auth/core/types'
 
 interface Props {
   hidden: boolean
@@ -63,7 +66,8 @@ const Navigation = (props: Props) => {
     verticalNavMenuContent: userVerticalNavMenuContent
   } = props
 
-  const { data: session } = useSession()
+  const { data } = useSession()
+  const session = data as unknown as Session & { token: JWT; user: User }
 
   // ** States
   const [groupActive, setGroupActive] = useState<string[]>([])
