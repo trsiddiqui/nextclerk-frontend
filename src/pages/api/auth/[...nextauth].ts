@@ -7,13 +7,13 @@ import KeycloakProvider from 'next-auth/providers/keycloak'
 
 const clientId = 'nextclerk'
 const clientSecret = 'uvmAPUcHKYG9ZZXsymO9QP3rFAPPmLhF'
-const host = 'localhost' // process.env.NODE_ENV === 'production' ? 'test.nextclerk.com' : 'localhost'
+const host = 'http://localhost' // process.env.NODE_ENV === 'production' ? 'http://test.nextclerk.com' : 'http://localhost'
 console.log('using', host)
 console.log(process.env.NEXTAUTH_URL)
 async function refreshAccessToken(token: JWT & Account) {
   try {
     // console.log('REFRESHING', token)
-    const url = `http://${host}:8086/realms/${clientId}/protocol/openid-connect/token`
+    const url = `${host}:8086/realms/${clientId}/protocol/openid-connect/token`
 
     const response = await fetch(url, {
       headers: {
@@ -61,7 +61,7 @@ export const authOptions: AuthOptions = {
     KeycloakProvider({
       clientId: clientId,
       clientSecret: clientSecret,
-      issuer: `${process.env.NEXTAUTH_URL}:8086/realms/${clientId}`
+      issuer: `${host}:8086/realms/${clientId}`
     })
 
     // GitHubProvider({
