@@ -1,4 +1,5 @@
-import NextAuth, { Account, AuthOptions } from 'next-auth'
+import NextAuth from 'next-auth'
+import { Account, AuthOptions } from 'next-auth/core/types'
 import { JWT } from 'next-auth/jwt'
 import KeycloakProvider from 'next-auth/providers/keycloak'
 
@@ -7,7 +8,7 @@ import KeycloakProvider from 'next-auth/providers/keycloak'
 const clientId = 'nextclerk'
 const clientSecret = 'uvmAPUcHKYG9ZZXsymO9QP3rFAPPmLhF'
 const host = process.env.NODE_ENV === 'production' ? 'test.nextclerk.com' : 'localhost'
-
+console.log('using', host)
 async function refreshAccessToken(token: JWT & Account) {
   try {
     // console.log('REFRESHING', token)
