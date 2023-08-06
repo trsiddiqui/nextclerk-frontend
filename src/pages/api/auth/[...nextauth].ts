@@ -61,7 +61,7 @@ export const authOptions: AuthOptions = {
     KeycloakProvider({
       clientId: clientId,
       clientSecret: clientSecret,
-      issuer: `http://${host}:8086/realms/${clientId}`
+      issuer: `${process.env.NEXTAUTH_URL}:8086/realms/${clientId}`
     })
 
     // GitHubProvider({
