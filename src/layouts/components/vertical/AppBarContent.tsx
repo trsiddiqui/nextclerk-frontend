@@ -3,6 +3,7 @@ import Box from '@mui/material/Box'
 import { Theme } from '@mui/material/styles'
 import IconButton from '@mui/material/IconButton'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import LoginIcon from '@mui/icons-material/Login'
 
 // ** Icons Imports
 import Menu from 'mdi-material-ui/Menu'
@@ -37,7 +38,7 @@ const AppBarContent = (props: Props) => {
 
   // ** Hook
   const hiddenSm = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
 
   return (
     <Box
@@ -89,20 +90,19 @@ const AppBarContent = (props: Props) => {
       </Box>
       {session ? (
         <>
-          Signed in as {JSON.stringify({ session, status })} <br />
-          <button onClick={() => signOut()}>Sign out</button>
+          <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
+            {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
+            <NotificationDropdown />
+            <UserDropdown name={session.token.name} email={session.token.email} signOut={signOut} />
+          </Box>
         </>
       ) : (
         <>
-          Not signed in <br />
-          <button onClick={() => signIn('keycloak')}>Sign in</button>
+          <IconButton aria-label='delete' onClick={() => signIn('keycloak')}>
+            <LoginIcon />
+          </IconButton>
         </>
       )}
-      <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
-        {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
-        <NotificationDropdown />
-        <UserDropdown />
-      </Box>
     </Box>
   )
 }
