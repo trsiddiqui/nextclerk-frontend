@@ -4,10 +4,13 @@ import KeycloakProvider from 'next-auth/providers/keycloak'
 
 // import GitHubProvider from 'next-auth/providers/github'
 
+const clientId = 'nextclerk'
+const clientSecret = 'uvmAPUcHKYG9ZZXsymO9QP3rFAPPmLhF'
+
 async function refreshAccessToken(token: JWT & Account) {
   try {
     // console.log('REFRESHING', token)
-    const url = 'http://localhost:8086/realms/keycloak-express/protocol/openid-connect/token'
+    const url = `http://localhost:8086/realms/${clientId}/protocol/openid-connect/token`
 
     const response = await fetch(url, {
       headers: {
@@ -15,8 +18,8 @@ async function refreshAccessToken(token: JWT & Account) {
       },
       method: 'POST',
       body: new URLSearchParams({
-        client_id: 'keycloak-express',
-        client_secret: '1y3dvXeKzYywae2Smc9JSk105goh7rpD',
+        client_id: clientId,
+        client_secret: clientSecret,
         grant_type: 'refresh_token',
         refresh_token: token.refresh_token!
       })
@@ -53,9 +56,9 @@ export const authOptions: AuthOptions = {
   // Configure one or more authentication providers
   providers: [
     KeycloakProvider({
-      clientId: 'keycloak-express',
-      clientSecret: '1y3dvXeKzYywae2Smc9JSk105goh7rpD',
-      issuer: 'http://0.0.0.0:8086/realms/keycloak-express'
+      clientId: clientId,
+      clientSecret: clientSecret,
+      issuer: `http://0.0.0.0:8086/realms/${clientId}`
     })
 
     // GitHubProvider({
