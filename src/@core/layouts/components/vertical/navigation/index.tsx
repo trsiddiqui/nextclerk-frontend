@@ -23,10 +23,11 @@ import VerticalNavHeader from './VerticalNavHeader'
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import { IconButton } from '@mui/material'
-import { useSession } from 'next-auth/react'
-import { Session } from 'next-auth'
-import { JWT } from 'next-auth/jwt'
-import { User } from 'next-auth/core/types'
+
+// import { useSession } from 'next-auth/react'
+// import { Session } from 'next-auth'
+// import { JWT } from 'next-auth/jwt'
+// import { User } from 'next-auth/core/types'
 
 interface Props {
   hidden: boolean
@@ -66,8 +67,8 @@ const Navigation = (props: Props) => {
     verticalNavMenuContent: userVerticalNavMenuContent
   } = props
 
-  const { data } = useSession()
-  const session = data as unknown as Session & { token: JWT; user: User }
+  // const { data } = useSession()
+  // const session = data as unknown as Session & { token: JWT; user: User }
 
   // ** States
   const [groupActive, setGroupActive] = useState<string[]>([])
@@ -126,18 +127,18 @@ const Navigation = (props: Props) => {
         }}
       />
 
-      {session?.token ? (
-        <IconButton
-          sx={{ marginTop: 5, width: 40, marginLeft: 10, background: 'white', border: '1px solid lightgrey' }}
-          color='primary'
-          size='medium'
-          onClick={() => router.push('/supporting-package/create')}
-        >
-          <AddIcon fontSize='inherit' />
-        </IconButton>
-      ) : (
+      {/* {session?.token ? ( */}
+      <IconButton
+        sx={{ marginTop: 5, width: 40, marginLeft: 10, background: 'white', border: '1px solid lightgrey' }}
+        color='primary'
+        size='medium'
+        onClick={() => router.push('/supporting-package/create')}
+      >
+        <AddIcon fontSize='inherit' />
+      </IconButton>
+      {/* ) : (
         <></>
-      )}
+      )} */}
 
       <Box sx={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
         {/* @ts-ignore */}
