@@ -47,10 +47,7 @@ const UserLayout = ({ children }: Props) => {
       hidden={hidden}
       settings={settings}
       saveSettings={saveSettings}
-      verticalNavItems={
-        // session?.token ? VerticalNavItems() : []
-        VerticalNavItems()
-      } // Navigation Items
+      verticalNavItems={session?.token ? VerticalNavItems() : []} // Navigation Items
       verticalAppBarContent={(
         props // AppBar Content
       ) => (
