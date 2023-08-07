@@ -31,7 +31,6 @@ async function refreshAccessToken(token: JWT & Account) {
     const refreshedTokens = await response.json()
 
     console.log('REFRESHED', refreshedTokens)
-    console.log(Math.trunc(new Date().getTime() / 1000) + refreshedTokens.expires_in)
     if (!response.ok) {
       throw refreshedTokens
     }
@@ -46,7 +45,7 @@ async function refreshAccessToken(token: JWT & Account) {
 
     return returnObject
   } catch (error) {
-    console.log(error)
+    console.error(error)
 
     return {
       ...token,
@@ -61,7 +60,10 @@ export const authOptions: AuthOptions = {
     KeycloakProvider({
       clientId: clientId,
       clientSecret: clientSecret,
-      issuer: `${host}:8086/realms/${clientId}`
+      issuer: `${host}:8086/realms/${clientId}`,
+      authorization: `${host}:8086/realms/myrealm/protocol/openid-connect/auth`,
+      accessTokenUrl: `${host}:8086/realms/myrealm/protocol/openid-connect/token`,
+      profileUrl: `${host}:8086/realms/myrealm/protocol/openid-connect/userinfo`
     })
 
     // GitHubProvider({
@@ -70,23 +72,24 @@ export const authOptions: AuthOptions = {
     // })
   ],
   callbacks: {
-    async jwt({ token, account, user }) {
+    async jwt({ token, account, user, profile }) {
       if (account && user) {
         // token = Object.assign({}, token, { account, user, profile, session })
         return {
           ...token,
-          ...account
+          ...account,
+          ...profile
         }
       }
 
-      // console.log('JWT', { token, account, user, profile, session })
-      console.log(new Date(), new Date((token?.expires_at as number) * 1000))
+      // console.log(new Date(), new Date((token?.expires_at as number) * 1000))
 
       // // Return previous token if the access token has not expired yet
       if (new Date() < new Date((token?.expires_at as number) * 1000)) {
         return {
           ...token,
-          ...account
+          ...account,
+          ...profile
         }
       }
 

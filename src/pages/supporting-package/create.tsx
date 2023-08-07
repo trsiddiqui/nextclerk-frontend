@@ -16,18 +16,31 @@ import { AutocompleteRow, DropDownRow } from 'src/@core/utils'
 import { User } from 'src/utils/types'
 import SupportingPackageForm from 'src/@core/page-components/supporting-packages/supporting-package-form'
 import { GetSessionParams, getSession } from 'next-auth/react'
+import { Account, Profile, Session } from 'next-auth'
+import { JWT } from 'next-auth/jwt'
+import { Policies } from 'src/@core/auth'
 
 export async function getServerSideProps(context: GetSessionParams | undefined) {
-  const session = await getSession(context)
+  const session = (await getSession(context)) as unknown as {
+    token: Session & JWT & Account & Profile & { groups: Array<string> }
+  }
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false
+      }
+    }
+  }
 
-  // if (!session) {
-  //   return {
-  //     redirect: {
-  //       destination: '/',
-  //       permanent: false
-  //     }
-  //   }
-  // }
+  if (!session.token.groups.includes(Policies.CREATE_SUPPORTING_PACKAGES)) {
+    return {
+      redirect: {
+        destination: '/404',
+        permanent: false
+      }
+    }
+  }
 
   // Fetch data from external API
   const categories = await getAllCategories(true)
