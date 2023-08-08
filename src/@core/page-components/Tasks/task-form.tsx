@@ -97,12 +97,6 @@ const TaskForm = ({
   saveTaskMethod: (...args: any) => Promise<any>
   task?: TaskResponse
 }) => {
-  const [values, setValues] = useState({
-    name: '',
-    date: dayjs(),
-    tab: 0,
-    commentsSortedBy: 'dateAsc'
-  })
   const router = useRouter()
   enum SnackBarType {
     Success = 'success',
