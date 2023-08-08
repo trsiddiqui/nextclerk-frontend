@@ -23,7 +23,7 @@ import // GetSessionParams,
 // import { Policies } from 'src/@core/auth'
 
 export async function getServerSideProps() {
-// context: GetSessionParams | undefined
+  // context: GetSessionParams | undefined
   // const session = (await getSession(context)) as unknown as {
   //   token: Session & JWT & Account & Profile & { groups: Array<string> }
   // }
