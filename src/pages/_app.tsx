@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { Router } from 'next/router'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
+import { SessionProvider } from 'next-auth/react'
 
 // ** Loader Import
 import NProgress from 'nprogress'
@@ -30,9 +31,11 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 // ** Global css styles
 import '../../styles/globals.css'
 import { registerLicense } from '@syncfusion/ej2-base'
+import { Session } from 'next-auth'
 
 // ** Extend App Props with Emotion
 type ExtendedAppProps = AppProps & {
+  session: Session
   Component: NextPage
   emotionCache: EmotionCache
 }
@@ -58,7 +61,7 @@ const App = (props: ExtendedAppProps) => {
     'Mgo+DSMBaFt+QHJqVk1hXk5Hd0BLVGpAblJ3T2ZQdVt5ZDU7a15RRnVfR11kS31QdUBlWnhXdw==;Mgo+DSMBPh8sVXJ1S0R+X1pFdEBBXHxAd1p/VWJYdVt5flBPcDwsT3RfQF5jTH5UdEZgWnpYc31QQQ==;ORg4AjUWIQA/Gnt2VFhiQlJPd11dXmJWd1p/THNYflR1fV9DaUwxOX1dQl9gSXtTcUdgWnxbdnBURmc=;MTk2MDU5NUAzMjMxMmUzMjJlMzNKditTcVRNSEU4SWVpam5SbWJHZGVrRW5FRmdaWVpnZ2o1VDgrbzZZbUZvPQ==;MTk2MDU5NkAzMjMxMmUzMjJlMzNkbTFCdDRTdzU0dTltUjgvVG5Ud2JldkRNREltcFJRTVhZOGdFZXFHd1JNPQ==;NRAiBiAaIQQuGjN/V0d+Xk9HfV5AQmBIYVp/TGpJfl96cVxMZVVBJAtUQF1hSn5WdkJhWnxddXJRTmhb;MTk2MDU5OEAzMjMxMmUzMjJlMzNPVWNORnZIc0xsWGljamRkMEdYbFhBUmdtY0cxZTJReXI2SEhoSXM5eTl3PQ==;MTk2MDU5OUAzMjMxMmUzMjJlMzNtTkJTZFErMW52bEw0Y2NVWDVZc2d0TzhUMXJQK3ZDTnJtNmFXdncvN1NNPQ==;Mgo+DSMBMAY9C3t2VFhiQlJPd11dXmJWd1p/THNYflR1fV9DaUwxOX1dQl9gSXtTcUdgWnxbdnFSRGk=;MTk2MDYwMUAzMjMxMmUzMjJlMzNGMTYzY2xTQUE3RjlvUlVxaDhtUVBqRnBEYVc2WUo3dG1sVGsrcjBRNnVZPQ==;MTk2MDYwMkAzMjMxMmUzMjJlMzNNNU90TElvSHRFQTdvTU1nNEo1eEE2N2JaWUd2QldZb3k5Wm5LMkJOOEV3PQ==;MTk2MDYwM0AzMjMxMmUzMjJlMzNPVWNORnZIc0xsWGljamRkMEdYbFhBUmdtY0cxZTJReXI2SEhoSXM5eTl3PQ=='
   )
   console.log('license registered')
-  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+  const { Component, emotionCache = clientSideEmotionCache, pageProps, session } = props
 
   // Variables
   const getLayout = Component.getLayout ?? (page => <UserLayout>{page}</UserLayout>)
@@ -71,14 +74,15 @@ const App = (props: ExtendedAppProps) => {
         <meta name='keywords' content='NextClerk' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>
-
-      <SettingsProvider>
-        <SettingsConsumer>
-          {({ settings }) => {
-            return <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
-          }}
-        </SettingsConsumer>
-      </SettingsProvider>
+      <SessionProvider session={session}>
+        <SettingsProvider>
+          <SettingsConsumer>
+            {({ settings }) => {
+              return <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
+            }}
+          </SettingsConsumer>
+        </SettingsProvider>
+      </SessionProvider>
     </CacheProvider>
   )
 }

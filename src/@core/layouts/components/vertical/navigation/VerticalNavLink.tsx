@@ -109,9 +109,9 @@ const VerticalNavLink = ({ item, navVisible, toggleNavVisibility }: Props) => {
         >
           <ListItemIcon
             sx={{
-              mr: 2.5,
               color: 'text.primary',
-              transition: 'margin .25s ease-in-out'
+              transition: 'margin .25s ease-in-out',
+              mr: '0px !important'
             }}
           >
             <UserIcon icon={IconTag} />
@@ -121,7 +121,7 @@ const VerticalNavLink = ({ item, navVisible, toggleNavVisibility }: Props) => {
             <Typography
               fontSize={12}
               {...(themeConfig.menuTextTruncate && { noWrap: true })}
-              sx={{ textAlign: 'center', width: '100%', marginLeft: '-7px' }}
+              sx={{ textAlign: 'center', width: '100%', marginLeft: '0' }}
             >
               {item.title}
             </Typography>

@@ -24,6 +24,11 @@ import VerticalNavHeader from './VerticalNavHeader'
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import { IconButton } from '@mui/material'
 
+// import { useSession } from 'next-auth/react'
+// import { Session } from 'next-auth'
+// import { JWT } from 'next-auth/jwt'
+// import { User } from 'next-auth/core/types'
+
 interface Props {
   hidden: boolean
   navWidth: number
@@ -61,6 +66,9 @@ const Navigation = (props: Props) => {
     beforeVerticalNavMenuContent,
     verticalNavMenuContent: userVerticalNavMenuContent
   } = props
+
+  // const { data } = useSession()
+  // const session = data as unknown as Session & { token: JWT; user: User }
 
   // ** States
   const [groupActive, setGroupActive] = useState<string[]>([])
@@ -119,6 +127,7 @@ const Navigation = (props: Props) => {
         }}
       />
 
+      {/* {session?.token ? ( */}
       <IconButton
         sx={{ marginTop: 5, width: 40, marginLeft: 10, background: 'white', border: '1px solid lightgrey' }}
         color='primary'
@@ -127,14 +136,10 @@ const Navigation = (props: Props) => {
       >
         <AddIcon fontSize='inherit' />
       </IconButton>
-      {/* <Button
-        sx={{ margin: '40px 10px 10px 10px' }}
-        variant='outlined'
-        startIcon={<AddIcon />}
-        onClick={() => router.push('/supporting-package/create')}
-      >
-        Create
-      </Button> */}
+      {/* ) : (
+        <></>
+      )} */}
+
       <Box sx={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
         {/* @ts-ignore */}
         <ScrollWrapper

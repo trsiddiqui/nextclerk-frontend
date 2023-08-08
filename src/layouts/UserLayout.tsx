@@ -17,6 +17,9 @@ import VerticalAppBarContent from './components/vertical/AppBarContent'
 
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
+import { useSession } from 'next-auth/react'
+import { Session, User } from 'next-auth/core/types'
+import { JWT } from 'next-auth/jwt/types'
 
 interface Props {
   children: ReactNode
@@ -25,6 +28,9 @@ interface Props {
 const UserLayout = ({ children }: Props) => {
   // ** Hooks
   const { settings, saveSettings } = useSettings()
+
+  const { data } = useSession()
+  const session = data as unknown as Session & { token: JWT; user: User }
 
   /**
    *  The below variable will hide the current layout menu at given screen size.
@@ -41,7 +47,10 @@ const UserLayout = ({ children }: Props) => {
       hidden={hidden}
       settings={settings}
       saveSettings={saveSettings}
-      verticalNavItems={VerticalNavItems()} // Navigation Items
+      verticalNavItems={
+        // session?.token ? VerticalNavItems() : []
+        VerticalNavItems()
+      } // Navigation Items
       verticalAppBarContent={(
         props // AppBar Content
       ) => (

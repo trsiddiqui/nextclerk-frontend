@@ -207,7 +207,7 @@ const SupportingPackageForm = ({
   const [loading, setLoading] = useState(false)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
   const [journalEntrySpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
-  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>()
+  const [, setJournalEntries] = useState<JournalEntry[]>()
   const [allCategories] = useState(categories)
   const [allLabels] = useState(labels)
   const [label, setLabel] = useState<{ label: string; uuid: string } | null>(
@@ -509,7 +509,7 @@ const SupportingPackageForm = ({
   function oncreated(): void {
     if (spreadsheet) {
       setLoading(true)
-      if (masterFile?.downloadUrl) {
+      if (masterFile?.mimetype.includes('sheet') && masterFile?.downloadUrl) {
         fetch(masterFile?.downloadUrl) // fetch the remote url
           .then(response => {
             response.blob().then(fileBlob => {
@@ -622,7 +622,7 @@ const SupportingPackageForm = ({
   }
   const handleSaveSupportingPackage = async (isDraft: boolean) => {
     setSaveAnchorEl(null)
-    if (spreadsheet) {
+    if (spreadsheet && masterFile?.mimetype.includes('sheet')) {
       spreadsheet?.save({
         saveType: 'Xlsx',
         fileName: masterFile?.originalname
@@ -795,17 +795,21 @@ const SupportingPackageForm = ({
       ...masterFileObject,
       downloadUrl
     })
-    fetch(downloadUrl) // fetch the remote url
-      .then(response => {
-        response.blob().then(fileBlob => {
-          const file = new File([fileBlob], masterFileObject.originalname) //convert the blob into file
-          if (spreadsheet) {
-            spreadsheet.open({ file: file }) // open the file into Spreadsheet
-            // spreadsheet.hideFileMenuItems(['File'], true)
-            // spreadsheet.hideToolbarItems('Home', [19])
-          }
+    if (masterFileObject.mimetype.includes('sheet')) {
+      fetch(downloadUrl) // fetch the remote url
+        .then(response => {
+          response.blob().then(fileBlob => {
+            const file = new File([fileBlob], masterFileObject.originalname) //convert the blob into file
+            if (spreadsheet) {
+              spreadsheet.open({ file: file }) // open the file into Spreadsheet
+              // spreadsheet.hideFileMenuItems(['File'], true)
+              // spreadsheet.hideToolbarItems('Home', [19])
+            }
+          })
         })
-      })
+    } else {
+      setLoading(false)
+    }
   }
 
   return (
@@ -1049,7 +1053,7 @@ const SupportingPackageForm = ({
           </AppBar>
           {/* @ts-ignore */}
           <TabPanel style={{ display: tab === 0 ? 'unset' : 'none' }} dir={theme.direction}>
-            {masterFile ? (
+            {masterFile && masterFile?.mimetype.includes('sheet') ? (
               <Grid
                 justifyContent='space-between' // Add it here :)
                 container
@@ -1459,7 +1463,7 @@ const SupportingPackageForm = ({
               sx={{
                 pl: 1,
                 pt: 1,
-                height: masterFile ? '100vh' : '300px',
+                height: masterFile && masterFile.mimetype.includes('sheet') ? '100vh' : '300px',
                 position: isSpreadsheetFullScreen ? 'fixed' : 'default',
                 top: isSpreadsheetFullScreen ? '0px' : 'default',
                 bottom: isSpreadsheetFullScreen ? '0px' : 'default',
@@ -1469,7 +1473,7 @@ const SupportingPackageForm = ({
               width='100%'
               height='100%'
             >
-              {masterFile ? (
+              {masterFile && masterFile?.mimetype.includes('sheet') ? (
                 <SpreadsheetComponent
                   allowConditionalFormat
                   allowEditing={true}
@@ -1485,6 +1489,9 @@ const SupportingPackageForm = ({
                   openUrl={syncfusionWebApiUrls().openUrl}
                   allowOpen={true}
                   openComplete={() => {
+                    setLoading(false)
+                  }}
+                  openFailure={() => {
                     setLoading(false)
                   }}
                   saveUrl={syncfusionWebApiUrls().saveUrl}
@@ -1671,7 +1678,7 @@ const SupportingPackageForm = ({
           >
             <Grid
               container
-              sx={{ pl: 1, height: masterFile ? '600px' : '200px' }}
+              sx={{ pl: 1, height: masterFile && masterFile?.mimetype.includes('sheet') ? '600px' : '200px' }}
               width='100%'
               className='journal-entry-tab'
             >
