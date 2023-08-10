@@ -65,11 +65,6 @@ export const authOptions: AuthOptions = {
       accessTokenUrl: `${host}:8086/realms/myrealm/protocol/openid-connect/token`,
       profileUrl: `${host}:8086/realms/myrealm/protocol/openid-connect/userinfo`
     })
-
-    // GitHubProvider({
-    //   clientId: '49c824b1db9fc7ccaf00',
-    //   clientSecret: '0797c08596ae65085af5dfcd0a866089c2e8992b'
-    // })
   ],
   callbacks: {
     async jwt({ token, account, user, profile }) {
