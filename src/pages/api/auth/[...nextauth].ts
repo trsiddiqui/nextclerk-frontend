@@ -61,9 +61,9 @@ export const authOptions: AuthOptions = {
       clientId: clientId,
       clientSecret: clientSecret,
       issuer: `${host}:8086/realms/${clientId}`,
-      authorization: `${host}:8086/realms/myrealm/protocol/openid-connect/auth`,
-      accessTokenUrl: `${host}:8086/realms/myrealm/protocol/openid-connect/token`,
-      profileUrl: `${host}:8086/realms/myrealm/protocol/openid-connect/userinfo`
+      authorization: `${host}:8086/realms/${clientId}/protocol/openid-connect/auth`,
+      accessTokenUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/token`,
+      profileUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/userinfo`
     })
   ],
   callbacks: {
