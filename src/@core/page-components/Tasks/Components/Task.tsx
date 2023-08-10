@@ -137,6 +137,7 @@ export const Task = ({ task }: { task: TaskResponse }) => {
                 width: 38,
                 height: 38,
                 marginRight: 3,
+                marginTop: 5,
                 fontSize: '1rem',
                 color: 'common.white',
                 backgroundColor: 'gray'
