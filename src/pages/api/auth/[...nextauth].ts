@@ -118,4 +118,6 @@ export const authOptions: AuthOptions = {
     }
   }
 }
+
+console.log(authOptions)
 export default NextAuth(authOptions)
