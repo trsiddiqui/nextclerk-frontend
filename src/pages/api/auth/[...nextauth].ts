@@ -119,5 +119,7 @@ export const authOptions: AuthOptions = {
   }
 }
 
-console.log(authOptions)
-export default NextAuth(authOptions)
+console.log(JSON.stringify(authOptions.providers))
+const nextAuth = NextAuth(authOptions)
+console.log(JSON.stringify(nextAuth))
+export default nextAuth
