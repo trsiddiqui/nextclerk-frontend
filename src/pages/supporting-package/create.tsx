@@ -15,13 +15,15 @@ import {
 import { AutocompleteRow, DropDownRow } from 'src/@core/utils'
 import { User } from 'src/utils/types'
 import SupportingPackageForm from 'src/@core/page-components/supporting-packages/supporting-package-form'
-// import { GetSessionParams, getSession } from 'next-auth/react'
+import // GetSessionParams,
+// getSession
+'next-auth/react'
 // import { Account, Profile, Session } from 'next-auth'
 // import { JWT } from 'next-auth/jwt'
 // import { Policies } from 'src/@core/auth'
 
 export async function getServerSideProps() {
-// context: GetSessionParams | undefined
+  // context: GetSessionParams | undefined
   // const session = (await getSession(context)) as unknown as {
   //   token: Session & JWT & Account & Profile & { groups: Array<string> }
   // }
@@ -54,7 +56,19 @@ export async function getServerSideProps() {
   const activeUser = await getActiveUser(true)
 
   // Pass data to the page via props
-  return { props: { categories, accounts, departments, locations, customers, activeUser, users, labels } }
+  return {
+    props: {
+      categories,
+      accounts,
+      departments,
+      locations,
+      customers,
+      activeUser,
+      users,
+      labels
+      // session
+    }
+  }
 }
 
 const CreateSupportPackage = ({
