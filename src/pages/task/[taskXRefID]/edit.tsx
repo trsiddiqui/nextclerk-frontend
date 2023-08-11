@@ -39,7 +39,7 @@ const EditTask = ({
       labels={labels}
       users={users}
       task={task}
-      saveTaskMethod={updateTask}
+      saveOrUpdateTaskMethod={updateTask}
     ></TaskForm>
   )
 }

@@ -88,21 +88,15 @@ const TaskForm = ({
   categories,
   labels,
   users,
-  saveTaskMethod,
+  saveOrUpdateTaskMethod,
   task
 }: {
   categories: Array<AutocompleteRow>
   labels: Array<DropDownRow>
   users: User[]
-  saveTaskMethod: (...args: any) => Promise<any>
+  saveOrUpdateTaskMethod: (...args: any) => Promise<any>
   task?: TaskResponse
 }) => {
-  const [values, setValues] = useState({
-    name: '',
-    date: dayjs(),
-    tab: 0,
-    commentsSortedBy: 'dateAsc'
-  })
   const router = useRouter()
   enum SnackBarType {
     Success = 'success',
@@ -187,7 +181,7 @@ const TaskForm = ({
       // }))
     }
 
-    await APICallWrapper(saveTaskMethod, [taskObject], 'An error occurred while creating task.')
+    await APICallWrapper(saveOrUpdateTaskMethod, [taskObject], 'An error occurred while creating task.')
 
     showMessage(
       'The Task has been saved successfully. (TODO: Navigate to Task Dashboard when done)',
@@ -203,34 +197,6 @@ const TaskForm = ({
           <CardHeader title='Create a Task' titleTypographyProps={{ variant: 'h6' }}></CardHeader>
           <Divider sx={{ margin: 0 }} />
           <CardContent>
-            <Grid container spacing={1} sx={{ marginTop: -2 }}>
-              <Grid item xs={12} sm={6} sx={{ marginTop: -2 }} textAlign='right'>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      defaultChecked={isConfidential}
-                      onChange={event => {
-                        setIsConfidential(event.currentTarget.checked)
-                      }}
-                    />
-                  }
-                  label='Confidential'
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} sx={{ marginTop: -2 }} textAlign='right'>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      defaultChecked={isRecurring}
-                      onChange={event => {
-                        setIsRecurring(event.currentTarget.checked)
-                      }}
-                    />
-                  }
-                  label='Recurring'
-                />
-              </Grid>
-            </Grid>
             <Grid container spacing={5} sx={{ marginTop: -13 }}>
               <Grid item xs={12} sm={12} sx={{ marginTop: 1 }}>
                 <Typography variant='body2' sx={{ fontWeight: 600 }}>
@@ -305,6 +271,34 @@ const TaskForm = ({
                   />
                 </FormControl>
               </Grid>
+              <Grid container spacing={9} sx={{ marginTop: 2 }}>
+                <Grid item xs={12} sm={3} textAlign='left' sx={{ marginLeft: 5 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        defaultChecked={isConfidential}
+                        onChange={event => {
+                          setIsConfidential(event.currentTarget.checked)
+                        }}
+                      />
+                    }
+                    label='Confidential'
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} sx={{ marginTop: -2 }} textAlign='left'>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        defaultChecked={isRecurring}
+                        onChange={event => {
+                          setIsRecurring(event.currentTarget.checked)
+                        }}
+                      />
+                    }
+                    label='Recurring'
+                  />
+                </Grid>
+              </Grid>
               <Grid item xs={12} sm={12}>
                 <Card variant='outlined'>
                   <CardHeader title='Descriptions'></CardHeader>
@@ -318,15 +312,16 @@ const TaskForm = ({
                       variant='standard'
                       onChange={e => setDescription(e.target.value)}
                       maxRows={4}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position='end'>
-                            <IconButton edge='end' color='primary'>
-                              <SendIcon />
-                            </IconButton>
-                          </InputAdornment>
-                        )
-                      }}
+
+                      // InputProps={{
+                      //   endAdornment: (
+                      //     <InputAdornment position='end'>
+                      //       <IconButton edge='end' color='primary'>
+                      //         <SendIcon />
+                      //       </IconButton>
+                      //     </InputAdornment>
+                      //   )
+                      // }}
                     />
                   </CardContent>
                 </Card>

@@ -220,6 +220,12 @@ export const getTask = async (taskXRefID: string, isBackend = false): Promise<Ta
   return response.data
 }
 
+export const archiveTask = async (taskXRefID: string, isBackend = false): Promise<TaskResponse> => {
+  const response = await (isBackend ? backendApi : api).delete<TaskResponse>(`/${customerXRefID}/tasks/${taskXRefID}`)
+
+  return response.data
+}
+
 export const getTasks = async (isBackend = false): Promise<TaskResponse[]> => {
   const response = await (isBackend ? backendApi : api).get<TaskResponse[]>(`/${customerXRefID}/tasks`)
 

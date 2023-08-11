@@ -34,7 +34,7 @@ const CreateTask = ({
       categories={categories}
       labels={labels}
       users={users}
-      saveTaskMethod={createTaskApi}
+      saveOrUpdateTaskMethod={createTaskApi}
     ></TaskForm>
   )
 }
