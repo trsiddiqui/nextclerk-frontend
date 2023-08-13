@@ -206,7 +206,7 @@ const SupportingPackageForm = ({
   )
   const [loading, setLoading] = useState(false)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
-  const [journalEntrySpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
+  // const [journalEntrySpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
   const [, setJournalEntries] = useState<JournalEntry[]>()
   const [allCategories] = useState(categories)
   const [allLabels] = useState(labels)
@@ -428,22 +428,6 @@ const SupportingPackageForm = ({
     setChooseMaterFileModalOpen(false)
   }
 
-  const journalEntrySpreadsheetCreated = () => {
-    if (!journalEntrySpreadsheetRef) {
-      return
-    }
-    // TODO: Add code to load existing journal entries
-    // journalEntrySpreadsheetRef.insertRow(rowsModel)
-    // journalEntrySpreadsheetRef.addDataValidation(
-    //   { type: 'Decimal', isHighlighted: true, ignoreBlank: true },
-    //   'B2:B1000'
-    // )
-    // journalEntrySpreadsheetRef.addDataValidation(
-    //   { type: 'Decimal', isHighlighted: true, ignoreBlank: true },
-    //   'C2:C1000'
-    // )
-  }
-
   const fileUploadProp = (params: {
     setFileMethod: any
     filesCollection?: unknown[]
@@ -628,24 +612,26 @@ const SupportingPackageForm = ({
         fileName: masterFile?.originalname
       })
     }
-    const persistedJournalEntries = []
-    if (journalEntrySpreadsheetRef) {
-      const rows = await getSpreadsheetRows(journalEntrySpreadsheetRef)
-      for (const row of rows) {
-        const obj = {
-          accountUUID: accounts.find(x => x.label === row.cells[0].value)?.id,
-          debitAmount: row.cells[1]?.value,
-          creditAmount: row.cells[2]?.value,
-          memo: row.cells[3]?.value,
-          departmentUUID: departments.find(x => x.label === row.cells[4]?.value)?.id,
-          locationUUID: locations.find(x => x.label === row.cells[5]?.value)?.id,
-          customerUUID: customers.find(x => x.label === row.cells[6]?.value)?.id
-        }
-        console.log(obj)
-        persistedJournalEntries.push(obj)
-      }
-      setJournalEntries(persistedJournalEntries)
-    }
+    // const persistedJournalEntries = []
+
+    // TODO:
+    // if (journalEntrySpreadsheetRef) {
+    //   const rows = await getSpreadsheetRows(journalEntrySpreadsheetRef)
+    //   for (const row of rows) {
+    //     const obj = {
+    //       accountUUID: accounts.find(x => x.label === row.cells[0].value)?.id,
+    //       debitAmount: row.cells[1]?.value,
+    //       creditAmount: row.cells[2]?.value,
+    //       memo: row.cells[3]?.value,
+    //       departmentUUID: departments.find(x => x.label === row.cells[4]?.value)?.id,
+    //       locationUUID: locations.find(x => x.label === row.cells[5]?.value)?.id,
+    //       customerUUID: customers.find(x => x.label === row.cells[6]?.value)?.id
+    //     }
+    //     console.log(obj)
+    //     persistedJournalEntries.push(obj)
+    //   }
+    //   setJournalEntries(persistedJournalEntries)
+    // }
     let communications: Array<{
       users: string[]
       text: string
@@ -698,8 +684,8 @@ const SupportingPackageForm = ({
         uuid: file.uploaded.uuid,
         isMaster: file.uploaded.uuid === masterFile?.uploaded.uuid
       })),
-      communications,
-      journalEntries: persistedJournalEntries
+      communications
+      // journalEntries: persistedJournalEntries
     }
 
     await APICallWrapper(
@@ -714,73 +700,6 @@ const SupportingPackageForm = ({
     )
   }
   // #endregion
-
-  const autoCompleteOnChange = (args: ChangeEventArgs) => {
-    if (journalEntrySpreadsheetRef) {
-      const actCell = journalEntrySpreadsheetRef.getActiveSheet().activeCell
-      journalEntrySpreadsheetRef.updateCell({ value: args.value.toString() }, actCell)
-    }
-  }
-
-  const autoCompleteAccountComponent = () => {
-    return (
-      <div className='auto-complete-inside-sheet'>
-        <AutoCompleteComponent
-          allowCustom={false}
-          dataSource={accounts.map(a => a.label)}
-          className='abc'
-          showPopupButton
-          autofill
-          change={autoCompleteOnChange.bind(this)}
-        ></AutoCompleteComponent>
-      </div>
-    )
-  }
-
-  const autoCompleteDepartmentComponent = () => {
-    return (
-      <div className='auto-complete-inside-sheet'>
-        <AutoCompleteComponent
-          allowCustom={false}
-          dataSource={departments.map(a => a.label)}
-          className='abc'
-          showPopupButton
-          autofill
-          change={autoCompleteOnChange.bind(this)}
-        ></AutoCompleteComponent>
-      </div>
-    )
-  }
-
-  const autoCompleteLocationsComponent = () => {
-    return (
-      <div className='auto-complete-inside-sheet'>
-        <AutoCompleteComponent
-          allowCustom={false}
-          dataSource={locations.map(a => a.label)}
-          className='abc'
-          showPopupButton
-          autofill
-          change={autoCompleteOnChange.bind(this)}
-        ></AutoCompleteComponent>
-      </div>
-    )
-  }
-
-  const autoCompleteCustomersComponent = () => {
-    return (
-      <div className='auto-complete-inside-sheet'>
-        <AutoCompleteComponent
-          allowCustom={false}
-          dataSource={customers.map(a => a.label)}
-          className='abc'
-          showPopupButton
-          autofill
-          change={autoCompleteOnChange.bind(this)}
-        ></AutoCompleteComponent>
-      </div>
-    )
-  }
 
   const selectMasterFile = async (uuid: string) => {
     setLoading(true)
@@ -1682,141 +1601,7 @@ const SupportingPackageForm = ({
               width='100%'
               className='journal-entry-tab'
             >
-              <SpreadsheetComponent
-                ref={ssObj => {
-                  if (ssObj) {
-                    setJESpreadsheetRef(ssObj)
-                  }
-                }}
-                created={journalEntrySpreadsheetCreated.bind(this)}
-                allowDataValidation
-                allowFreezePane
-                cellEdit={args => {
-                  // Preventing the editing in 5th(Amount) column.
-                  if (
-                    args.address.endsWith('A1') ||
-                    args.address.endsWith('B1') ||
-                    args.address.endsWith('C1') ||
-                    args.address.endsWith('D1') ||
-                    args.address.endsWith('E1') ||
-                    args.address.endsWith('F1') ||
-                    args.address.endsWith('G1')
-                  ) {
-                    args.cancel = true
-                  }
-                }}
-              >
-                <SheetsDirective>
-                  <SheetDirective frozenRows={1} frozenColumns={7}>
-                    <ColumnsDirective>
-                      <ColumnDirective width={200}></ColumnDirective>
-                      <ColumnDirective width={80}></ColumnDirective>
-                      <ColumnDirective width={80}></ColumnDirective>
-                      <ColumnDirective width={280}></ColumnDirective>
-                      <ColumnDirective width={150}></ColumnDirective>
-                      <ColumnDirective width={150}></ColumnDirective>
-                      <ColumnDirective width={150}></ColumnDirective>
-                    </ColumnsDirective>
-                    <RowsDirective>
-                      <RowDirective height={30}>
-                        <CellsDirective>
-                          <CellDirective
-                            value='Account'
-                            isLocked
-                            style={{
-                              color: 'grey',
-                              textAlign: 'center',
-                              verticalAlign: 'middle',
-                              fontSize: '18px',
-                              fontFamily: 'Courier New',
-                              fontWeight: 'bold'
-                            }}
-                          ></CellDirective>
-                          <CellDirective
-                            value='Debit'
-                            isLocked
-                            style={{
-                              color: 'grey',
-                              textAlign: 'center',
-                              verticalAlign: 'middle',
-                              fontSize: '18px',
-                              fontFamily: 'Courier New',
-                              fontWeight: 'bold'
-                            }}
-                          ></CellDirective>
-                          <CellDirective
-                            value='Credit'
-                            isLocked
-                            style={{
-                              color: 'grey',
-                              textAlign: 'center',
-                              verticalAlign: 'middle',
-                              fontSize: '18px',
-                              fontFamily: 'Courier New',
-                              fontWeight: 'bold'
-                            }}
-                          ></CellDirective>
-                          <CellDirective
-                            value='Line Memo'
-                            isLocked
-                            style={{
-                              color: 'grey',
-                              textAlign: 'center',
-                              verticalAlign: 'middle',
-                              fontSize: '18px',
-                              fontFamily: 'Courier New',
-                              fontWeight: 'bold'
-                            }}
-                          ></CellDirective>
-                          <CellDirective
-                            value='Department'
-                            isLocked
-                            style={{
-                              color: 'grey',
-                              textAlign: 'center',
-                              verticalAlign: 'middle',
-                              fontSize: '18px',
-                              fontFamily: 'Courier New',
-                              fontWeight: 'bold'
-                            }}
-                          ></CellDirective>
-                          <CellDirective
-                            value='Location'
-                            isLocked
-                            style={{
-                              color: 'grey',
-                              textAlign: 'center',
-                              verticalAlign: 'middle',
-                              fontSize: '18px',
-                              fontFamily: 'Courier New',
-                              fontWeight: 'bold'
-                            }}
-                          ></CellDirective>
-                          <CellDirective
-                            value='Name'
-                            isLocked
-                            style={{
-                              color: 'grey',
-                              textAlign: 'center',
-                              verticalAlign: 'middle',
-                              fontSize: '18px',
-                              fontFamily: 'Courier New',
-                              fontWeight: 'bold'
-                            }}
-                          ></CellDirective>
-                        </CellsDirective>
-                      </RowDirective>
-                    </RowsDirective>
-                    <RangesDirective>
-                      <RangeDirective address='A2:A1000' template={autoCompleteAccountComponent} />
-                      <RangeDirective address='B2:B1000' showFieldAsHeader />
-                      <RangeDirective address='E2:E1000' template={autoCompleteDepartmentComponent} />
-                      <RangeDirective address='F2:F1000' template={autoCompleteLocationsComponent} />
-                      <RangeDirective address='G2:G1000' template={autoCompleteCustomersComponent} />
-                    </RangesDirective>
-                  </SheetDirective>
-                </SheetsDirective>
-              </SpreadsheetComponent>
+              {/* TODO: Journal Entries Table */}
             </Grid>
           </TabPanel>
         </Paper>
