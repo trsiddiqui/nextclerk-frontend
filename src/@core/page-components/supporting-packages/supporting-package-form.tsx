@@ -1764,109 +1764,142 @@ const SupportingPackageForm = ({
           <TabPanel style={{ display: tab === 1 ? 'unset' : 'none' }} dir={theme.direction}>
             <Container sx={{ padding: '10px 0px' }}>
               {/* <Paper sx={{ margin: '0px 0 30px 0' }}> */}
-              <Grid container sx={{ padding: '1rem 1rem', marginBottom: '20px' }}>
-                <TextField
-                  fullWidth
-                  id='outlined-multiline-flexible'
-                  label='Add Comment(s)'
-                  multiline
-                  variant='standard'
-                  value={currentSPNote}
-                  onChange={event => setCurrentSPNote(event.target.value)}
-                  maxRows={4}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton color='primary' onClick={handleUploadNotesFileOpen}>
-                          <AttachFileIcon />
-                        </IconButton>
-
-                        <IconButton
-                          edge='end'
-                          color='primary'
-                          onClick={() => {
-                            setSPNotes(
-                              SPNotes.concat({
-                                message: currentSPNote,
-                                file: notesFile,
-                                user: activeUser.details,
-                                createdAt: DateTime.now()
-                              })
-                            )
-                            setCurrentSPNote('')
-                            setNotesFile(null)
-                          }}
-                        >
-                          <SendIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-                {notesFile ? (
-                  <Chip
-                    color='primary'
-                    label={`${notesFile.originalname} (${(notesFile.size / 1024).toFixed(1)} KB)`}
-                    variant={masterFile?.originalname === notesFile.originalname ? 'filled' : 'outlined'}
-                    avatar={
-                      isSupportedMimeType(notesFile.mimetype) ? (
-                        <Avatar
-                          alt='Flora'
-                          src={`${
-                            process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-                          }${mimetypeToIconImage(notesFile.mimetype)}`}
+              <Grid container>
+                {masterFile && masterFile.mimetype.includes('pdf') ? (
+                  <Grid item lg={6} md={6} sm={12}>
+                    <Document
+                      file={masterFile.downloadUrl}
+                      onLoadSuccess={document => {
+                        setNumPagesOfActivePDF(document.numPages)
+                      }}
+                      renderMode='canvas'
+                    >
+                      {Array.from(new Array(numPagesOfActivePDF), (el, index) => (
+                        <Page
+                          key={`page_${index + 1}`}
+                          pageNumber={index + 1}
+                          renderTextLayer={false}
+                          height={800}
+                          renderForms={false}
+                          renderAnnotationLayer={false}
                         />
-                      ) : undefined
-                    }
-                    onDelete={() => {
-                      // TODO: CALL API TO DELETE THE ATTACHED FILE
-                      setNotesFile(null)
-                    }}
-                    sx={{ marginLeft: 3 }}
-                  />
+                      ))}
+                    </Document>
+                  </Grid>
                 ) : (
                   <></>
                 )}
+                <Grid
+                  item
+                  sm={12}
+                  lg={masterFile && masterFile.mimetype.includes('pdf') ? 6 : 12}
+                  md={masterFile && masterFile.mimetype.includes('pdf') ? 6 : 12}
+                >
+                  <Container sx={{ padding: '1rem 1rem', marginBottom: '20px' }}>
+                    <TextField
+                      fullWidth
+                      id='outlined-multiline-flexible'
+                      label='Add Comment(s)'
+                      multiline
+                      variant='standard'
+                      value={currentSPNote}
+                      onChange={event => setCurrentSPNote(event.target.value)}
+                      maxRows={4}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton color='primary' onClick={handleUploadNotesFileOpen}>
+                              <AttachFileIcon />
+                            </IconButton>
+
+                            <IconButton
+                              edge='end'
+                              color='primary'
+                              onClick={() => {
+                                setSPNotes(
+                                  SPNotes.concat({
+                                    message: currentSPNote,
+                                    file: notesFile,
+                                    user: activeUser.details,
+                                    createdAt: DateTime.now()
+                                  })
+                                )
+                                setCurrentSPNote('')
+                                setNotesFile(null)
+                              }}
+                            >
+                              <SendIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  </Container>
+                  {notesFile ? (
+                    <Chip
+                      color='primary'
+                      label={`${notesFile.originalname} (${(notesFile.size / 1024).toFixed(1)} KB)`}
+                      variant={masterFile?.originalname === notesFile.originalname ? 'filled' : 'outlined'}
+                      avatar={
+                        isSupportedMimeType(notesFile.mimetype) ? (
+                          <Avatar
+                            alt='Flora'
+                            src={`${
+                              process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                            }${mimetypeToIconImage(notesFile.mimetype)}`}
+                          />
+                        ) : undefined
+                      }
+                      onDelete={() => {
+                        // TODO: CALL API TO DELETE THE ATTACHED FILE
+                        setNotesFile(null)
+                      }}
+                      sx={{ marginLeft: 3 }}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                  {SPNotes.sort((a, b) => b.createdAt.diff(a.createdAt).as('millisecond')).map((note, index) => (
+                    <>
+                      <Grid container wrap='nowrap' spacing={2} key={index}>
+                        <Grid item>
+                          <Avatar alt={note.user.name}>{getInitials(note.user.name)}</Avatar>
+                        </Grid>
+                        <Grid justifyContent='left' item xs zeroMinWidth>
+                          <h4 style={{ margin: 0, textAlign: 'left' }}>{note.user.name}</h4>
+                          <p style={{ textAlign: 'left' }}>{note.message}</p>
+                          <p style={{ textAlign: 'left', color: 'gray' }}>
+                            {note.createdAt.toFormat('dd MMM, yyyy hh:mm a')}
+                            {note.file ? (
+                              <Chip
+                                key={index}
+                                color='primary'
+                                label={`${note.file.originalname} (${(note.file.size / 1024).toFixed(1)} KB)`}
+                                variant={masterFile?.originalname === note.file.originalname ? 'filled' : 'outlined'}
+                                avatar={
+                                  isSupportedMimeType(note.file.mimetype) ? (
+                                    <Avatar
+                                      alt='Flora'
+                                      src={`${
+                                        process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                                      }${mimetypeToIconImage(note.file.mimetype)}`}
+                                    />
+                                  ) : undefined
+                                }
+                                sx={{ marginLeft: 3 }}
+                              />
+                            ) : (
+                              <></>
+                            )}
+                          </p>
+                        </Grid>
+                      </Grid>
+                      <Divider />
+                    </>
+                  ))}
+                </Grid>
               </Grid>
               {/* </Paper> */}
-              {SPNotes.sort((a, b) => b.createdAt.diff(a.createdAt).as('millisecond')).map((note, index) => (
-                <>
-                  <Grid container wrap='nowrap' spacing={2} key={index}>
-                    <Grid item>
-                      <Avatar alt={note.user.name}>{getInitials(note.user.name)}</Avatar>
-                    </Grid>
-                    <Grid justifyContent='left' item xs zeroMinWidth>
-                      <h4 style={{ margin: 0, textAlign: 'left' }}>{note.user.name}</h4>
-                      <p style={{ textAlign: 'left' }}>{note.message}</p>
-                      <p style={{ textAlign: 'left', color: 'gray' }}>
-                        {note.createdAt.toFormat('dd MMM, yyyy hh:mm a')}
-                        {note.file ? (
-                          <Chip
-                            key={index}
-                            color='primary'
-                            label={`${note.file.originalname} (${(note.file.size / 1024).toFixed(1)} KB)`}
-                            variant={masterFile?.originalname === note.file.originalname ? 'filled' : 'outlined'}
-                            avatar={
-                              isSupportedMimeType(note.file.mimetype) ? (
-                                <Avatar
-                                  alt='Flora'
-                                  src={`${
-                                    process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-                                  }${mimetypeToIconImage(note.file.mimetype)}`}
-                                />
-                              ) : undefined
-                            }
-                            sx={{ marginLeft: 3 }}
-                          />
-                        ) : (
-                          <></>
-                        )}
-                      </p>
-                    </Grid>
-                  </Grid>
-                  <Divider />
-                </>
-              ))}
             </Container>
           </TabPanel>
           <TabPanel
@@ -2269,7 +2302,14 @@ const SupportingPackageForm = ({
           renderMode='canvas'
         >
           {Array.from(new Array(numPagesOfActivePDF), (el, index) => (
-            <Page key={`page_${index + 1}`} pageNumber={index + 1} renderTextLayer={false} height={800} />
+            <Page
+              key={`page_${index + 1}`}
+              pageNumber={index + 1}
+              renderTextLayer={false}
+              renderForms={false}
+              renderAnnotationLayer={false}
+              height={800}
+            />
           ))}
         </Document>
       </Dialog>
