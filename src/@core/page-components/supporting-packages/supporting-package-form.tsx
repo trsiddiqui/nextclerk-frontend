@@ -2,11 +2,24 @@
 // ** React Imports
 import React, { useState } from 'react'
 import { DateTime } from 'luxon'
-
+import { v4 as uuid } from 'uuid'
 declare const window: Window &
   typeof globalThis & {
     saveCompleteFunction: any
   }
+
+import {
+  DataGrid,
+  GridActionsCellItem,
+  GridColDef,
+  GridRowId,
+  GridRowModel,
+  GridRowModes,
+  GridRowModesModel,
+  GridRowsProp,
+  GridToolbarContainer
+} from '@mui/x-data-grid'
+import { randomCreatedDate, randomTraderName, randomUpdatedDate } from '@mui/x-data-grid-generator'
 import { Document, Page, pdfjs } from 'react-pdf'
 // ** MUI Imports
 import CloseIcon from '@mui/icons-material/Close'
@@ -22,6 +35,9 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import SearchIcon from '@mui/icons-material/Search'
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
+import AddIcon from '@mui/icons-material/Add'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import DeleteIcon from '@mui/icons-material/Delete'
 import {
   Autocomplete,
   Avatar,
@@ -207,7 +223,21 @@ const SupportingPackageForm = ({
   const [loading, setLoading] = useState(false)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
   // const [journalEntrySpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
-  const [, setJournalEntries] = useState<JournalEntry[]>()
+  debugger
+  const [journalEntries, setJournalEntries] = useState<GridRowsProp>(
+    supportingPackage?.journalEntries?.length
+      ? supportingPackage.journalEntries.map(journalEntry => ({
+          id: journalEntry.uuid,
+          account: journalEntry.accountLabel,
+          department: journalEntry.departmentLabel,
+          location: journalEntry.locationLabel,
+          customer: journalEntry.customerLabel,
+          creditAmount: journalEntry.creditAmount,
+          debitAmount: journalEntry.debitAmount,
+          memo: journalEntry.memo
+        }))
+      : []
+  )
   const [allCategories] = useState(categories)
   const [allLabels] = useState(labels)
   const [label, setLabel] = useState<{ label: string; uuid: string } | null>(
@@ -612,26 +642,23 @@ const SupportingPackageForm = ({
         fileName: masterFile?.originalname
       })
     }
-    // const persistedJournalEntries = []
+    const persistedJournalEntries = []
 
-    // TODO:
-    // if (journalEntrySpreadsheetRef) {
-    //   const rows = await getSpreadsheetRows(journalEntrySpreadsheetRef)
-    //   for (const row of rows) {
-    //     const obj = {
-    //       accountUUID: accounts.find(x => x.label === row.cells[0].value)?.id,
-    //       debitAmount: row.cells[1]?.value,
-    //       creditAmount: row.cells[2]?.value,
-    //       memo: row.cells[3]?.value,
-    //       departmentUUID: departments.find(x => x.label === row.cells[4]?.value)?.id,
-    //       locationUUID: locations.find(x => x.label === row.cells[5]?.value)?.id,
-    //       customerUUID: customers.find(x => x.label === row.cells[6]?.value)?.id
-    //     }
-    //     console.log(obj)
-    //     persistedJournalEntries.push(obj)
-    //   }
-    //   setJournalEntries(persistedJournalEntries)
-    // }
+    if (journalEntries.length > 0) {
+      for (const row of journalEntries) {
+        const obj = {
+          accountUUID: accounts.find(x => x.label === row.account)?.id,
+          debitAmount: row.debitAmount,
+          creditAmount: row.creditAmount,
+          memo: row.memo,
+          departmentUUID: departments.find(x => x.label === row.department)?.id,
+          locationUUID: locations.find(x => x.label === row.location)?.id,
+          customerUUID: customers.find(x => x.label === row.customer)?.id
+        }
+        console.log(obj)
+        persistedJournalEntries.push(obj)
+      }
+    }
     let communications: Array<{
       users: string[]
       text: string
@@ -684,8 +711,8 @@ const SupportingPackageForm = ({
         uuid: file.uploaded.uuid,
         isMaster: file.uploaded.uuid === masterFile?.uploaded.uuid
       })),
-      communications
-      // journalEntries: persistedJournalEntries
+      communications,
+      journalEntries: persistedJournalEntries
     }
 
     await APICallWrapper(
@@ -730,6 +757,256 @@ const SupportingPackageForm = ({
       setLoading(false)
     }
   }
+
+  function EditToolbar() {
+    const addJournalEntries = () => {
+      const id = uuid()
+      setJournalEntries([
+        ...journalEntries,
+        {
+          id,
+          account: '',
+          credit: 0,
+          debit: 0,
+          memo: '',
+          department: '',
+          location: '',
+          customer: '',
+          badAccount: true,
+          badDepartment: true,
+          badCustomer: true,
+          badLocation: true
+        }
+      ])
+    }
+
+    return (
+      <GridToolbarContainer>
+        <Button color='primary' startIcon={<AddIcon />} onClick={addJournalEntries}>
+          Add Journal Entry
+        </Button>
+      </GridToolbarContainer>
+    )
+  }
+
+  const columns: GridColDef[] = [
+    {
+      field: 'account',
+      headerName: 'Account',
+      flex: 0.6,
+      renderCell: params => (
+        <Autocomplete
+          freeSolo
+          disablePortal
+          id='accounts-combobox'
+          options={accounts}
+          sx={{ width: '100%' }}
+          renderInput={inputParams => {
+            return (
+              <>
+                <TextField {...inputParams} error={params.row.badAccount} />
+              </>
+            )
+          }}
+          defaultValue={params.row.account}
+          value={params.row.account}
+          onSelect={e => {
+            params.row.account = (e.target as HTMLSelectElement).value
+
+            if (accounts.find(x => x.label === params.row.account) == null) {
+              params.row.account = ''
+              params.row.badAccount = true
+            } else {
+              params.row.badAccount = false
+            }
+          }}
+        />
+      ),
+      headerAlign: 'center'
+    },
+    {
+      field: 'creditAmount',
+      headerName: 'Credit',
+      type: 'number',
+      editable: true,
+      align: 'center',
+      flex: 0.3,
+      headerAlign: 'center'
+    },
+    {
+      field: 'debitAmount',
+      headerName: 'Credit',
+      type: 'number',
+      editable: true,
+      align: 'center',
+      flex: 0.3,
+      headerAlign: 'center'
+    },
+    {
+      field: 'memo',
+      headerName: 'Line Memo',
+      type: 'string',
+      flex: 1,
+      editable: true
+    },
+    {
+      field: 'department',
+      headerName: 'Department',
+      flex: 0.6,
+      headerAlign: 'center',
+      renderCell: params => (
+        <Autocomplete
+          freeSolo
+          disablePortal
+          id='accounts-combobox'
+          options={departments}
+          sx={{ width: '100%', border: 'none' }}
+          renderInput={inputParams => {
+            return (
+              <>
+                <TextField {...inputParams} error={params.row.badDepartment} />
+              </>
+            )
+          }}
+          defaultValue={params.row.department}
+          value={params.row.department}
+          onSelect={e => {
+            params.row.department = (e.target as HTMLSelectElement).value
+            if (departments.find(x => x.label === params.row.department) == null) {
+              params.row.department = ''
+              params.row.badDepartment = true
+            } else {
+              params.row.badDepartment = false
+            }
+          }}
+        />
+      )
+    },
+    {
+      field: 'location',
+      headerName: 'Location',
+      flex: 0.6,
+      headerAlign: 'center',
+      renderCell: params => (
+        <Autocomplete
+          freeSolo
+          disablePortal
+          id='accounts-combobox'
+          options={locations}
+          sx={{ width: '100%' }}
+          renderInput={inputParams => {
+            return (
+              <>
+                <TextField {...inputParams} error={params.row.badLocation} />
+              </>
+            )
+          }}
+          defaultValue={params.row.location}
+          value={params.row.location}
+          onSelect={e => {
+            params.row.location = (e.target as HTMLSelectElement).value
+            if (locations.find(x => x.label === params.row.location) == null) {
+              params.row.location = ''
+              params.row.badLocation = true
+            } else {
+              params.row.badLocation = false
+            }
+          }}
+        />
+      )
+    },
+    {
+      field: 'customer',
+      headerName: 'Customer',
+      flex: 0.6,
+      headerAlign: 'center',
+      renderCell: params => (
+        <>
+          {params.row.badCustomer}
+          <Autocomplete
+            freeSolo
+            disablePortal
+            id='accounts-combobox'
+            options={customers}
+            sx={{ width: '100%' }}
+            renderInput={inputParams => {
+              return <TextField {...inputParams} error={params.row.badCustomer} />
+            }}
+            defaultValue={params.row.customer}
+            value={params.row.customer}
+            onSelect={e => {
+              params.row.customer = (e.target as HTMLSelectElement).value
+              if (customers.find(x => x.label === params.row.customer) == null) {
+                params.row.customer = ''
+                params.row.badCustomer = true
+              } else {
+                params.row.badCustomer = false
+              }
+            }}
+          />
+        </>
+      )
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 100,
+      cellClassName: 'actions',
+      getActions: ({ id }) => {
+        return [
+          <GridActionsCellItem
+            icon={<ContentCopyIcon />}
+            label='Edit'
+            className='textPrimary'
+            onClick={() => {
+              const row = journalEntries.find(x => x.id === id)
+              if (row) {
+                setJournalEntries(
+                  journalEntries.concat({
+                    ...row,
+                    id: uuid()
+                  })
+                )
+              }
+            }}
+            color='inherit'
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label='Delete'
+            onClick={() => {
+              const row = journalEntries.find(x => x.id === id)
+              if (row) {
+                setJournalEntries(journalEntries.filter(x => x.id !== id))
+              }
+            }}
+            color='inherit'
+          />
+        ]
+      }
+    }
+  ]
+
+  const processRowUpdate = (newRow: GridRowModel) => {
+    const updatedRow = { ...newRow, isNew: false }
+    setJournalEntries(journalEntries.map(row => (row.id === newRow.id ? updatedRow : row)))
+    return updatedRow
+  }
+
+  // const rows: GridRowsProp = [
+  //   {
+  //     id: 1,
+  //     account: 'CASH',
+  //     credit: 12,
+  //     debit: 0,
+  //     memo: 'Some message',
+  //     department: 'IT',
+  //     location: 'Location 1',
+  //     customer: 'Customer 1',
+  //     badCustomer: false
+  //   }
+  // ]
 
   return (
     <Grid container spacing={5}>
@@ -938,6 +1215,11 @@ const SupportingPackageForm = ({
             >
               <MenuItem onClick={() => handleSaveSupportingPackage(true)}>Save Draft</MenuItem>
               <MenuItem
+                disabled={
+                  journalEntries.length > 0
+                    ? journalEntries.some(x => x.badAccount || x.badCustomer || x.badDepartment || x.badLocation)
+                    : false
+                }
                 onClick={() => {
                   handleSaveSupportingPackage(false)
                 }}
@@ -1595,13 +1877,17 @@ const SupportingPackageForm = ({
             index={firstTime ? 2 : undefined}
             dir={theme.direction}
           >
-            <Grid
-              container
-              sx={{ pl: 1, height: masterFile && masterFile?.mimetype.includes('sheet') ? '600px' : '200px' }}
-              width='100%'
-              className='journal-entry-tab'
-            >
+            <Grid container sx={{ pl: 1, height: '600px' }} width='100%' className='journal-entry-tab'>
               {/* TODO: Journal Entries Table */}
+              <DataGrid
+                editMode='row'
+                rows={journalEntries}
+                columns={columns}
+                processRowUpdate={processRowUpdate}
+                slots={{
+                  toolbar: EditToolbar
+                }}
+              />
             </Grid>
           </TabPanel>
         </Paper>

@@ -51,3 +51,7 @@ code[class*='language-'] {
 div#__next-build-watcher + div {
   display: none;
 }
+
+.css-lorysy-MuiDataGrid-root .MuiDataGrid-cell {
+  padding: 0 !important;
+}

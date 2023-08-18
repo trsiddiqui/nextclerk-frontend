@@ -78,17 +78,18 @@ export enum SupportingPackageUserType {
 }
 
 export type JournalEntry = {
-  account?: string
+  accountLabel?: string
   accountUUID?: string
   debitAmount?: string
   creditAmount?: string
   memo?: string
-  department?: string
+  departmentLabel?: string
   departmentUUID?: string
-  location?: string
+  locationLabel?: string
   locationUUID?: string
-  customer?: string
+  customerLabel?: string
   customerUUID?: string
+  uuid: string
 }
 
 export type SupportingPackageResponse = {
