@@ -3,23 +3,13 @@
 import React, { useState } from 'react'
 import { DateTime } from 'luxon'
 import { v4 as uuid } from 'uuid'
+
 declare const window: Window &
   typeof globalThis & {
     saveCompleteFunction: any
   }
 
-import {
-  DataGrid,
-  GridActionsCellItem,
-  GridColDef,
-  GridRowId,
-  GridRowModel,
-  GridRowModes,
-  GridRowModesModel,
-  GridRowsProp,
-  GridToolbarContainer
-} from '@mui/x-data-grid'
-import { randomCreatedDate, randomTraderName, randomUpdatedDate } from '@mui/x-data-grid-generator'
+import { DataGrid, GridActionsCellItem, GridColDef, GridRowModel, GridRowsProp } from '@mui/x-data-grid'
 import { Document, Page, pdfjs } from 'react-pdf'
 // ** MUI Imports
 import CloseIcon from '@mui/icons-material/Close'
@@ -35,7 +25,6 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import SearchIcon from '@mui/icons-material/Search'
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
-import AddIcon from '@mui/icons-material/Add'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
@@ -93,23 +82,11 @@ import { DatePicker } from '@mui/lab'
 import { StyledTableCell, StyledTableRow } from 'src/views/tables/TableCustomized'
 import {
   BeforeSaveEventArgs,
-  CellDirective,
-  CellsDirective,
-  // CellStyleModel,
-  ColumnDirective,
-  ColumnsDirective,
   getRangeIndexes,
   MenuSelectEventArgs,
-  RangeDirective,
-  RangesDirective,
-  RowDirective,
-  RowsDirective,
   SaveCompleteEventArgs,
-  SheetDirective,
-  SheetsDirective,
   SpreadsheetComponent
 } from '@syncfusion/ej2-react-spreadsheet'
-import { AutoCompleteComponent, ChangeEventArgs } from '@syncfusion/ej2-react-dropdowns'
 import {
   searchUsers,
   uploadFile,
@@ -124,16 +101,13 @@ import {
   AutocompleteRow,
   DropDownRow,
   TabPanel,
-  // columnAddressToIndex,
   getCellsFromRangeAddress,
   getInitials,
-  getSpreadsheetRows,
   isSupportedMimeType,
   mimetypeToIconImage
 } from 'src/@core/utils'
 import {
   ActionItemState,
-  JournalEntry,
   MasterFileUploaded,
   SupportingPackageResponse,
   SupportingPackageUserType,
@@ -222,8 +196,6 @@ const SupportingPackageForm = ({
   )
   const [loading, setLoading] = useState(false)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
-  // const [journalEntrySpreadsheetRef, setJESpreadsheetRef] = useState<SpreadsheetComponent>()
-  debugger
   const [journalEntries, setJournalEntries] = useState<GridRowsProp>(
     supportingPackage?.journalEntries?.length
       ? supportingPackage.journalEntries.map(journalEntry => ({
@@ -236,7 +208,7 @@ const SupportingPackageForm = ({
           debitAmount: journalEntry.debitAmount,
           memo: journalEntry.memo
         }))
-      : []
+      : [{ id: uuid() }, { id: uuid() }, { id: uuid() }, { id: uuid() }, { id: uuid() }]
   )
   const [allCategories] = useState(categories)
   const [allLabels] = useState(labels)
@@ -758,42 +730,12 @@ const SupportingPackageForm = ({
     }
   }
 
-  function EditToolbar() {
-    const addJournalEntries = () => {
-      const id = uuid()
-      setJournalEntries([
-        ...journalEntries,
-        {
-          id,
-          account: '',
-          credit: 0,
-          debit: 0,
-          memo: '',
-          department: '',
-          location: '',
-          customer: '',
-          badAccount: true,
-          badDepartment: true,
-          badCustomer: true,
-          badLocation: true
-        }
-      ])
-    }
-
-    return (
-      <GridToolbarContainer>
-        <Button color='primary' startIcon={<AddIcon />} onClick={addJournalEntries}>
-          Add Journal Entry
-        </Button>
-      </GridToolbarContainer>
-    )
-  }
-
   const columns: GridColDef[] = [
     {
       field: 'account',
       headerName: 'Account',
       flex: 0.6,
+      cellClassName: 'data-grid-column',
       renderCell: params => (
         <Autocomplete
           freeSolo
@@ -830,15 +772,17 @@ const SupportingPackageForm = ({
       type: 'number',
       editable: true,
       align: 'center',
+      cellClassName: 'data-grid-column',
       flex: 0.3,
       headerAlign: 'center'
     },
     {
       field: 'debitAmount',
-      headerName: 'Credit',
+      headerName: 'Debit',
       type: 'number',
       editable: true,
       align: 'center',
+      cellClassName: 'data-grid-column',
       flex: 0.3,
       headerAlign: 'center'
     },
@@ -847,24 +791,27 @@ const SupportingPackageForm = ({
       headerName: 'Line Memo',
       type: 'string',
       flex: 1,
-      editable: true
+      editable: true,
+      cellClassName: 'data-grid-column',
+      headerAlign: 'center'
     },
     {
       field: 'department',
       headerName: 'Department',
       flex: 0.6,
       headerAlign: 'center',
+      cellClassName: 'data-grid-column',
       renderCell: params => (
         <Autocomplete
           freeSolo
           disablePortal
           id='accounts-combobox'
           options={departments}
-          sx={{ width: '100%', border: 'none' }}
+          sx={{ width: '100%', border: 'none !important' }}
           renderInput={inputParams => {
             return (
               <>
-                <TextField {...inputParams} error={params.row.badDepartment} />
+                <TextField {...inputParams} />
               </>
             )
           }}
@@ -874,9 +821,6 @@ const SupportingPackageForm = ({
             params.row.department = (e.target as HTMLSelectElement).value
             if (departments.find(x => x.label === params.row.department) == null) {
               params.row.department = ''
-              params.row.badDepartment = true
-            } else {
-              params.row.badDepartment = false
             }
           }}
         />
@@ -887,6 +831,7 @@ const SupportingPackageForm = ({
       headerName: 'Location',
       flex: 0.6,
       headerAlign: 'center',
+      cellClassName: 'data-grid-column',
       renderCell: params => (
         <Autocomplete
           freeSolo
@@ -897,7 +842,7 @@ const SupportingPackageForm = ({
           renderInput={inputParams => {
             return (
               <>
-                <TextField {...inputParams} error={params.row.badLocation} />
+                <TextField {...inputParams} />
               </>
             )
           }}
@@ -907,9 +852,6 @@ const SupportingPackageForm = ({
             params.row.location = (e.target as HTMLSelectElement).value
             if (locations.find(x => x.label === params.row.location) == null) {
               params.row.location = ''
-              params.row.badLocation = true
-            } else {
-              params.row.badLocation = false
             }
           }}
         />
@@ -917,9 +859,10 @@ const SupportingPackageForm = ({
     },
     {
       field: 'customer',
-      headerName: 'Customer',
+      headerName: 'Name',
       flex: 0.6,
       headerAlign: 'center',
+      cellClassName: 'data-grid-column',
       renderCell: params => (
         <>
           {params.row.badCustomer}
@@ -930,7 +873,7 @@ const SupportingPackageForm = ({
             options={customers}
             sx={{ width: '100%' }}
             renderInput={inputParams => {
-              return <TextField {...inputParams} error={params.row.badCustomer} />
+              return <TextField {...inputParams} />
             }}
             defaultValue={params.row.customer}
             value={params.row.customer}
@@ -938,9 +881,6 @@ const SupportingPackageForm = ({
               params.row.customer = (e.target as HTMLSelectElement).value
               if (customers.find(x => x.label === params.row.customer) == null) {
                 params.row.customer = ''
-                params.row.badCustomer = true
-              } else {
-                params.row.badCustomer = false
               }
             }}
           />
@@ -951,11 +891,12 @@ const SupportingPackageForm = ({
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
+      cellClassName: 'data-grid-column',
       width: 100,
-      cellClassName: 'actions',
       getActions: ({ id }) => {
         return [
           <GridActionsCellItem
+            key={1}
             icon={<ContentCopyIcon />}
             label='Edit'
             className='textPrimary'
@@ -973,8 +914,10 @@ const SupportingPackageForm = ({
             color='inherit'
           />,
           <GridActionsCellItem
+            key={2}
             icon={<DeleteIcon />}
             label='Delete'
+            disabled={journalEntries.length === 1}
             onClick={() => {
               const row = journalEntries.find(x => x.id === id)
               if (row) {
@@ -991,6 +934,7 @@ const SupportingPackageForm = ({
   const processRowUpdate = (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false }
     setJournalEntries(journalEntries.map(row => (row.id === newRow.id ? updatedRow : row)))
+
     return updatedRow
   }
 
@@ -1010,12 +954,12 @@ const SupportingPackageForm = ({
 
   return (
     <Grid container spacing={5}>
-      <Card>
+      <Card style={{ width: '100%' }}>
         <form onSubmit={e => e.preventDefault()}>
           <CardHeader title='Create a Supporting Package' titleTypographyProps={{ variant: 'h6' }}></CardHeader>
           <Divider sx={{ margin: 0 }} />
           <CardContent>
-            <Grid item xs={12} sm={12} sx={{ marginTop: -2 }} textAlign='right'>
+            <Grid item xs={12} sm={12} md={12} lg={12} xl={12} sx={{ marginTop: -2 }} textAlign='right'>
               <FormControlLabel
                 control={
                   <Switch
@@ -1215,11 +1159,7 @@ const SupportingPackageForm = ({
             >
               <MenuItem onClick={() => handleSaveSupportingPackage(true)}>Save Draft</MenuItem>
               <MenuItem
-                disabled={
-                  journalEntries.length > 0
-                    ? journalEntries.some(x => x.badAccount || x.badCustomer || x.badDepartment || x.badLocation)
-                    : false
-                }
+                disabled={journalEntries.length > 0 ? journalEntries.some(x => x.badAccount) : false}
                 onClick={() => {
                   handleSaveSupportingPackage(false)
                 }}
@@ -1912,15 +1852,7 @@ const SupportingPackageForm = ({
           >
             <Grid container sx={{ pl: 1, height: '600px' }} width='100%' className='journal-entry-tab'>
               {/* TODO: Journal Entries Table */}
-              <DataGrid
-                editMode='row'
-                rows={journalEntries}
-                columns={columns}
-                processRowUpdate={processRowUpdate}
-                slots={{
-                  toolbar: EditToolbar
-                }}
-              />
+              <DataGrid editMode='row' rows={journalEntries} columns={columns} processRowUpdate={processRowUpdate} />
             </Grid>
           </TabPanel>
         </Paper>

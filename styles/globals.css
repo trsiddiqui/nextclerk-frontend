@@ -55,3 +55,13 @@ div#__next-build-watcher + div {
 .css-lorysy-MuiDataGrid-root .MuiDataGrid-cell {
   padding: 0 !important;
 }
+
+.data-grid-column {
+  border-left: 1px solid rgb(64, 64, 64);
+  border-right: 1px solid rgb(64, 64, 64);
+}
+
+.MuiAutocomplete-inputRoot,
+.MuiOutlinedInput-root {
+  border-radius: 0px !important;
+}
