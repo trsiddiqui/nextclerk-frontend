@@ -644,6 +644,7 @@ const SupportingPackageForm = ({
     if (journalEntries.length > 0) {
       for (const row of journalEntries) {
         const obj = {
+          uuid: row.id,
           accountUUID: accounts.find(x => x.label === row.account)?.id,
           debitAmount: row.debitAmount,
           creditAmount: row.creditAmount,
