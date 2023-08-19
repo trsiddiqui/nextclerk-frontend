@@ -9,7 +9,7 @@ const CardImgTop = () => {
     <Card>
       <CardMedia
         sx={{ height: '14.5625rem' }}
-        image={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/cards/glass-house.png`}
+        image={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/cards/glass-house.png`}
       />
       <CardContent>
         <Typography variant='h6' sx={{ marginBottom: 2 }}>

@@ -51,7 +51,7 @@ const Error401 = () => {
         <Img
           height='487'
           alt='error-illustration'
-          src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/401.png`}
+          src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/401.png`}
         />
         <Link passHref href='/'>
           <Button component='a' variant='contained' sx={{ px: 5.5 }}>

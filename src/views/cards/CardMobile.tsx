@@ -57,9 +57,7 @@ const CardMobile = () => {
               width={137}
               height={176}
               alt='Apple iPhone 11 Pro'
-              src={`${
-                process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-              }/images/cards/iPhone-11-pro.png`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/cards/iPhone-11-pro.png`}
             />
           </CardContent>
         </StyledGrid>

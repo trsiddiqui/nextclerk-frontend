@@ -23,7 +23,7 @@ const depositData = [
     amount: '+$4,650',
     subtitle: 'Sell UI Kit',
     title: 'Gumroad Account',
-    logo: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/gumroad.png`
+    logo: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/gumroad.png`
   },
   {
     logoWidth: 38,
@@ -31,7 +31,7 @@ const depositData = [
     amount: '+$92,705',
     title: 'Mastercard',
     subtitle: 'Wallet deposit',
-    logo: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/mastercard-label.png`
+    logo: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/mastercard-label.png`
   },
   {
     logoWidth: 20,
@@ -39,7 +39,7 @@ const depositData = [
     amount: '+$957',
     title: 'Stripe Account',
     subtitle: 'iOS Application',
-    logo: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/stripe.png`
+    logo: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/stripe.png`
   },
   {
     logoWidth: 34,
@@ -47,7 +47,7 @@ const depositData = [
     amount: '+$6,837',
     title: 'American Bank',
     subtitle: 'Bank Transfer',
-    logo: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/american-bank.png`
+    logo: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/american-bank.png`
   },
   {
     logoWidth: 33,
@@ -55,7 +55,7 @@ const depositData = [
     amount: '+$446',
     title: 'Bank Account',
     subtitle: 'Wallet deposit',
-    logo: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/citi-bank.png`
+    logo: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/citi-bank.png`
   }
 ]
 
@@ -66,14 +66,14 @@ const withdrawData = [
     amount: '-$145',
     title: 'Google Adsense',
     subtitle: 'Paypal deposit',
-    logo: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/google.png`
+    logo: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/google.png`
   },
   {
     logoWidth: 34,
     logoHeight: 34,
     amount: '-$1870',
     title: 'Github Enterprise',
-    logo: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/github.png`,
+    logo: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/github.png`,
     subtitle: 'Security & compliance'
   },
   {
@@ -82,7 +82,7 @@ const withdrawData = [
     amount: '-$450',
     title: 'Upgrade Slack Plan',
     subtitle: 'Debit card deposit',
-    logo: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/slack.png`
+    logo: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/slack.png`
   },
   {
     logoWidth: 30,
@@ -90,14 +90,14 @@ const withdrawData = [
     amount: '-$540',
     title: 'Digital Ocean',
     subtitle: 'Cloud Hosting',
-    logo: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/digital-ocean.png`
+    logo: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/digital-ocean.png`
   },
   {
     logoWidth: 36,
     logoHeight: 21,
     amount: '-$21',
     title: 'AWS Account',
-    logo: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/aws.png`,
+    logo: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/aws.png`,
     subtitle: 'Choosing a Cloud Platform'
   }
 ]

@@ -52,15 +52,13 @@ const VerticalNavHeader = (props: Props) => {
           <StyledLink>
             {settings.mode === 'light' ? (
               <img
-                src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/logos/nextclerk.png`}
+                src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/nextclerk.png`}
                 style={{ width: '100%' }}
                 alt='Next Clerk'
               />
             ) : (
               <img
-                src={`${
-                  process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-                }/images/logos/nextclerk-inverted.png`}
+                src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/logos/nextclerk-inverted.png`}
                 style={{ width: '100%' }}
                 alt='Next Clerk'
               />

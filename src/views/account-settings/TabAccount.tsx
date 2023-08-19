@@ -49,7 +49,7 @@ const TabAccount = () => {
   // ** State
   const [openAlert, setOpenAlert] = useState<boolean>(true)
   const [imgSrc, setImgSrc] = useState<string>(
-    `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/1.png`
+    `${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/1.png`
   )
 
   const onChange = (file: ChangeEvent) => {
@@ -83,11 +83,7 @@ const TabAccount = () => {
                 <ResetButtonStyled
                   color='error'
                   variant='outlined'
-                  onClick={() =>
-                    setImgSrc(
-                      `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/1.png`
-                    )
-                  }
+                  onClick={() => setImgSrc(`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/1.png`)}
                 >
                   Reset
                 </ResetButtonStyled>

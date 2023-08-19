@@ -33,7 +33,7 @@ const data: DataType[] = [
     color: 'primary',
     amount: '$24,895.65',
     subtitle: 'Vuejs, React & HTML',
-    imgSrc: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/cards/logo-zipcar.png`
+    imgSrc: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/cards/logo-zipcar.png`
   },
   {
     progress: 50,
@@ -42,7 +42,7 @@ const data: DataType[] = [
     title: 'Bitbank',
     amount: '$8,650.20',
     subtitle: 'Sketch, Figma & XD',
-    imgSrc: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/cards/logo-bitbank.png`
+    imgSrc: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/cards/logo-bitbank.png`
   },
   {
     progress: 20,
@@ -51,7 +51,7 @@ const data: DataType[] = [
     color: 'secondary',
     amount: '$1,245.80',
     subtitle: 'HTML & Angular',
-    imgSrc: `${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/cards/logo-aviato.png`
+    imgSrc: `${process.env.NODE_ENV === 'production' ? '' : ''}/images/cards/logo-aviato.png`
   }
 ]
 

@@ -29,7 +29,7 @@ const CardLinkedIn = () => {
           <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
             <Avatar
               alt='Anne Burke'
-              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/8.png`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/8.png`}
               sx={{ width: 34, height: 34, marginRight: 2.75 }}
             />
             <Typography variant='body2' sx={{ color: 'common.white' }}>

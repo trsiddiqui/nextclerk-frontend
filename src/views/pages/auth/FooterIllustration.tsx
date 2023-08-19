@@ -46,21 +46,17 @@ const FooterIllustrationsV1 = (props: FooterIllustrationsProp) => {
         {image1 || (
           <Tree1Img
             alt='tree'
-            src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/auth-v1-tree.png`}
+            src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/auth-v1-tree.png`}
           />
         )}
         <MaskImg
           alt='mask'
-          src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/auth-v1-mask-${
-            theme.palette.mode
-          }.png`}
+          src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/auth-v1-mask-${theme.palette.mode}.png`}
         />
         {image2 || (
           <Tree2Img
             alt='tree-2'
-            src={`${
-              process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-            }/images/pages/auth-v1-tree-2.png`}
+            src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/auth-v1-tree-2.png`}
           />
         )}
       </Fragment>

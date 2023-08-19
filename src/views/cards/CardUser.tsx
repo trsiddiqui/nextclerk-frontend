@@ -13,11 +13,11 @@ const CardUser = () => {
     <Card sx={{ position: 'relative' }}>
       <CardMedia
         sx={{ height: '12.625rem' }}
-        image={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/cards/background-user.png`}
+        image={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/cards/background-user.png`}
       />
       <Avatar
         alt='Robert Meyer'
-        src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/1.png`}
+        src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/1.png`}
         sx={{
           width: 75,
           height: 75,
@@ -49,32 +49,26 @@ const CardUser = () => {
             18 mutual friends
           </Typography>
           <AvatarGroup max={4}>
+            <Avatar src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/8.png`} alt='Alice Cobb' />
             <Avatar
-              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/8.png`}
-              alt='Alice Cobb'
-            />
-            <Avatar
-              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/7.png`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/7.png`}
               alt='Jeffery Warner'
             />
             <Avatar
-              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/3.png`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/3.png`}
               alt='Howard Lloyd'
             />
+            <Avatar src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/2.png`} alt='Bettie Dunn' />
             <Avatar
-              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/2.png`}
-              alt='Bettie Dunn'
-            />
-            <Avatar
-              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/4.png`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/4.png`}
               alt='Olivia Sparks'
             />
             <Avatar
-              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/5.png`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/5.png`}
               alt='Jimmy Hanson'
             />
             <Avatar
-              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/6.png`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/6.png`}
               alt='Hallie Richards'
             />
           </AvatarGroup>

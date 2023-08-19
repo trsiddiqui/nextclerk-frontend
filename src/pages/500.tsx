@@ -60,7 +60,7 @@ const Error500 = () => {
         <Img
           height='487'
           alt='error-illustration'
-          src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/500.png`}
+          src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/500.png`}
         />
         <Link passHref href='/'>
           <Button component='a' variant='contained' sx={{ px: 5.5 }}>
@@ -72,7 +72,7 @@ const Error500 = () => {
         image={
           <TreeIllustration
             alt='tree'
-            src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/tree-3.png`}
+            src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/tree-3.png`}
           />
         }
       />

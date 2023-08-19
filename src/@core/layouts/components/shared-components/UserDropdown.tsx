@@ -86,7 +86,7 @@ const UserDropdown = ({
           alt={name}
           onClick={handleDropdownOpen}
           sx={{ width: 40, height: 40 }}
-          src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/1.png`}
+          src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/1.png`}
         />
       </Badge>
       <Menu
@@ -106,7 +106,7 @@ const UserDropdown = ({
             >
               <Avatar
                 alt={name}
-                src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/1.png`}
+                src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/1.png`}
                 sx={{ width: '2.5rem', height: '2.5rem' }}
               />
             </Badge>

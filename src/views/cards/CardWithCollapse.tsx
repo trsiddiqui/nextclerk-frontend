@@ -29,7 +29,7 @@ const CardWithCollapse = () => {
     <Card>
       <CardMedia
         sx={{ height: '14.5625rem' }}
-        image={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/cards/paper-boat.png`}
+        image={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/cards/paper-boat.png`}
       />
       <CardContent>
         <Typography variant='h6' sx={{ marginBottom: 2 }}>

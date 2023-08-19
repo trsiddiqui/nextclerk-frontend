@@ -41,16 +41,11 @@ const FooterIllustrations = (props: FooterIllustrationsProp) => {
     return (
       <Fragment>
         {image || (
-          <TreeImg
-            alt='tree'
-            src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/tree-2.png`}
-          />
+          <TreeImg alt='tree' src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/tree-2.png`} />
         )}
         <MaskImg
           alt='mask'
-          src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/misc-mask-${
-            theme.palette.mode
-          }.png`}
+          src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/misc-mask-${theme.palette.mode}.png`}
         />
       </Fragment>
     )

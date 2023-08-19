@@ -42,12 +42,9 @@ const Trophy = () => {
         </Button>
         <TriangleImg
           alt='triangle background'
-          src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/misc/${imageSrc}`}
+          src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/misc/${imageSrc}`}
         />
-        <TrophyImg
-          alt='trophy'
-          src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/misc/trophy.png`}
-        />
+        <TrophyImg alt='trophy' src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/misc/trophy.png`} />
       </CardContent>
     </Card>
   )

@@ -29,7 +29,7 @@ const CardFacebook = () => {
           <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
             <Avatar
               alt='Eugene Clarke'
-              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/avatars/1.png`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/avatars/1.png`}
               sx={{ width: 34, height: 34, marginRight: 2.75 }}
             />
             <Typography variant='body2' sx={{ color: 'common.white' }}>

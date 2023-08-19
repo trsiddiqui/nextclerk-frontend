@@ -167,7 +167,7 @@ const TabSecurity = () => {
               width={183}
               alt='avatar'
               height={256}
-              src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/pose-m-1.png`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/pose-m-1.png`}
             />
           </Grid>
         </Grid>

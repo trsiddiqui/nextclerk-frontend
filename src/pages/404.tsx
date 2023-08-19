@@ -60,7 +60,7 @@ const Error404 = () => {
         <Img
           height='487'
           alt='error-illustration'
-          src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/404.png`}
+          src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/404.png`}
         />
         <Link passHref href='/'>
           <Button component='a' variant='contained' sx={{ px: 5.5 }}>
@@ -72,7 +72,7 @@ const Error404 = () => {
         image={
           <TreeIllustration
             alt='tree'
-            src={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/pages/tree.png`}
+            src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/pages/tree.png`}
           />
         }
       />

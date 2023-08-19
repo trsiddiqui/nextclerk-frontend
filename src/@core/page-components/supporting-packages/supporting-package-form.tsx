@@ -1468,9 +1468,9 @@ const SupportingPackageForm = ({
                           isSupportedMimeType(masterFileCommentFile.mimetype) ? (
                             <Avatar
                               alt='Flora'
-                              src={`${
-                                process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-                              }${mimetypeToIconImage(masterFileCommentFile.mimetype)}`}
+                              src={`${process.env.NODE_ENV === 'production' ? '' : ''}${mimetypeToIconImage(
+                                masterFileCommentFile.mimetype
+                              )}`}
                             />
                           ) : undefined
                         }
@@ -1522,7 +1522,7 @@ const SupportingPackageForm = ({
                                           <Avatar
                                             alt='Flora'
                                             src={`${
-                                              process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
+                                              process.env.NODE_ENV === 'production' ? '' : ''
                                             }${mimetypeToIconImage(masterFileComment.file.mimetype)}`}
                                           />
                                         ) : undefined
@@ -1739,9 +1739,7 @@ const SupportingPackageForm = ({
                       >
                         <Avatar
                           alt='Flora'
-                          src={`${
-                            process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-                          }/images/icons/excel.png`}
+                          src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/icons/excel.png`}
                         />
                       </IconButton>
                       <Typography component='div'>Create a Microsoft Excel File</Typography>
@@ -1835,9 +1833,9 @@ const SupportingPackageForm = ({
                         isSupportedMimeType(notesFile.mimetype) ? (
                           <Avatar
                             alt='Flora'
-                            src={`${
-                              process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-                            }${mimetypeToIconImage(notesFile.mimetype)}`}
+                            src={`${process.env.NODE_ENV === 'production' ? '' : ''}${mimetypeToIconImage(
+                              notesFile.mimetype
+                            )}`}
                           />
                         ) : undefined
                       }
@@ -1871,9 +1869,9 @@ const SupportingPackageForm = ({
                                   isSupportedMimeType(note.file.mimetype) ? (
                                     <Avatar
                                       alt='Flora'
-                                      src={`${
-                                        process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-                                      }${mimetypeToIconImage(note.file.mimetype)}`}
+                                      src={`${process.env.NODE_ENV === 'production' ? '' : ''}${mimetypeToIconImage(
+                                        note.file.mimetype
+                                      )}`}
                                     />
                                   ) : undefined
                                 }
@@ -1937,9 +1935,9 @@ const SupportingPackageForm = ({
                     isSupportedMimeType(attachment.mimetype) ? (
                       <Avatar
                         alt='Flora'
-                        src={`${
-                          process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-                        }${mimetypeToIconImage(attachment.mimetype)}`}
+                        src={`${process.env.NODE_ENV === 'production' ? '' : ''}${mimetypeToIconImage(
+                          attachment.mimetype
+                        )}`}
                       />
                     ) : undefined
                   }

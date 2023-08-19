@@ -10,7 +10,7 @@ const CardAppleWatch = () => {
     <Card>
       <CardMedia
         sx={{ height: '9.375rem' }}
-        image={`${process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''}/images/cards/watch-on-hand.jpg`}
+        image={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/cards/watch-on-hand.jpg`}
       />
       <CardContent sx={{ padding: theme => `${theme.spacing(3, 5.25, 4)} !important` }}>
         <Typography variant='h6' sx={{ marginBottom: 2 }}>

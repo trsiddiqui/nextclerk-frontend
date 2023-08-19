@@ -71,9 +71,7 @@ const CardHorizontalRatings = () => {
           <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Img
               alt='Stumptown Roasters'
-              src={`${
-                process.env.NODE_ENV === 'production' ? '/nextclerk-frontend' : ''
-              }/images/cards/analog-clock.jpg`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}/images/cards/analog-clock.jpg`}
             />
           </CardContent>
         </StyledGrid2>
