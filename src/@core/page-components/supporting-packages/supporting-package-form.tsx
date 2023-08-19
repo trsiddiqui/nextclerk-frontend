@@ -28,6 +28,7 @@ import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
+import PreviewIcon from '@mui/icons-material/Preview'
 import {
   Autocomplete,
   Avatar,
@@ -209,7 +210,13 @@ const SupportingPackageForm = ({
           debitAmount: journalEntry.debitAmount,
           memo: journalEntry.memo
         }))
-      : [{ id: uuid() }, { id: uuid() }, { id: uuid() }, { id: uuid() }, { id: uuid() }]
+      : [
+          { id: uuid(), badAccount: true },
+          { id: uuid(), badAccount: true },
+          { id: uuid(), badAccount: true },
+          { id: uuid(), badAccount: true },
+          { id: uuid(), badAccount: true }
+        ]
   )
   const [allCategories] = useState(categories)
   const [allLabels] = useState(labels)
@@ -230,6 +237,17 @@ const SupportingPackageForm = ({
   const [uploadSPFileOpen, setUploadSPFileOpen] = React.useState(false)
   const handleUploadSPFileOpen = () => setUploadSPFileOpen(true)
   const handleUploadSPFileClose = () => setUploadSPFileOpen(false)
+  const [uploadJEFileOpen, setUploadJEFileOpen] = React.useState(false)
+  const handleUploadJEFileOpen = () => setUploadJEFileOpen(true)
+  const handleUploadJEFileClose = () => setUploadJEFileOpen(false)
+  const [uploadingFileForJERowId, setUploadingFileForJERowId] = React.useState<string>('')
+  const setJournalEntryFile = (file: unknown, params: { id: string }) => {
+    const journalEntry = journalEntries.find(je => je.id === params.id)
+    if (journalEntry) {
+      journalEntry.file = file
+    }
+    setJournalEntries(journalEntries)
+  }
   const [uploadNotesFileOpen, setUploadNotesFileOpen] = React.useState(false)
   const [uploadMasterFileCommentFileOpen, setUploadMasterFileCommentFileOpen] = React.useState(false)
   const [notesFile, setNotesFile] = React.useState<UploadedFileProps | null>(null)
@@ -435,6 +453,7 @@ const SupportingPackageForm = ({
     setFileMethod: any
     filesCollection?: unknown[]
     handleModalClose: any
+    paramsForSetFileMethod?: unknown
   }): FileUploadProps => ({
     accept: '*/*',
     onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -447,7 +466,10 @@ const SupportingPackageForm = ({
         )
         setLoading(false)
         if (resp != null) {
-          params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
+          params.setFileMethod(
+            params.filesCollection ? params.filesCollection.concat(resp) : resp,
+            params.paramsForSetFileMethod
+          )
           setAttachments(attachments.concat(resp))
           params.handleModalClose()
         }
@@ -897,6 +919,30 @@ const SupportingPackageForm = ({
       width: 100,
       getActions: ({ id }) => {
         return [
+          <GridActionsCellItem
+            key={1}
+            icon={journalEntries.find(x => x.id === id)?.file ? <PreviewIcon /> : <AttachFileIcon />}
+            label='Attach'
+            className='textPrimary'
+            onClick={() => {
+              const journalEntry = journalEntries.find(x => x.id === id)
+              if (journalEntry?.file) {
+                if (journalEntry.file.mimetype.includes('pdf')) {
+                  setPdfViewerOpen(true)
+                  setActivePDFURL(journalEntry.file.uploaded.downloadLink ?? '')
+                } else {
+                  const w = window.open(journalEntry.file.uploaded.downloadLink, '_default')
+                  if (w) {
+                    w.focus()
+                  }
+                }
+              } else {
+                setUploadingFileForJERowId(id as string)
+                handleUploadJEFileOpen()
+              }
+            }}
+            color='inherit'
+          />,
           <GridActionsCellItem
             key={1}
             icon={<ContentCopyIcon />}
@@ -2198,6 +2244,26 @@ const SupportingPackageForm = ({
             </Box>
           </Grid>
         </Grid>
+      </Dialog>
+      <Dialog
+        open={uploadJEFileOpen}
+        onClose={handleUploadJEFileClose}
+        aria-labelledby='modal-modal-journal'
+        aria-describedby='modal-modal-journal'
+        sx={{
+          msOverflowX: 'scroll',
+          paddingTop: 2
+        }}
+      >
+        <Box sx={styles.sheetModalStyle}>
+          <FileUpload
+            {...fileUploadProp({
+              setFileMethod: setJournalEntryFile,
+              paramsForSetFileMethod: { id: uploadingFileForJERowId },
+              handleModalClose: handleUploadJEFileClose
+            })}
+          />
+        </Box>
       </Dialog>
       <Dialog
         open={uploadSPFileOpen}
