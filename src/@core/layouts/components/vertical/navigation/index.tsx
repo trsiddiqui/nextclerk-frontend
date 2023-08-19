@@ -157,19 +157,19 @@ const Navigation = (props: Props) => {
       >
         <MenuItem
           onClick={() => {
-            router.push('/supporting-package/create')
-            handleClose()
-          }}
-        >
-          Add Supporting Package
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
             router.push('/task/create')
             handleClose()
           }}
         >
-          Add Task
+          New Task
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            router.push('/supporting-package/create')
+            handleClose()
+          }}
+        >
+          New Supporting Package
         </MenuItem>
         <MenuItem onClick={handleClose}>Upload File</MenuItem>
       </Menu>
