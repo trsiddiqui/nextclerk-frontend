@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid'
 declare const window: Window &
   typeof globalThis & {
     saveCompleteFunction: any
+    open(): any
   }
 
 import { DataGrid, GridActionsCellItem, GridColDef, GridRowModel, GridRowsProp } from '@mui/x-data-grid'
@@ -1911,7 +1912,13 @@ const SupportingPackageForm = ({
                       setPdfViewerOpen(true)
                       setActivePDFURL(attachment.uploaded.downloadLink ?? '')
                     } else {
-                      window.open(attachment?.uploaded?.downloadLink ?? attachment?.downloadUrl ?? '', '_blank').focus()
+                      const w = window.open(
+                        attachment?.uploaded?.downloadLink ?? attachment?.downloadUrl ?? '',
+                        '_blank'
+                      )
+                      if (w) {
+                        w.focus()
+                      }
                     }
                   }}
                 />
