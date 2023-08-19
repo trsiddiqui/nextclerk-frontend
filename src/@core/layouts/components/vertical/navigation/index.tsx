@@ -22,7 +22,8 @@ import VerticalNavHeader from './VerticalNavHeader'
 
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
-import { IconButton } from '@mui/material'
+import { IconButton, Menu, MenuItem } from '@mui/material'
+import React from 'react'
 
 // import { useSession } from 'next-auth/react'
 // import { Session } from 'next-auth'
@@ -114,6 +115,15 @@ const Navigation = (props: Props) => {
 
   const router = useRouter()
 
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+
   return (
     <Drawer {...props}>
       <VerticalNavHeader {...props} />
@@ -129,13 +139,40 @@ const Navigation = (props: Props) => {
 
       {/* {session?.token ? ( */}
       <IconButton
-        sx={{ marginTop: 5, width: 40, marginLeft: 10, background: 'white', border: '1px solid lightgrey' }}
+        sx={{ marginTop: 5, width: 40, marginLeft: 11, background: 'white', border: '1px solid lightgrey' }}
         color='primary'
         size='medium'
-        onClick={() => router.push('/supporting-package/create')}
+        onClick={handleClick}
       >
         <AddIcon fontSize='inherit' />
       </IconButton>
+      <Menu
+        id='basic-menu'
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button'
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            router.push('/supporting-package/create')
+            handleClose()
+          }}
+        >
+          Add Supporting Package
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            router.push('/task/create')
+            handleClose()
+          }}
+        >
+          Add Task
+        </MenuItem>
+        <MenuItem onClick={handleClose}>Upload File</MenuItem>
+      </Menu>
       {/* ) : (
         <></>
       )} */}
