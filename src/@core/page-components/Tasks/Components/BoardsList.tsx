@@ -12,7 +12,7 @@ export const BoardsList = ({ tasks }: { tasks: TaskResponse[] }) => {
       }}
     >
       {tasks.map((task, index) => (
-        <Grid key={index} item xs={9}>
+        <Grid key={index} item xs={12}>
           <Task task={task} />
         </Grid>
       ))}

@@ -24,7 +24,7 @@ const mainStyle = {
     height: '100%'
   },
   boardCard: {
-    width: '380px',
+    width: '100%',
     display: 'flex',
     maxHeight: '100%',
     overflowX: 'hidden',
@@ -49,8 +49,8 @@ const mainStyle = {
 const TaskList = ({ tasks, caption }: { tasks: TaskResponse[]; caption: string }) => {
   return (
     <Grid container sx={mainStyle.root} spacing={1}>
-      <Grid container sx={mainStyle.boardsWrap}>
-        <Grid sx={mainStyle.boardsContent}>
+      <Grid sx={mainStyle.boardsWrap}>
+        <Grid sx={mainStyle.boardsContent} item xs={12} md={12} lg={12} xl={12}>
           <Paper sx={mainStyle.boardCard} elevation={3}>
             <BoardHeader title={caption} />
             <Divider />
