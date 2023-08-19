@@ -447,6 +447,7 @@ const SupportingPackageForm = ({
         setLoading(false)
         if (resp != null) {
           params.setFileMethod(params.filesCollection ? params.filesCollection.concat(resp) : resp)
+          setAttachments(attachments.concat(resp))
           params.handleModalClose()
         }
       }
@@ -1909,6 +1910,8 @@ const SupportingPackageForm = ({
                     if (attachment.mimetype.includes('pdf')) {
                       setPdfViewerOpen(true)
                       setActivePDFURL(attachment.uploaded.downloadLink ?? '')
+                    } else {
+                      window.open(attachment?.uploaded?.downloadLink ?? attachment?.downloadUrl ?? '', '_blank').focus()
                     }
                   }}
                 />

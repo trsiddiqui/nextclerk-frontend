@@ -21,6 +21,8 @@ export type UploadedFileProps = {
   /** Size of the file in bytes. */
   size: number
 
+  downloadUrl?: string
+
   uploaded: {
     uuid: string
     downloadLink?: string
