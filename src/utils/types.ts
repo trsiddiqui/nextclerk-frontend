@@ -92,6 +92,7 @@ export type JournalEntry = {
   customerLabel?: string
   customerUUID?: string
   uuid: string
+  file?: UploadedFileProps
 }
 
 export type SupportingPackageResponse = {

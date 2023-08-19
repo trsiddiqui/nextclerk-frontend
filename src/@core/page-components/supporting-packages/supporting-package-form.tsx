@@ -208,7 +208,8 @@ const SupportingPackageForm = ({
           customer: journalEntry.customerLabel,
           creditAmount: journalEntry.creditAmount,
           debitAmount: journalEntry.debitAmount,
-          memo: journalEntry.memo
+          memo: journalEntry.memo,
+          file: journalEntry.file
         }))
       : [
           { id: uuid(), badAccount: true },
@@ -649,7 +650,8 @@ const SupportingPackageForm = ({
           memo: row.memo,
           departmentUUID: departments.find(x => x.label === row.department)?.id,
           locationUUID: locations.find(x => x.label === row.location)?.id,
-          customerUUID: customers.find(x => x.label === row.customer)?.id
+          customerUUID: customers.find(x => x.label === row.customer)?.id,
+          file: row.file ? { uuid: row.file?.uploaded?.uuid } : undefined
         }
         console.log(obj)
         persistedJournalEntries.push(obj)
