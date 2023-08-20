@@ -10,6 +10,11 @@ export enum ActionItemState {
   COMPLETED = 'COMPLETED'
 }
 
+export type SpreadsheetRange = {
+  range: string
+  sheet: number
+}
+
 export type UploadedFileProps = {
   // eslint-disable-next-line lines-around-comment
   /** Name of the file on the uploader's computer. */
@@ -93,6 +98,7 @@ export type JournalEntry = {
   customerUUID?: string
   uuid: string
   file?: UploadedFileProps
+  cellLink?: SpreadsheetRange
 }
 
 export type SupportingPackageResponse = {

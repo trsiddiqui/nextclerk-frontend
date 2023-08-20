@@ -113,6 +113,7 @@ import {
 import {
   ActionItemState,
   MasterFileUploaded,
+  SpreadsheetRange,
   SupportingPackageResponse,
   SupportingPackageUserType,
   UploadedFileProps,
@@ -155,11 +156,6 @@ const styles = {
     verticalAlign: 'middle',
     textDecoration: 'underline'
   }
-}
-
-type SpreadsheetRange = {
-  range: string
-  sheet: number
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
