@@ -7,7 +7,7 @@ import KeycloakProvider from 'next-auth/providers/keycloak'
 
 const clientId = 'nextclerk'
 const clientSecret = 'uvmAPUcHKYG9ZZXsymO9QP3rFAPPmLhF'
-const host = process.env.NODE_ENV === 'production' ? 'http://test.nextclerk.com' : 'http://localhost'
+const host = /* process.env.NODE_ENV === 'production' ? 'http://test.nextclerk.com' : */ 'http://localhost'
 console.log('using', host)
 console.log(process.env.NEXTAUTH_URL)
 console.log(process.env.NEXTAUTH_URL_INTERNAL)
@@ -61,11 +61,10 @@ export const authOptions: AuthOptions = {
     KeycloakProvider({
       clientId: clientId,
       clientSecret: clientSecret,
-      issuer: `${host}:8086/realms/${clientId}`
-
-      // authorization: `${host}:8086/realms/${clientId}/protocol/openid-connect/auth`,
-      // accessTokenUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/token`,
-      // profileUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/userinfo`
+      issuer: `${host}:8086/realms/${clientId}`,
+      authorization: `${host}:8086/realms/${clientId}/protocol/openid-connect/auth`,
+      accessTokenUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/token`,
+      profileUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/userinfo`
     })
   ],
   callbacks: {
