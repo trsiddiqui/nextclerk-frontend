@@ -29,6 +29,8 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
 import PreviewIcon from '@mui/icons-material/Preview'
+import AddLinkIcon from '@mui/icons-material/AddLink'
+import GridOnIcon from '@mui/icons-material/GridOn'
 import {
   Autocomplete,
   Avatar,
@@ -264,6 +266,7 @@ const SupportingPackageForm = ({
   const [activePDFURL, setActivePDFURL] = React.useState<string | null>(null)
   const [numPagesOfActivePDF, setNumPagesOfActivePDF] = React.useState<number | null>()
   const [pdfViewerOpen, setPdfViewerOpen] = React.useState(false)
+  const [journalEntryIDForLinking, setJournalEntryIDForLinking] = React.useState<string | null>(null)
 
   const supportingPackageNotes: Array<{
     message: string
@@ -508,7 +511,12 @@ const SupportingPackageForm = ({
         ],
         false
       )
-      spreadsheet.addContextMenuItems([{ text: 'Add Comments/Attachments' }, { text: 'Add Action Items' }], '', false) //To pass the items, Item before / after that the element to be inserted, Set false if the items need to be inserted before the text.
+      const contextMenuItems = [{ text: 'Add Comments/Attachments' }, { text: 'Add Action Items' }]
+      if (journalEntryIDForLinking) {
+        contextMenuItems.push({ text: 'Link with the Selected Journal Entry' })
+      }
+
+      spreadsheet.addContextMenuItems(contextMenuItems, '', false) //To pass the items, Item before / after that the element to be inserted, Set false if the items need to be inserted before the text.
 
       // Dont need now, hidden through CSS
       // spreadsheet.hideRibbonTabs(['File', 'Insert', 'Formulas', 'Data', 'View'], true)
@@ -535,7 +543,7 @@ const SupportingPackageForm = ({
   }
 
   // When you click on a comment inside Master file, it selects takes you to the cells in the master file
-  function onMasterSheetCommentClick(range: SpreadsheetRange) {
+  function goToRange(range: SpreadsheetRange) {
     if (spreadsheet) {
       const ri = getRangeIndexes(range.range)
       const cells = getCellsFromRangeAddress(
@@ -577,6 +585,17 @@ const SupportingPackageForm = ({
           })
           spreadsheet.hideFileMenuItems(['File'], true)
           setSpreadsheet(spreadsheet)
+          break
+        case 'Link with the Selected Journal Entry':
+          const journalEntry = journalEntries.find(x => x.id === journalEntryIDForLinking)
+          if (journalEntry) {
+            journalEntry.cellLink = {
+              range: String(spreadsheet.getActiveSheet().selectedRange),
+              sheet: spreadsheet.getActiveSheet().id!
+            }
+          }
+          setJournalEntryIDForLinking(null)
+          setTab(2)
           break
       }
     }
@@ -652,7 +671,8 @@ const SupportingPackageForm = ({
           departmentUUID: departments.find(x => x.label === row.department)?.id,
           locationUUID: locations.find(x => x.label === row.location)?.id,
           customerUUID: customers.find(x => x.label === row.customer)?.id,
-          file: row.file ? { uuid: row.file?.uploaded?.uuid } : undefined
+          file: row.file ? { uuid: row.file?.uploaded?.uuid } : undefined,
+          cellLink: row.cellLink
         }
         console.log(obj)
         persistedJournalEntries.push(obj)
@@ -919,12 +939,22 @@ const SupportingPackageForm = ({
       type: 'actions',
       headerName: 'Actions',
       cellClassName: 'data-grid-column',
-      width: 100,
+      width: 140,
       getActions: ({ id }) => {
-        return [
+        const actions = [
           <GridActionsCellItem
             key={1}
-            icon={journalEntries.find(x => x.id === id)?.file ? <PreviewIcon /> : <AttachFileIcon />}
+            icon={
+              journalEntries.find(x => x.id === id)?.file ? (
+                <Tooltip title='View(PDF)/Download(Others)'>
+                  <PreviewIcon />
+                </Tooltip>
+              ) : (
+                <Tooltip title='Attach File'>
+                  <AttachFileIcon />
+                </Tooltip>
+              )
+            }
             label='Attach'
             className='textPrimary'
             onClick={() => {
@@ -948,7 +978,11 @@ const SupportingPackageForm = ({
           />,
           <GridActionsCellItem
             key={1}
-            icon={<ContentCopyIcon />}
+            icon={
+              <Tooltip title='View(PDF)/Download(Others)'>
+                <ContentCopyIcon />
+              </Tooltip>
+            }
             label='Edit'
             className='textPrimary'
             onClick={() => {
@@ -966,7 +1000,11 @@ const SupportingPackageForm = ({
           />,
           <GridActionsCellItem
             key={2}
-            icon={<DeleteIcon />}
+            icon={
+              <Tooltip title='Delete'>
+                <DeleteIcon />
+              </Tooltip>
+            }
             label='Delete'
             disabled={journalEntries.length === 1}
             onClick={() => {
@@ -978,6 +1016,37 @@ const SupportingPackageForm = ({
             color='inherit'
           />
         ]
+        if (masterFile && masterFile.mimetype.includes('sheet')) {
+          actions.push(
+            <GridActionsCellItem
+              key={2}
+              icon={
+                journalEntries.find(x => x.id === id)?.cellLink ? (
+                  <Tooltip title='View the Selected Range in the Calculation Sheet'>
+                    <GridOnIcon />
+                  </Tooltip>
+                ) : (
+                  <Tooltip title='Link with a Calculation Cell'>
+                    <AddLinkIcon />
+                  </Tooltip>
+                )
+              }
+              label='Link'
+              disabled={journalEntries.length === 1}
+              onClick={() => {
+                setTab(0)
+                if (journalEntries.find(x => x.id === id)?.cellLink) {
+                  goToRange(journalEntries.find(x => x.id === id)?.cellLink)
+                } else {
+                  setJournalEntryIDForLinking(id as string)
+                }
+              }}
+              color='inherit'
+            />
+          )
+        }
+
+        return actions
       }
     }
   ]
@@ -1496,7 +1565,7 @@ const SupportingPackageForm = ({
                               spacing={2}
                               key={index}
                               onClick={() => {
-                                onMasterSheetCommentClick(masterFileComment.cellRange)
+                                goToRange(masterFileComment.cellRange)
                               }}
                             >
                               <Grid item>
@@ -1597,7 +1666,7 @@ const SupportingPackageForm = ({
                           key={index}
                           onClick={() => {
                             if (actionItem.cellRange) {
-                              onMasterSheetCommentClick(actionItem.cellRange)
+                              goToRange(actionItem.cellRange)
                             }
                           }}
                         >
