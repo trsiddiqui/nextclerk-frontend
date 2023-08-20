@@ -10,6 +10,7 @@ const clientSecret = 'uvmAPUcHKYG9ZZXsymO9QP3rFAPPmLhF'
 const host = process.env.NODE_ENV === 'production' ? 'http://test.nextclerk.com' : 'http://localhost'
 console.log('using', host)
 console.log(process.env.NEXTAUTH_URL)
+console.log(process.env.NEXTAUTH_URL_INTERNAL)
 async function refreshAccessToken(token: JWT & Account) {
   try {
     // console.log('REFRESHING', token)
