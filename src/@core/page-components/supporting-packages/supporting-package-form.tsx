@@ -211,7 +211,8 @@ const SupportingPackageForm = ({
           creditAmount: journalEntry.creditAmount,
           debitAmount: journalEntry.debitAmount,
           memo: journalEntry.memo,
-          file: journalEntry.file
+          file: journalEntry.file,
+          cellLink: journalEntry.cellLink
         }))
       : [
           { id: uuid(), badAccount: true },
