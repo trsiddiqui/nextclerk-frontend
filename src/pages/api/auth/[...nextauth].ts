@@ -7,10 +7,8 @@ import KeycloakProvider from 'next-auth/providers/keycloak'
 
 const clientId = 'nextclerk'
 const clientSecret = 'uvmAPUcHKYG9ZZXsymO9QP3rFAPPmLhF'
-const host = /* process.env.NODE_ENV === 'production' ? 'http://test.nextclerk.com' : */ 'http://localhost'
+const host = process.env.NODE_ENV === 'production' ? 'http://test.nextclerk.com' : 'http://localhost'
 console.log('using', host)
-console.log(process.env.NEXTAUTH_URL)
-console.log(process.env.NEXTAUTH_URL_INTERNAL)
 async function refreshAccessToken(token: JWT & Account) {
   try {
     // console.log('REFRESHING', token)
@@ -67,6 +65,7 @@ export const authOptions: AuthOptions = {
       profileUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/userinfo`
     })
   ],
+  debug: true,
   callbacks: {
     async jwt({ token, account, user, profile }) {
       if (account && user) {
@@ -115,7 +114,6 @@ export const authOptions: AuthOptions = {
   }
 }
 
-console.log(JSON.stringify(authOptions.providers))
 const nextAuth = NextAuth(authOptions)
 console.log(JSON.stringify(nextAuth))
 export default nextAuth
