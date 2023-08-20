@@ -61,10 +61,11 @@ export const authOptions: AuthOptions = {
     KeycloakProvider({
       clientId: clientId,
       clientSecret: clientSecret,
-      issuer: `${host}:8086/realms/${clientId}`,
-      authorization: `${host}:8086/realms/${clientId}/protocol/openid-connect/auth`,
-      accessTokenUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/token`,
-      profileUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/userinfo`
+      issuer: `${host}:8086/realms/${clientId}`
+
+      // authorization: `${host}:8086/realms/${clientId}/protocol/openid-connect/auth`,
+      // accessTokenUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/token`,
+      // profileUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/userinfo`
     })
   ],
   callbacks: {
