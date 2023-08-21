@@ -811,8 +811,8 @@ const SupportingPackageForm = ({
       headerAlign: 'center'
     },
     {
-      field: 'creditAmount',
-      headerName: 'Credit',
+      field: 'debitAmount',
+      headerName: 'Debit',
       type: 'number',
       editable: true,
       align: 'center',
@@ -821,8 +821,8 @@ const SupportingPackageForm = ({
       headerAlign: 'center'
     },
     {
-      field: 'debitAmount',
-      headerName: 'Debit',
+      field: 'creditAmount',
+      headerName: 'Credit',
       type: 'number',
       editable: true,
       align: 'center',
