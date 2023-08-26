@@ -237,3 +237,24 @@ export const updateTask = async (task: TaskUpdate, isBackend = false): Promise<v
 
   return await (isBackend ? backendApi : api).put(`/${customerXRefID}/tasks/${taskXRefID}`, updateTask)
 }
+
+export const getAuth = async (isBackend = false): Promise<void> => {
+  let baseURL = ''
+  console.log(baseURL)
+  isBackend ? (baseURL = 'http://localhost:3000/') : `http://${hostname}:3000/`
+
+  const authURL = axios.create({
+    baseURL
+  })
+
+  authURL
+    .get(`/third-party-auth/quickbooks/auth-request?entityID=${customerXRefID}`)
+    .then(response => {
+      window.open(response.data, '', 'blank')
+    })
+    .catch(error => {
+      if (error.response) {
+        console.log(error.response.data) // => the response payload
+      }
+    })
+}
