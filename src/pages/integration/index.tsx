@@ -8,7 +8,7 @@ import { AddAlarmRounded } from '@mui/icons-material'
 
 const Integration = () => {
   const handleAuthRoute = async () => {
-    await getAuth(true)
+    await getAuth()
   }
 
   return (
