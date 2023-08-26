@@ -1,6 +1,4 @@
 // ** MUI Imports
-import Fab from '@mui/material/Fab'
-import AddIcon from '@mui/icons-material/Add'
 import { Grid } from '@mui/material'
 
 // ** Styled Component Import
@@ -80,11 +78,6 @@ const TaskDashboard2 = ({ tasks }: { tasks: TaskResponse[] }) => {
         <Grid item xs={12}>
           <Table />
         </Grid> */}
-      </Grid>
-      <Grid>
-        <Fab size='medium' color='success' aria-label='add' href='/task/create/'>
-          <AddIcon />
-        </Fab>
       </Grid>
     </div>
   )
