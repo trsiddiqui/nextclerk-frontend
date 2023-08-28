@@ -120,6 +120,7 @@ import {
   User
 } from 'src/utils/types'
 import { FileUpload, FileUploadProps } from 'src/@core/components/custom/file-upload'
+import { useRouter } from 'next/router'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
 
@@ -185,6 +186,8 @@ const SupportingPackageForm = ({
   saveSupportingPackageMethod: (...args: any) => Promise<any>
   supportingPackage?: SupportingPackageResponse
 }) => {
+  const router = useRouter()
+  const { taskID } = router.query
   const theme = useTheme()
   const [name, setName] = useState(supportingPackage?.title ?? '')
   const [number, setNumber] = useState(supportingPackage?.number ?? '')
@@ -720,6 +723,7 @@ const SupportingPackageForm = ({
       isConfidential,
       date,
       isDraft,
+      taskID,
       // TODO: Fill this when linked with a Journal Entry
       journalNumber: undefined,
       users: participants.map(user => ({ uuid: user.uuid, type: SupportingPackageUserType.PARTICIPANT })),

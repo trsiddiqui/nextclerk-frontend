@@ -169,6 +169,7 @@ export type SupportingPackageResponse = {
 }
 
 export type TaskResponse = {
+  id?: number
   uuid: string
   number: string
   title: string
