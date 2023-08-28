@@ -10,7 +10,6 @@ import {
   Switch,
   Link,
   IconButton,
-  InputAdornment,
   Card,
   Grid,
   Button,
@@ -41,7 +40,6 @@ import dayjs, { Dayjs } from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
-import SendIcon from '@mui/icons-material/Send'
 import SearchIcon from '@mui/icons-material/Search'
 import { AutocompleteRow, DropDownRow, getInitials } from 'src/@core/utils'
 import { TaskResponse, User } from 'src/utils/types'
@@ -419,7 +417,11 @@ const TaskForm = ({
                   type='submit'
                   sx={{ mr: 2 }}
                   variant='contained'
-                  onClick={() => router.push(`/supporting-package/${task.supportingPackageUUID}/edit`)}
+                  onClick={() =>
+                    router.push({
+                      pathname: `/supporting-package/${task.supportingPackageUUID}/edit`
+                    })
+                  }
                 >
                   CONTINUE ON SUPPORTING PACKAGE
                 </Button>
@@ -429,7 +431,12 @@ const TaskForm = ({
                   type='submit'
                   sx={{ mr: 2 }}
                   variant='contained'
-                  onClick={() => router.push('/supporting-package/create')}
+                  onClick={() =>
+                    router.push({
+                      pathname: `/supporting-package/create`,
+                      query: { taskID: task.id }
+                    })
+                  }
                 >
                   CREATE SUPPORTING PACKAGE
                 </Button>
