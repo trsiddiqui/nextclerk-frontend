@@ -7,12 +7,12 @@ import KeycloakProvider from 'next-auth/providers/keycloak'
 
 const clientId = 'nextclerk'
 const clientSecret = 'uvmAPUcHKYG9ZZXsymO9QP3rFAPPmLhF'
-const host = process.env.NODE_ENV === 'production' ? 'http://18.232.142.190' : 'http://localhost'
+const host = process.env.NODE_ENV === 'production' ? 'https://18.232.142.190' : 'http://localhost:8086'
 console.log('using', host)
 async function refreshAccessToken(token: JWT & Account) {
   try {
     // console.log('REFRESHING', token)
-    const url = `${host}:8086/realms/${clientId}/protocol/openid-connect/token`
+    const url = `${host}/realms/${clientId}/protocol/openid-connect/token`
 
     const response = await fetch(url, {
       headers: {
@@ -59,10 +59,10 @@ export const authOptions: AuthOptions = {
     KeycloakProvider({
       clientId: clientId,
       clientSecret: clientSecret,
-      issuer: `${host}:8086/realms/${clientId}`,
-      authorization: `${host}:8086/realms/${clientId}/protocol/openid-connect/auth`,
-      accessTokenUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/token`,
-      profileUrl: `${host}:8086/realms/${clientId}/protocol/openid-connect/userinfo`
+      issuer: `${host}/realms/${clientId}`,
+      authorization: `${host}/realms/${clientId}/protocol/openid-connect/auth`,
+      accessTokenUrl: `${host}/realms/${clientId}/protocol/openid-connect/token`,
+      profileUrl: `${host}/realms/${clientId}/protocol/openid-connect/userinfo`
     })
   ],
   debug: true,
