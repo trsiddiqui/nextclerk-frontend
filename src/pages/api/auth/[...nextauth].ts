@@ -7,7 +7,7 @@ import KeycloakProvider from 'next-auth/providers/keycloak'
 
 const clientId = 'nextclerk'
 const clientSecret = 'uvmAPUcHKYG9ZZXsymO9QP3rFAPPmLhF'
-const host = process.env.NODE_ENV === 'production' ? 'http://test.nextclerk.com' : 'http://localhost'
+const host = process.env.NODE_ENV === 'production' ? 'http://18.232.142.190' : 'http://localhost'
 console.log('using', host)
 async function refreshAccessToken(token: JWT & Account) {
   try {
