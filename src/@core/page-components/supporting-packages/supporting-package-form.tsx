@@ -99,7 +99,8 @@ import {
   getLatestMasterFile,
   uploadUpdatedFile,
   getOnlineViewLink,
-  syncfusionWebApiUrls
+  syncfusionWebApiUrls,
+  postJEToQB
 } from 'src/utils/apiClient'
 import {
   AutocompleteRow,
@@ -186,11 +187,13 @@ const SupportingPackageForm = ({
   saveSupportingPackageMethod: (...args: any) => Promise<any>
   supportingPackage?: SupportingPackageResponse
 }) => {
+  console.log(supportingPackage)
   const router = useRouter()
   const { taskID } = router.query
   const theme = useTheme()
   const [name, setName] = useState(supportingPackage?.title ?? '')
   const [number, setNumber] = useState(supportingPackage?.number ?? '')
+  const [journalNumber, setJournalNumber] = useState(supportingPackage?.journalNumber ?? '')
   const [isConfidential, setIsConfidential] = useState<boolean>(supportingPackage?.isConfidential ?? false)
   const [category, setCategory] = useState<{ label: string; uuid: string } | null>(
     supportingPackage?.categoryName && supportingPackage?.categoryUUID
@@ -203,6 +206,7 @@ const SupportingPackageForm = ({
     supportingPackage?.journalEntries?.length
       ? supportingPackage.journalEntries.map(journalEntry => ({
           id: journalEntry.uuid,
+          accountUUID: journalEntry.accountUUID,
           account: journalEntry.accountLabel,
           department: journalEntry.departmentLabel,
           location: journalEntry.locationLabel,
@@ -724,8 +728,7 @@ const SupportingPackageForm = ({
       date,
       isDraft,
       taskID,
-      // TODO: Fill this when linked with a Journal Entry
-      journalNumber: undefined,
+      journalNumber,
       users: participants.map(user => ({ uuid: user.uuid, type: SupportingPackageUserType.PARTICIPANT })),
       files: attachments.map(file => ({
         uuid: file.uploaded.uuid,
@@ -1140,7 +1143,15 @@ const SupportingPackageForm = ({
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField variant='filled' fullWidth label='Journal Number' placeholder='Journal Number' />
+                <TextField
+                  fullWidth
+                  type='text'
+                  label='Journal Number'
+                  placeholder='JE Number'
+                  variant='filled'
+                  onChange={e => setJournalNumber(e.target.value)}
+                  value={journalNumber}
+                />
               </Grid>
               <Grid item xs={12} sm={3}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -1969,6 +1980,26 @@ const SupportingPackageForm = ({
             index={firstTime ? 2 : undefined}
             dir={theme.direction}
           >
+            {supportingPackage?.journalEntries?.length && (
+              <Grid item xs={12}>
+                <Button
+                  sx={{ marginLeft: '75%' }}
+                  variant='text'
+                  endIcon={<LaunchIcon />}
+                  onClick={async () => {
+                    console.log(journalEntries)
+                    await postJEToQB(journalEntries, supportingPackage.uuid)
+
+                    // window.saveCompleteFunction = async () => {
+                    //   // const link = await APICallWrapper(getOnlineViewLink, [masterFile.uploaded.uuid])
+
+                    // }
+                  }}
+                >
+                  Export to Integrated ERP
+                </Button>
+              </Grid>
+            )}
             <Grid container sx={{ pl: 1, height: '600px' }} width='100%' className='journal-entry-tab'>
               {/* TODO: Journal Entries Table */}
               <DataGrid editMode='row' rows={journalEntries} columns={columns} processRowUpdate={processRowUpdate} />

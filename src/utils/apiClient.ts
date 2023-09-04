@@ -249,11 +249,22 @@ export const getAuth = async (isBackend = false): Promise<void> => {
   authURL
     .get(`/third-party-auth/quickbooks/auth-request?entityID=${customerXRefID}`)
     .then(response => {
-      window.open(response.data, '', 'blank')
+      window.open(response.data, '', '_blank')
     })
     .catch(error => {
       if (error.response) {
         console.log(error.response.data) // => the response payload
       }
     })
+}
+
+export const postJEToQB = async (
+  journalEntryLines: unknown,
+  supportingPackageXRefID: string,
+  isBackend = false
+): Promise<void> => {
+  return await (isBackend ? backendApi : api).post(
+    `/${customerXRefID}/supporting-packages/${supportingPackageXRefID}/journalEntry/post-to-erp`,
+    journalEntryLines
+  )
 }
