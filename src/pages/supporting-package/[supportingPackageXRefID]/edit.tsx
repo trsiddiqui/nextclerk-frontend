@@ -32,7 +32,7 @@ export async function getServerSideProps({
   const users = await searchUsers(undefined, true)
   const activeUser = await getActiveUser(true)
 
-  const supportingPackage = await getSupportingPackage(supportingPackageXRefID)
+  const supportingPackage = await getSupportingPackage(supportingPackageXRefID, true)
 
   // Pass data to the page via props
   return {
