@@ -1988,7 +1988,7 @@ const SupportingPackageForm = ({
                   endIcon={<LaunchIcon />}
                   onClick={async () => {
                     console.log(journalEntries)
-                    await postJEToQB(journalEntries, supportingPackage.uuid, true)
+                    await postJEToQB(journalEntries, supportingPackage.uuid)
 
                     // window.saveCompleteFunction = async () => {
                     //   // const link = await APICallWrapper(getOnlineViewLink, [masterFile.uploaded.uuid])
