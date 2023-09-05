@@ -40,7 +40,7 @@ export async function getServerSideProps({
   }
 }
 
-const CreateSupportPackage = ({
+const EditSupportPackage = ({
   categories,
   accounts,
   departments,
@@ -77,4 +77,4 @@ const CreateSupportPackage = ({
   )
 }
 
-export default CreateSupportPackage
+export default EditSupportPackage
