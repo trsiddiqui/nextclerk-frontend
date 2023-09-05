@@ -9,6 +9,9 @@ const UserPage = () => {
   const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
 
+  // TODO: remove this log
+  console.log(setUsers)
+
   const columns: GridColDef[] = [
     {
       field: 'firstName',
