@@ -2,14 +2,17 @@ import axios from 'axios'
 import {
   Account,
   Customer,
+  DashboardUser,
   Department,
   Location,
   MasterFileUploaded,
+  Role,
   SupportingPackageResponse,
   TaskResponse,
   TaskUpdate,
   UploadedFileProps,
-  User
+  User,
+  UserRequest
 } from './types'
 import { DropDownRow } from 'src/@core/utils'
 
@@ -39,7 +42,7 @@ export const syncfusionWebApiUrls = (): { openUrl: string; saveUrl: string } => 
 
 // TODO: This should come from the JWT
 // Currently coming from backend seeds
-const customerXRefID = 'f590257b-a925-45d3-b980-26ff13faf64e'
+export const customerXRefID = 'f590257b-a925-45d3-b980-26ff13faf64e'
 
 export const getAllCategories = async (isBackend = false) => {
   const categories = await (isBackend ? backendApi : api).get<User[]>(`/${customerXRefID}/categories`)
@@ -267,4 +270,23 @@ export const postJEToQB = async (
     `/${customerXRefID}/supporting-packages/${supportingPackageXRefID}/journalEntry/post-to-erp`,
     journalEntryLines
   )
+}
+export const getAllRoles = async (isBackend = false): Promise<Role[]> => {
+  const response = await (isBackend ? backendApi : api).get(`/user-administration/groups`)
+
+  return response.data
+}
+
+export const getAllUsersForDashboard = async (isBackend = false): Promise<DashboardUser[]> => {
+  const response = await (isBackend ? backendApi : api).get(`/user-administration/${customerXRefID}/users`)
+
+  return response.data
+}
+
+export const updateUser = async (user: UserRequest, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).put(`/user-administration/${customerXRefID}/users/${user.uuid}`, user)
+}
+
+export const logoutUser = async (userXRefID: string): Promise<void> => {
+  return await api.post(`/user-administration/users/${userXRefID}/logout`)
 }

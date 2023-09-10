@@ -217,3 +217,40 @@ export enum Status {
   DONE = 'DONE',
   INPROGRESS = 'INPROGRESS'
 }
+
+export type Role = {
+  label: string
+  uuid: string
+}
+
+export type DashboardUser = {
+  uuid: string
+  email: string
+  firstName: string
+  lastName: string
+  groups?: string[]
+  manager?: {
+    firstName: string
+    lastName: string
+    uuid: string
+    email: string
+  }
+  department: {
+    label: string
+    uuid: string
+  }
+  isAccountingManager: boolean
+  archived: boolean
+}
+
+export type UserRequest = {
+  uuid: string
+  email: string
+  firstName: string
+  lastName: string
+  isAccountingManager: boolean
+  groups?: string[]
+  entityUuid: string
+  managerUuid?: string
+  departmentUuid?: string
+}
