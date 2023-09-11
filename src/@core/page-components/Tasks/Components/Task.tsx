@@ -94,7 +94,7 @@ export const Task = ({ task }: { task: TaskResponse }) => {
 
   const handleDeleteTask = async ({ taskUUID }: { taskUUID: string }) => {
     // await APICallWrapper(deleteTaskMethod, [taskUUID], 'An error occurred while deleting task. Please contact support.')
-    await archiveTask(taskUUID, true)
+    await archiveTask(taskUUID)
     setOpen(false)
     router.reload()
   }
