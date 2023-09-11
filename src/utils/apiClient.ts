@@ -262,9 +262,11 @@ export const postJEToQB = async (
   journalEntryLines: unknown,
   supportingPackageXRefID: string,
   isBackend = false
-): Promise<void> => {
-  return await (isBackend ? backendApi : api).post(
+): Promise<number> => {
+  const result = await (isBackend ? backendApi : api).post(
     `/${customerXRefID}/supporting-packages/${supportingPackageXRefID}/journalEntry/post-to-erp`,
     journalEntryLines
   )
+
+  return result.status
 }

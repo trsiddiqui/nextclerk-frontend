@@ -189,15 +189,28 @@ const SupportingPackageForm = ({
 }) => {
   console.log(supportingPackage)
   const router = useRouter()
-  const { taskID } = router.query
+  const { taskID, taskTitle, taskIsConfidential, taskCategory, taskLabel, taskDescription } = router.query
   const theme = useTheme()
-  const [name, setName] = useState(supportingPackage?.title ?? '')
+  const [name, setName] = useState(
+    supportingPackage?.title ? supportingPackage?.title : taskTitle !== undefined ? taskTitle : ''
+  )
   const [number, setNumber] = useState(supportingPackage?.number ?? '')
   const [journalNumber, setJournalNumber] = useState(supportingPackage?.journalNumber ?? '')
-  const [isConfidential, setIsConfidential] = useState<boolean>(supportingPackage?.isConfidential ?? false)
+  const [isConfidential, setIsConfidential] = useState<boolean>(
+    supportingPackage?.isConfidential
+      ? supportingPackage?.isConfidential
+      : taskIsConfidential && taskIsConfidential === 'true'
+      ? true
+      : false
+  )
   const [category, setCategory] = useState<{ label: string; uuid: string } | null>(
     supportingPackage?.categoryName && supportingPackage?.categoryUUID
       ? { label: supportingPackage?.categoryName, uuid: supportingPackage.categoryUUID }
+      : taskCategory
+      ? {
+          label: categories.find(ca => ca.name === taskCategory)?.name as string,
+          uuid: categories.find(ca => ca.name === taskCategory)?.uuid as string
+        }
       : null
   )
   const [loading, setLoading] = useState(false)
@@ -230,6 +243,11 @@ const SupportingPackageForm = ({
   const [label, setLabel] = useState<{ label: string; uuid: string } | null>(
     supportingPackage?.label && supportingPackage?.labelUUID
       ? { label: supportingPackage?.label, uuid: supportingPackage.labelUUID }
+      : taskLabel
+      ? {
+          label: labels.find(la => la.label === taskLabel)?.label as string,
+          uuid: labels.find(la => la.label === taskLabel)?.id as string
+        }
       : null
   )
   const [date, setDate] = useState<Dayjs | null>(dayjs(supportingPackage?.date))
@@ -748,6 +766,7 @@ const SupportingPackageForm = ({
       'The Supporting Package has been saved successfully. (TODO: Navigate to Supporting Package Dashboard when done)',
       SnackBarType.Success
     )
+    router.push('/')
   }
   // #endregion
 
@@ -1060,6 +1079,17 @@ const SupportingPackageForm = ({
     setJournalEntries(journalEntries.map(row => (row.id === newRow.id ? updatedRow : row)))
 
     return updatedRow
+  }
+
+  const postJEtoQBHandler = async (journalEntries: unknown, supportingPackageUUID: string) => {
+    setLoading(true)
+    try {
+      await postJEToQB(journalEntries, supportingPackageUUID)
+      showMessage('JE posted to ERP Successfully', SnackBarType.Success)
+    } catch (error) {
+      showMessage('We cannot proceed with your export request.', SnackBarType.Error)
+    }
+    setLoading(false)
   }
 
   // const rows: GridRowsProp = [
@@ -1987,13 +2017,9 @@ const SupportingPackageForm = ({
                   variant='text'
                   endIcon={<LaunchIcon />}
                   onClick={async () => {
-                    console.log(journalEntries)
-                    await postJEToQB(journalEntries, supportingPackage.uuid)
-
-                    // window.saveCompleteFunction = async () => {
-                    //   // const link = await APICallWrapper(getOnlineViewLink, [masterFile.uploaded.uuid])
-
-                    // }
+                    await postJEtoQBHandler(journalEntries, supportingPackage.uuid)
+                    // console.log(journalEntries)
+                    // await postJEToQB(journalEntries, supportingPackage.uuid)
                   }}
                 >
                   Export to Integrated ERP
