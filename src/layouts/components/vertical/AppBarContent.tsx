@@ -96,7 +96,12 @@ const AppBarContent = (props: Props) => {
           <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
             {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
             <NotificationDropdown />
-            <UserDropdown name={session.token.name as string} email={session.token.email as string} signOut={signOut} />
+            <UserDropdown
+              name={session.token.name as string}
+              email={session.token.email as string}
+              userXRefID={session.token.sub!}
+              signOut={signOut}
+            />
           </Box>
         </>
       ) : (

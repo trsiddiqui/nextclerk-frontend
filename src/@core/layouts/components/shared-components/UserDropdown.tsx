@@ -19,6 +19,7 @@ import CogOutline from 'mdi-material-ui/CogOutline'
 import LogoutVariant from 'mdi-material-ui/LogoutVariant'
 import AccountOutline from 'mdi-material-ui/AccountOutline'
 import { SignOutResponse } from 'next-auth/react'
+import { logoutUser } from 'src/utils/apiClient'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -32,11 +33,13 @@ const BadgeContentSpan = styled('span')(({ theme }) => ({
 const UserDropdown = ({
   name,
   email,
-  signOut
+  signOut,
+  userXRefID
 }: {
   name: string
   email: string
   signOut: () => Promise<SignOutResponse | undefined>
+  userXRefID: string
 }) => {
   // ** States
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
@@ -136,8 +139,19 @@ const UserDropdown = ({
         <Divider />
         <MenuItem
           sx={{ py: 2 }}
-          onClick={() => {
-            signOut()
+          onClick={async () => {
+            // await fetch('https://auth.nextclerk.com/realms/nextclerk/protocol/openid-connect/logout', {
+            //   mode: 'cors',
+            //   headers: {
+            //     'Content-Type': 'application/json'
+            //   }
+            // })
+
+            await signOut()
+            window.location.href =
+              'https://auth.nextclerk.com/realms/nextclerk/protocol/openid-connect/logout?redirect_uri=http://test.nextclerk.com'
+
+            // await logoutUser(userXRefID)
 
             // handleDropdownClose('/pages/login')
           }}
