@@ -85,7 +85,7 @@ const AppBarContent = (props: Props) => {
             <Avatar>
               <BusinessIcon />
             </Avatar>
-            <Typography sx={{ margin: '1px 5px' }} variant='body2'>
+            <Typography sx={{ margin: '10px 1px' }} variant='body2'>
               Working Group LLC
             </Typography>
           </Grid>

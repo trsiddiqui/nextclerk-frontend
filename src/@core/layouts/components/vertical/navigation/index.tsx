@@ -24,6 +24,9 @@ import VerticalNavHeader from './VerticalNavHeader'
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import { IconButton, Menu, MenuItem } from '@mui/material'
 import React from 'react'
+import { useSession } from 'next-auth/react'
+import { Session, User } from 'next-auth'
+import { JWT } from 'next-auth/jwt'
 
 // import { useSession } from 'next-auth/react'
 // import { Session } from 'next-auth'
@@ -68,8 +71,8 @@ const Navigation = (props: Props) => {
     verticalNavMenuContent: userVerticalNavMenuContent
   } = props
 
-  // const { data } = useSession()
-  // const session = data as unknown as Session & { token: JWT; user: User }
+  const { data } = useSession()
+  const session = data as unknown as Session & { token: JWT; user: User }
 
   // ** States
   const [groupActive, setGroupActive] = useState<string[]>([])
@@ -137,45 +140,47 @@ const Navigation = (props: Props) => {
         }}
       />
 
-      {/* {session?.token ? ( */}
-      <IconButton
-        sx={{ marginTop: 5, width: 40, marginLeft: 11, background: 'white', border: '1px solid lightgrey' }}
-        color='primary'
-        size='medium'
-        onClick={handleClick}
-      >
-        <AddIcon fontSize='inherit' />
-      </IconButton>
-      <Menu
-        id='basic-menu'
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button'
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            router.push('/task/create')
-            handleClose()
-          }}
-        >
-          New Task
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            router.push('/supporting-package/create')
-            handleClose()
-          }}
-        >
-          New Supporting Package
-        </MenuItem>
-        <MenuItem onClick={handleClose}>Upload File</MenuItem>
-      </Menu>
-      {/* ) : (
+      {session?.token ? (
+        <>
+          <IconButton
+            sx={{ marginTop: 5, width: 40, marginLeft: 11, background: 'white', border: '1px solid lightgrey' }}
+            color='primary'
+            size='medium'
+            onClick={handleClick}
+          >
+            <AddIcon fontSize='inherit' />
+          </IconButton>
+          <Menu
+            id='basic-menu'
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            MenuListProps={{
+              'aria-labelledby': 'basic-button'
+            }}
+          >
+            <MenuItem
+              onClick={() => {
+                router.push('/task/create')
+                handleClose()
+              }}
+            >
+              New Task
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                router.push('/supporting-package/create')
+                handleClose()
+              }}
+            >
+              New Supporting Package
+            </MenuItem>
+            <MenuItem onClick={handleClose}>Upload File</MenuItem>
+          </Menu>
+        </>
+      ) : (
         <></>
-      )} */}
+      )}
 
       <Box sx={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
         {/* @ts-ignore */}

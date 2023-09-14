@@ -289,6 +289,14 @@ export const updateUser = async (user: UserRequest, isBackend = false): Promise<
   return await (isBackend ? backendApi : api).put(`/user-administration/${customerXRefID}/users/${user.uuid}`, user)
 }
 
+export const deleteUser = async (userId: string, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).delete(`/user-administration/${customerXRefID}/users/${userId}`)
+}
+
+export const createUser = async (user: UserRequest, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).post(`/user-administration/${customerXRefID}/users`, user)
+}
+
 export const logoutUser = async (userXRefID: string): Promise<void> => {
   return await api.post(`/user-administration/users/${userXRefID}/logout`)
 }

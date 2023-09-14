@@ -1,8 +1,11 @@
 import {
+  Backdrop,
   Box,
+  Button,
   Card,
   CardContent,
   Checkbox,
+  CircularProgress,
   Grid,
   ListItemText,
   MenuItem,
@@ -11,6 +14,8 @@ import {
   Tab,
   Tabs
 } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import { v4 as uuid } from 'uuid'
 import {
   DataGrid,
   GridActionsCellItem,
@@ -19,6 +24,7 @@ import {
   GridRowId,
   GridRowModes,
   GridRowModesModel,
+  GridToolbarContainer,
   MuiEvent,
   useGridApiRef
 } from '@mui/x-data-grid'
@@ -26,7 +32,9 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { DashboardUser } from 'src/utils/types'
 import {
+  createUser,
   customerXRefID,
+  deleteUser,
   getAllDepartments,
   getAllRoles,
   getAllUsersForDashboard,
@@ -78,6 +86,7 @@ const UserPage = ({
 }) => {
   const router = useRouter()
   const gridRef = useGridApiRef()
+  const [loading, setLoading] = useState(false)
   const [userData, setUserData] = useState<Array<DashboardUser & { isNew?: boolean }>>(
     users.map(u => ({ ...u, mode: GridRowModes.Edit, id: u.uuid }))
   )
@@ -89,52 +98,55 @@ const UserPage = ({
 
   const handleSaveClick = (id: GridRowId) => async () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } })
+    gridRef.current.forceUpdate()
     setTimeout(async () => {
       const updatedData = gridRef.current.getRow(id)
-      await updateUser({
-        firstName: updatedData.firstName,
-        lastName: updatedData.lastName,
-        uuid: id.toString(),
-        isAccountingManager: updatedData.isAccountingManager,
-        email: updatedData.email,
-        groups: updatedData.groups,
-        entityUuid: customerXRefID,
-        ...(updatedData.departmentName
-          ? { departmentUuid: departments.find(d => d.label === updatedData.departmentName)!.id }
-          : {}),
-        ...(updatedData.managerName
-          ? { managerUuid: userData.find(d => `${d.firstName} ${d.lastName}` === updatedData.managerName)!.uuid }
-          : {})
-      })
+      setLoading(true)
+      try {
+        if (updatedData.isNew) {
+          await createUser({
+            firstName: updatedData.firstName,
+            lastName: updatedData.lastName,
+            uuid: updatedData.id.toString(),
+            isAccountingManager: updatedData.isAccountingManager,
+            email: updatedData.email,
+            groups: updatedData.groups,
+            entityUuid: customerXRefID,
+            ...(updatedData.departmentName
+              ? { departmentUuid: departments.find(d => d.label === updatedData.departmentName)!.id }
+              : {}),
+            ...(updatedData.managerName
+              ? {
+                  managerUuid: userData.find(d => `${d.firstName} ${d.lastName}` === updatedData.managerName)!.uuid
+                }
+              : {})
+          })
+          location.reload()
+        } else {
+          await updateUser({
+            firstName: updatedData.firstName,
+            lastName: updatedData.lastName,
+            uuid: updatedData.id.toString(),
+            isAccountingManager: updatedData.isAccountingManager,
+            email: updatedData.email,
+            groups: updatedData.groups,
+            entityUuid: customerXRefID,
+            ...(updatedData.departmentName
+              ? { departmentUuid: departments.find(d => d.label === updatedData.departmentName)!.id }
+              : {}),
+            ...(updatedData.managerName
+              ? {
+                  managerUuid: userData.find(d => `${d.firstName} ${d.lastName}` === updatedData.managerName)!.uuid
+                }
+              : {})
+          })
+        }
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setLoading(false)
+      }
     }, 100)
-
-    //   {
-    //     "uuid": "5c4e5fc6-274c-4ac3-8498-75ce6cf7575f",
-    //     "email": "Majida@nextclerk.com",
-    //     "firstName": "Majida",
-    //     "lastName": "Razmjooa",
-    //     "isAccountingManager": false,
-    //     "archived": false,
-    //     "groups": [
-    //         "CORE ADMINS",
-    //         "Managers"
-    //     ],
-    //     "departmentName": "IT",
-    //     "departmentUuid": null,
-    //     "mode": "edit",
-    //     "id": "5c4e5fc6-274c-4ac3-8498-75ce6cf7575f",
-    //     "managerName": "Majid Razmjoo",
-    //     "accontingManager": true,
-    //     "status": true
-    // }
-
-    // TODO: Call API to update this user here
-  }
-
-  const handleDeleteClick = (id: GridRowId) => () => {
-    setUserData(userData.filter(row => row.uuid !== id))
-
-    // TODO: Call API to delete this user here
   }
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -250,6 +262,8 @@ const UserPage = ({
                 field: 'groups',
                 value
               })
+              const currentRow = gridRef.current.getRow(params.id)
+              currentRow.groups = value
             }}
             input={<OutlinedInput label='Tag' />}
             renderValue={selected => {
@@ -269,7 +283,7 @@ const UserPage = ({
       }
     },
     {
-      field: 'accontingManager',
+      field: 'isAccountingManager',
       headerName: 'Accounting Manager',
       type: 'boolean',
       editable: true,
@@ -278,17 +292,6 @@ const UserPage = ({
       flex: 0.3,
       headerAlign: 'center'
     },
-
-    // {
-    //   field: 'status',
-    //   headerName: 'Enabled',
-    //   type: 'boolean',
-    //   editable: true,
-    //   align: 'center',
-    //   cellClassName: 'data-grid-column',
-    //   flex: 0.3,
-    //   headerAlign: 'center'
-    // },
     {
       field: 'actions',
       type: 'actions',
@@ -333,33 +336,52 @@ const UserPage = ({
             key={2}
             icon={<DeleteIcon />}
             label='Delete'
-            onClick={handleDeleteClick(id)}
+            onClick={async () => {
+              setUserData(userData.filter(row => row.uuid !== id))
+              setLoading(true)
+              await deleteUser(id as string)
+              location.reload()
+            }}
             color='inherit'
           />
         ]
-
-        // const actions = [
-        //   <GridActionsCellItem
-        //     key={1}
-        //     icon={
-        //       <Tooltip title='View(PDF)/Download(Others)'>
-        //         <PreviewIcon />
-        //       </Tooltip>
-        //     }
-        //     label='Attach'
-        //     className='textPrimary'
-        //     onClick={() => {
-        //       // console.log('Some action taken', id, gridRef.current.getRowMode(id))
-        //       setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
-        //     }}
-        //     color='inherit'
-        //   />
-        // ]
-
-        // return actions
       }
     }
   ]
+
+  function EditToolbar() {
+    const handleClick = () => {
+      const id = uuid()
+      const user = {
+        department: {
+          label: '',
+          uuid: ''
+        },
+        email: '',
+        firstName: '',
+        isAccountingManager: false,
+        lastName: '',
+        uuid: id,
+        id,
+        archived: false,
+        isNew: true,
+        groups: []
+      }
+      setUserData([...userData, user])
+      setRowModesModel(oldModel => ({
+        ...oldModel,
+        [id]: { mode: GridRowModes.Edit, fieldToFocus: 'firstName' }
+      }))
+    }
+
+    return (
+      <GridToolbarContainer>
+        <Button color='primary' startIcon={<AddIcon />} onClick={handleClick}>
+          Add record
+        </Button>
+      </GridToolbarContainer>
+    )
+  }
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel)
@@ -397,10 +419,26 @@ const UserPage = ({
               onRowEditStop={(params: GridRowEditStopParams, event: MuiEvent) => {
                 event.defaultMuiPrevented = true
               }}
+              slots={{
+                toolbar: EditToolbar
+              }}
+
+              // processRowUpdate={async updatedData => {
+              //   setLoading(true)
+              //     setRowModesModel({ ...rowModesModel, [updatedData.id]: { mode: GridRowModes.View } })
+              //   } catch (error) {
+              //     setRowModesModel({ ...rowModesModel, [updatedData.id]: { mode: GridRowModes.Edit } })
+              //   } finally {
+              //     setLoading(false)
+              //   }
+              // }}
             />
           </CardContent>
         </Card>
       </Grid>
+      <Backdrop sx={{ color: '#fff', zIndex: 9999999 }} open={loading}>
+        <CircularProgress color='inherit' />
+      </Backdrop>
     </>
   )
 }
