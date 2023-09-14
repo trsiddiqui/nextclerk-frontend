@@ -85,6 +85,7 @@ export const getAllCustomers = async (isBackend = false) => {
 
   return customers.data.map(customer => ({
     label: customer.label,
+    type: customer.type,
     id: customer.uuid,
     key: customer.uuid
   }))

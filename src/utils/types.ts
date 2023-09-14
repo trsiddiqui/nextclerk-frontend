@@ -68,6 +68,7 @@ export interface Customer {
   entityID: string
   uuid: string
   label: string
+  type: string | null
 }
 
 export interface Location {
