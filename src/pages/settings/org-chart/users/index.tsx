@@ -48,8 +48,11 @@ import { DropDownRow } from 'src/@core/utils'
 
 export async function getServerSideProps() {
   // Fetch data from external API
+  console.log('Requesting Users')
   const users = await getAllUsersForDashboard()
+  console.log('Requesting Roles')
   const roles = await getAllRoles()
+  console.log('Requesting Departments')
   const departments = await getAllDepartments()
 
   // Pass data to the page via props
