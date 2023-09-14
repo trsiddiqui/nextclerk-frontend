@@ -13,9 +13,13 @@ const Company = () => {
         <Card style={{ width: '100%' }}>
           <CardContent>
             <>
-              {session.token.groups.map(permission => (
-                <Chip sx={{ mr: 5, mb: 2 }} key={permission} label={permission}></Chip>
-              ))}
+              {session ? (
+                session.token.groups.map(permission => (
+                  <Chip sx={{ mr: 5, mb: 2 }} key={permission} label={permission}></Chip>
+                ))
+              ) : (
+                <></>
+              )}
             </>
           </CardContent>
         </Card>
