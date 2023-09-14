@@ -254,3 +254,37 @@ export type UserRequest = {
   managerUuid?: string
   departmentUuid?: string
 }
+
+export type SessionTokenKeycloak = {
+  providerAccountId: string
+  provider: string
+  type: string
+  name: string
+  email: string
+  sub: string
+  access_token: string
+  refresh_token: string
+  token_type: string
+  id_token: string
+  session_state: string
+  scope: string
+  jti: string
+  iss: string
+  aud: string
+  typ: string
+  azp: string
+  at_hash: string
+  acr: string
+  sid: string
+  upn: string
+  preferred_username: string
+  given_name: string
+  family_name: string
+  error: string
+  groups: string[]
+  exp: number
+  expires_at: number
+  iat: number
+  auth_time: number
+  email_verified: boolean
+}
