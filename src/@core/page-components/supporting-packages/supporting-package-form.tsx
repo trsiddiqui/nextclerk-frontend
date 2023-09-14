@@ -930,7 +930,7 @@ const SupportingPackageForm = ({
     {
       field: 'customer',
       headerName: 'Name',
-      flex: 0.6,
+      flex: 1.5,
       headerAlign: 'center',
       cellClassName: 'data-grid-column',
       renderCell: params => (
@@ -939,12 +939,18 @@ const SupportingPackageForm = ({
           <Autocomplete
             freeSolo
             disablePortal
-            id='accounts-combobox'
+            id='customers-combobox'
             options={customers}
             sx={{ width: '100%' }}
             renderInput={inputParams => {
               return <TextField {...inputParams} />
             }}
+            getOptionLabel={option => option.label}
+            renderOption={(props, option) => (
+              <Box component='li' {...props}>
+                {option.label} ({option.type})
+              </Box>
+            )}
             defaultValue={params.row.customer}
             value={params.row.customer}
             onSelect={e => {

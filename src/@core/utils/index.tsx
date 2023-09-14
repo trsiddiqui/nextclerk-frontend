@@ -32,6 +32,7 @@ export interface DropDownRow {
   label: string
   id: string
   key: string
+  type?: string | null
 }
 
 export interface AutocompleteRow {
