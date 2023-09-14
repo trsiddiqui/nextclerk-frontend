@@ -434,7 +434,14 @@ const TaskForm = ({
                   onClick={() =>
                     router.push({
                       pathname: `/supporting-package/create`,
-                      query: { taskID: task.id }
+                      query: {
+                        taskID: task.id,
+                        taskTitle: task.title,
+                        taskIsConfidential: task.isConfidential,
+                        taskCategory: task.categoryName,
+                        taskLabel: task.label,
+                        taskDescription: task.description
+                      }
                     })
                   }
                 >

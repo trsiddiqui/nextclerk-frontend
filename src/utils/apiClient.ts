@@ -266,11 +266,13 @@ export const postJEToQB = async (
   journalEntryLines: unknown,
   supportingPackageXRefID: string,
   isBackend = false
-): Promise<void> => {
-  return await (isBackend ? backendApi : api).post(
+): Promise<number> => {
+  const result = await (isBackend ? backendApi : api).post(
     `/${customerXRefID}/supporting-packages/${supportingPackageXRefID}/journalEntry/post-to-erp`,
     journalEntryLines
   )
+
+  return result.status
 }
 export const getAllRoles = async (isBackend = false): Promise<Role[]> => {
   const response = await (isBackend ? backendApi : api).get(`/user-administration/groups`)
@@ -286,6 +288,14 @@ export const getAllUsersForDashboard = async (isBackend = false): Promise<Dashbo
 
 export const updateUser = async (user: UserRequest, isBackend = false): Promise<void> => {
   return await (isBackend ? backendApi : api).put(`/user-administration/${customerXRefID}/users/${user.uuid}`, user)
+}
+
+export const deleteUser = async (userId: string, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).delete(`/user-administration/${customerXRefID}/users/${userId}`)
+}
+
+export const createUser = async (user: UserRequest, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).post(`/user-administration/${customerXRefID}/users`, user)
 }
 
 export const logoutUser = async (userXRefID: string): Promise<void> => {

@@ -19,7 +19,6 @@ import CogOutline from 'mdi-material-ui/CogOutline'
 import LogoutVariant from 'mdi-material-ui/LogoutVariant'
 import AccountOutline from 'mdi-material-ui/AccountOutline'
 import { SignOutResponse } from 'next-auth/react'
-import { logoutUser } from 'src/utils/apiClient'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -33,13 +32,11 @@ const BadgeContentSpan = styled('span')(({ theme }) => ({
 const UserDropdown = ({
   name,
   email,
-  signOut,
-  userXRefID
+  signOut
 }: {
   name: string
   email: string
   signOut: () => Promise<SignOutResponse | undefined>
-  userXRefID: string
 }) => {
   // ** States
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
@@ -118,7 +115,13 @@ const UserDropdown = ({
           </Box>
         </Box>
         <Divider sx={{ mt: 0, mb: 1 }} />
-        <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose()}>
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            handleDropdownClose()
+            router.push('/settings/profile')
+          }}
+        >
           <Box sx={styles}>
             <AccountOutline sx={{ marginRight: 2 }} />
             Profile
@@ -127,8 +130,8 @@ const UserDropdown = ({
         <MenuItem
           sx={{ p: 0 }}
           onClick={() => {
-            router.push('/settings/org-chart/company')
             handleDropdownClose()
+            router.push('/settings/org-chart/company')
           }}
         >
           <Box sx={styles}>
