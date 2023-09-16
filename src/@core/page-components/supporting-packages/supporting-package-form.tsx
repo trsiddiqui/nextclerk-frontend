@@ -691,6 +691,11 @@ const SupportingPackageForm = ({
   }
   const handleSaveSupportingPackage = async (isDraft: boolean) => {
     setSaveAnchorEl(null)
+    if (!name || !number || !category || !journalNumber || !date) {
+      showMessage('Please fill all the highlighted fields above.', SnackBarType.Error)
+
+      return
+    }
     if (spreadsheet && masterFile?.mimetype.includes('sheet')) {
       spreadsheet?.save({
         saveType: 'Xlsx',
@@ -1170,6 +1175,7 @@ const SupportingPackageForm = ({
                   onChange={e => setName(e.target.value)}
                   variant='filled'
                   value={name}
+                  error={name == ''}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -1181,6 +1187,7 @@ const SupportingPackageForm = ({
                   variant='filled'
                   onChange={e => setNumber(e.target.value)}
                   value={number}
+                  error={number == ''}
                 />
               </Grid>
               {/* <Grid item xs={12} sm={4}>
@@ -1197,7 +1204,13 @@ const SupportingPackageForm = ({
                     }}
                     filterSelectedOptions
                     renderInput={params => (
-                      <TextField variant='filled' {...params} label='Support Category' placeholder='Support Category' />
+                      <TextField
+                        error={category == null}
+                        variant='filled'
+                        {...params}
+                        label='Support Category'
+                        placeholder='Support Category'
+                      />
                     )}
                   />
                 </FormControl>
@@ -1211,6 +1224,7 @@ const SupportingPackageForm = ({
                   variant='filled'
                   onChange={e => setJournalNumber(e.target.value)}
                   value={journalNumber}
+                  error={journalNumber == ''}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -1221,7 +1235,7 @@ const SupportingPackageForm = ({
                       inputFormat='MM/DD/YYYY'
                       value={date}
                       onChange={e => setDate(e)}
-                      renderInput={params => <TextField variant='filled' fullWidth {...params} />}
+                      renderInput={params => <TextField error={date == null} variant='filled' fullWidth {...params} />}
                     />
                   </DatePickerWrapper>
                 </LocalizationProvider>
