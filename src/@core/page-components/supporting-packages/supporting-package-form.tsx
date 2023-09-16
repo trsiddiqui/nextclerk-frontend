@@ -10,7 +10,14 @@ declare const window: Window &
     open(): any
   }
 
-import { DataGrid, GridActionsCellItem, GridColDef, GridRowModel, GridRowsProp } from '@mui/x-data-grid'
+import {
+  DataGrid,
+  GridActionsCellItem,
+  GridColDef,
+  GridRowModel,
+  GridRowsProp,
+  GridToolbarContainer
+} from '@mui/x-data-grid'
 import { Document, Page, pdfjs } from 'react-pdf'
 // ** MUI Imports
 import CloseIcon from '@mui/icons-material/Close'
@@ -189,7 +196,14 @@ const SupportingPackageForm = ({
 }) => {
   console.log(supportingPackage)
   const router = useRouter()
-  const { taskID, taskTitle, taskIsConfidential, taskCategory, taskLabel, taskDescription } = router.query
+  const {
+    taskID,
+    taskTitle,
+    taskIsConfidential,
+    taskCategory,
+    taskLabel
+    // taskDescription
+  } = router.query
   const theme = useTheme()
   const [name, setName] = useState(
     supportingPackage?.title ? supportingPackage?.title : taskTitle !== undefined ? taskTitle : ''
@@ -285,10 +299,13 @@ const SupportingPackageForm = ({
   const [currentSPNote, setCurrentSPNote] = useState('')
   const [firstTime, setFirstTime] = useState(true)
   const [isSpreadsheetFullScreen, setIsSpreadsheetFullScreen] = React.useState(false)
+  const [isJEFullScreen, setIsJEFullScreen] = React.useState(false)
+  // const [isNotesFullScreen, setIsNotesFullScreen] = React.useState(false)
   const [activePDFURL, setActivePDFURL] = React.useState<string | null>(null)
-  const [numPagesOfActivePDF, setNumPagesOfActivePDF] = React.useState<number | null>()
+  const [numPagesOfActivePDF, setNumPagesOfActivePDF] = React.useState<number>(1)
   const [pdfViewerOpen, setPdfViewerOpen] = React.useState(false)
   const [journalEntryIDForLinking, setJournalEntryIDForLinking] = React.useState<string | null>(null)
+  const [masterPDFFilePageNumber, setMasterPDFFilePageNumber] = React.useState(1)
 
   const supportingPackageNotes: Array<{
     message: string
@@ -1098,19 +1115,26 @@ const SupportingPackageForm = ({
     setLoading(false)
   }
 
-  // const rows: GridRowsProp = [
-  //   {
-  //     id: 1,
-  //     account: 'CASH',
-  //     credit: 12,
-  //     debit: 0,
-  //     memo: 'Some message',
-  //     department: 'IT',
-  //     location: 'Location 1',
-  //     customer: 'Customer 1',
-  //     badCustomer: false
-  //   }
-  // ]
+  const JEToolbar = () => {
+    return (
+      <GridToolbarContainer>
+        <div style={{ float: 'right', textAlign: 'right', flex: 1 }} id='je-toolbar-container'>
+          <IconButton
+            onClick={() => {
+              setIsJEFullScreen(!isJEFullScreen)
+              setTimeout(() => {
+                window.scrollTo({
+                  top: 1000
+                })
+              }, 100)
+            }}
+          >
+            {isJEFullScreen ? <FullscreenExitIcon></FullscreenExitIcon> : <FullscreenIcon></FullscreenIcon>}
+          </IconButton>
+        </div>
+      </GridToolbarContainer>
+    )
+  }
 
   return (
     <Grid container spacing={5}>
@@ -1868,11 +1892,30 @@ const SupportingPackageForm = ({
           </TabPanel>
           {/* @ts-ignore */}
           <TabPanel style={{ display: tab === 1 ? 'unset' : 'none' }} dir={theme.direction}>
-            <Container sx={{ padding: '10px 0px' }}>
+            <Container sx={{ padding: '10px 0px', maxWidth: '100% !important' }}>
+              {/* <Toolbar>Something</Toolbar> */}
               {/* <Paper sx={{ margin: '0px 0 30px 0' }}> */}
               <Grid container>
                 {masterFile && masterFile.mimetype.includes('pdf') ? (
-                  <Grid item lg={6} md={6} sm={12}>
+                  <Grid item lg={6} md={6} sm={12} xl={4}>
+                    <Button
+                      onClick={() => {
+                        setMasterPDFFilePageNumber(masterPDFFilePageNumber - 1)
+                      }}
+                      disabled={masterPDFFilePageNumber === 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setMasterPDFFilePageNumber(masterPDFFilePageNumber + 1)
+                      }}
+                      disabled={masterPDFFilePageNumber + 1 > numPagesOfActivePDF}
+                      sx={{ mr: 5 }}
+                    >
+                      Next
+                    </Button>
+                    {masterPDFFilePageNumber} / {numPagesOfActivePDF}
                     <Document
                       file={masterFile.downloadUrl}
                       onLoadSuccess={document => {
@@ -1880,16 +1923,13 @@ const SupportingPackageForm = ({
                       }}
                       renderMode='canvas'
                     >
-                      {Array.from(new Array(numPagesOfActivePDF), (el, index) => (
-                        <Page
-                          key={`page_${index + 1}`}
-                          pageNumber={index + 1}
-                          renderTextLayer={false}
-                          height={800}
-                          renderForms={false}
-                          renderAnnotationLayer={false}
-                        />
-                      ))}
+                      <Page
+                        pageNumber={masterPDFFilePageNumber}
+                        renderTextLayer={false}
+                        height={800}
+                        renderForms={false}
+                        renderAnnotationLayer={false}
+                      />
                     </Document>
                   </Grid>
                 ) : (
@@ -1900,6 +1940,7 @@ const SupportingPackageForm = ({
                   sm={12}
                   lg={masterFile && masterFile.mimetype.includes('pdf') ? 6 : 12}
                   md={masterFile && masterFile.mimetype.includes('pdf') ? 6 : 12}
+                  xl={masterFile && masterFile.mimetype.includes('pdf') ? 6 : 12}
                 >
                   <Container sx={{ padding: '1rem 1rem', marginBottom: '20px' }}>
                     <TextField
@@ -2032,9 +2073,32 @@ const SupportingPackageForm = ({
                 </Button>
               </Grid>
             )}
-            <Grid container sx={{ pl: 1, height: '600px' }} width='100%' className='journal-entry-tab'>
+            <Grid
+              container
+              sx={{
+                pl: 1,
+                height: isJEFullScreen ? '100vh' : '600px',
+                position: isJEFullScreen ? 'fixed' : 'default',
+                top: isJEFullScreen ? '0px' : 'default',
+                bottom: isJEFullScreen ? '0px' : 'default',
+                left: isJEFullScreen ? '0px' : 'default',
+                zIndex: isJEFullScreen ? 1200 : 'default',
+                backgroundColor: 'white'
+              }}
+              width='100%'
+              height='100vh'
+              className='journal-entry-tab'
+            >
               {/* TODO: Journal Entries Table */}
-              <DataGrid editMode='row' rows={journalEntries} columns={columns} processRowUpdate={processRowUpdate} />
+              <DataGrid
+                editMode='row'
+                rows={journalEntries}
+                columns={columns}
+                processRowUpdate={processRowUpdate}
+                slots={{
+                  toolbar: JEToolbar
+                }}
+              />
             </Grid>
           </TabPanel>
         </Paper>
