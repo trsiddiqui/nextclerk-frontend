@@ -970,7 +970,10 @@ const SupportingPackageForm = ({
             getOptionLabel={option => option.label}
             renderOption={(props, option) => (
               <Box component='li' {...props}>
-                {option.label} ({option.type})
+                <span>{option.label} -&nbsp;</span>
+                <Box component='li' color='red' fontSize={11}>
+                  <b>{option.type}</b>
+                </Box>
               </Box>
             )}
             defaultValue={params.row.customer}
