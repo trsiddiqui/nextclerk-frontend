@@ -82,7 +82,9 @@ import {
   Backdrop,
   CircularProgress,
   Snackbar,
-  Tooltip
+  Tooltip,
+  Select,
+  InputLabel
 } from '@mui/material'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
@@ -306,6 +308,7 @@ const SupportingPackageForm = ({
   const [pdfViewerOpen, setPdfViewerOpen] = React.useState(false)
   const [journalEntryIDForLinking, setJournalEntryIDForLinking] = React.useState<string | null>(null)
   const [masterPDFFilePageNumber, setMasterPDFFilePageNumber] = React.useState(1)
+  const [memoNotesSorting, setMemoNotesSorting] = React.useState(true)
 
   const supportingPackageNotes: Array<{
     message: string
@@ -513,7 +516,13 @@ const SupportingPackageForm = ({
             params.filesCollection ? params.filesCollection.concat(resp) : resp,
             params.paramsForSetFileMethod
           )
-          setAttachments(attachments.concat(resp))
+          attachments.push(resp)
+          setAttachments(attachments)
+          if (attachments.length === 1) {
+            debugger
+            // selectMasterFile(resp.uploaded.uuid)
+            await APICallWrapper(selectMasterFile, [resp.uploaded.uuid])
+          }
           params.handleModalClose()
         }
       }
@@ -583,6 +592,24 @@ const SupportingPackageForm = ({
 
   // When you click on a comment inside Master file, it selects takes you to the cells in the master file
   function goToRange(range: SpreadsheetRange) {
+    if (spreadsheet) {
+      const ri = getRangeIndexes(range.range)
+      const cells = getCellsFromRangeAddress(
+        ri[0] < ri[2] ? ri[0] : ri[2],
+        ri[1] < ri[3] ? ri[1] : ri[3],
+        ri[0] > ri[2] ? ri[0] : ri[2],
+        ri[1] > ri[3] ? ri[1] : ri[3]
+      )
+
+      // const middleCell = cells[Math.floor(cells.length / 2)]
+      spreadsheet.activeSheetIndex = range.sheet - 1
+      spreadsheet.goTo(cells[0])
+      spreadsheet.selectRange(range.range)
+    }
+  }
+
+  // When you click on a comment inside Master file, it selects takes you to the cells in the master file
+  function highlightRange(range: SpreadsheetRange) {
     if (spreadsheet) {
       const ri = getRangeIndexes(range.range)
       const cells = getCellsFromRangeAddress(
@@ -1512,7 +1539,7 @@ const SupportingPackageForm = ({
                         handleMasterSheetMenuClose()
                       }}
                     >
-                      Choose Master File
+                      {masterFile != null ? 'Change Master File' : 'Choose Master File'}
                     </MenuItem>
                     <MenuItem
                       onClick={() => {
@@ -1734,6 +1761,7 @@ const SupportingPackageForm = ({
                                 )
                                 setCurrentActionItem('')
                                 setMasterFileSelectedRange(null)
+                                spreadsheet?.sheets[0].
                               }}
                             >
                               <SendIcon />
@@ -1759,6 +1787,7 @@ const SupportingPackageForm = ({
                             }
                           }}
                         >
+                          {JSON.stringify(actionItem)}
                           <Card
                             sx={{
                               minWidth: '100%',
@@ -1959,6 +1988,30 @@ const SupportingPackageForm = ({
                   md={masterFile && masterFile.mimetype.includes('pdf') ? 6 : 12}
                   xl={masterFile && masterFile.mimetype.includes('pdf') ? 6 : 12}
                 >
+                  <Grid container>
+                    <Grid item sm={6} md={6} lg={6} xl={6}>
+                      <FormControl variant='standard' sx={{ m: 1, minWidth: 120 }}>
+                        <InputLabel id='demo-simple-select-standard-label'>Sort</InputLabel>
+                        <Select
+                          labelId='demo-simple-select-standard-label'
+                          id='demo-simple-select-standard'
+                          value={memoNotesSorting}
+                          onChange={event => {
+                            setMemoNotesSorting(event.target.value)
+                          }}
+                        >
+                          <MenuItem value=''>
+                            <em>None</em>
+                          </MenuItem>
+                          <MenuItem value={0}>Earliest</MenuItem>
+                          <MenuItem value={1}>Oldest</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    {/* <Grid item sm={6} md={6} lg={6} xl={6} container justifyContent='flex-end'>
+                      Fullscreen
+                    </Grid> */}
+                  </Grid>
                   <Container sx={{ padding: '1rem 1rem', marginBottom: '20px' }}>
                     <TextField
                       fullWidth
@@ -2023,7 +2076,9 @@ const SupportingPackageForm = ({
                   ) : (
                     <></>
                   )}
-                  {SPNotes.sort((a, b) => b.createdAt.diff(a.createdAt).as('millisecond')).map((note, index) => (
+                  {SPNotes.sort((a, b) =>
+                    (memoNotesSorting ? a.createdAt.diff(b.createdAt) : b.createdAt.diff(a.createdAt)).as('millisecond')
+                  ).map((note, index) => (
                     <>
                       <Grid container wrap='nowrap' spacing={2} key={index}>
                         <Grid item>
@@ -2034,7 +2089,7 @@ const SupportingPackageForm = ({
                           <p style={{ textAlign: 'left' }}>{note.message}</p>
                           <p style={{ textAlign: 'left', color: 'gray' }}>
                             {note.createdAt.toFormat('dd MMM, yyyy hh:mm a')}
-                            {note.file ? (
+                            {note.file != null ? (
                               <Chip
                                 key={index}
                                 color='primary'
@@ -2051,6 +2106,20 @@ const SupportingPackageForm = ({
                                   ) : undefined
                                 }
                                 sx={{ marginLeft: 3 }}
+                                onClick={() => {
+                                  if (note?.file?.mimetype?.includes('pdf')) {
+                                    setPdfViewerOpen(true)
+                                    setActivePDFURL(note.file.uploaded.downloadLink ?? '')
+                                  } else {
+                                    const w = window.open(
+                                      note.file?.uploaded?.downloadLink ?? note.file?.downloadUrl ?? '',
+                                      '_blank'
+                                    )
+                                    if (w) {
+                                      w.focus()
+                                    }
+                                  }
+                                }}
                               />
                             ) : (
                               <></>
@@ -2128,7 +2197,9 @@ const SupportingPackageForm = ({
           {attachments.length > 0 ? (
             <Grid item xs={12} sm={4} alignContent='end' textAlign='right'>
               <Typography component={'span'} variant='body2' sx={{ fontWeight: 600 }}>
-                <Link onClick={handleChooseMaterFileModalOpen}>Choose Master File</Link>
+                <Link onClick={handleChooseMaterFileModalOpen}>
+                  {masterFile != null ? 'Change Master File' : 'Choose Master File'}
+                </Link>
               </Typography>
             </Grid>
           ) : (
