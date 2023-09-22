@@ -648,6 +648,9 @@ const SupportingPackageForm = ({
         //   sethighlightedCells(highlightedCells.filter(c => c != cell))
         // } else {
         spreadsheet.cellFormat({ backgroundColor: '#FFFF01', color: '#000000' }, cell)
+
+        // Use this code to keep track of highlighted cells then use the commented code above
+        //  to set the existing styles before saving the file, if its a big deal
         // highlightedCells.push(cell)
         // }
       })
