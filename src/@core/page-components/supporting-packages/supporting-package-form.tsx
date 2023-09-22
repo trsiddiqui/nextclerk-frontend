@@ -115,6 +115,7 @@ import {
   AutocompleteRow,
   DropDownRow,
   TabPanel,
+  // columnAddressToIndex,
   getCellsFromRangeAddress,
   getInitials,
   isSupportedMimeType,
@@ -308,7 +309,7 @@ const SupportingPackageForm = ({
   const [pdfViewerOpen, setPdfViewerOpen] = React.useState(false)
   const [journalEntryIDForLinking, setJournalEntryIDForLinking] = React.useState<string | null>(null)
   const [masterPDFFilePageNumber, setMasterPDFFilePageNumber] = React.useState(1)
-  const [memoNotesSorting, setMemoNotesSorting] = React.useState(true)
+  const [memoNotesSorting, setMemoNotesSorting] = React.useState(0)
 
   const supportingPackageNotes: Array<{
     message: string
@@ -584,6 +585,16 @@ const SupportingPackageForm = ({
               spreadsheet.open({ file: file }) // open the file into Spreadsheet
               spreadsheet.hideFileMenuItems(['File'], true)
               // spreadsheet.hideToolbarItems('Home', [19])
+              masterFileComments
+                .filter(x => x.cellRange != null)
+                .forEach(comment => {
+                  highlightRange(comment.cellRange)
+                })
+              actionItems
+                .filter(x => x.cellRange != null)
+                .forEach(actionItem => {
+                  highlightRange(actionItem.cellRange)
+                })
             })
           })
       }
@@ -618,11 +629,28 @@ const SupportingPackageForm = ({
         ri[0] > ri[2] ? ri[0] : ri[2],
         ri[1] > ri[3] ? ri[1] : ri[3]
       )
-
       // const middleCell = cells[Math.floor(cells.length / 2)]
       spreadsheet.activeSheetIndex = range.sheet - 1
-      spreadsheet.goTo(cells[0])
-      spreadsheet.selectRange(range.range)
+      cells.forEach(cell => {
+        // const columnIndex = columnAddressToIndex(cell.replace(/[^A-Za-z]/g, ''))
+        // const rowIndex = parseInt(cell.replace(/^\D+/g, ''))
+        // const existingFormat = spreadsheet.getCellStyleValue(
+        //   ['backgroundColor', 'color'],
+        //   [rowIndex - 1, columnIndex - 1]
+        // )
+        // if (cellPreviousState[cell] == null) {
+        //   cellPreviousState[cell] = existingFormat
+        //   setCellPreviousState(cellPreviousState)
+        // }
+        // if (existingFormat.backgroundColor === '#FFFF01') {
+        //   // TODO: In edit screen, set `default` format (come up with one)
+        //   spreadsheet.cellFormat(cellPreviousState[cell], cell)
+        //   sethighlightedCells(highlightedCells.filter(c => c != cell))
+        // } else {
+        spreadsheet.cellFormat({ backgroundColor: '#FFFF01', color: '#000000' }, cell)
+        // highlightedCells.push(cell)
+        // }
+      })
     }
   }
 
@@ -1629,6 +1657,7 @@ const SupportingPackageForm = ({
                                     cellRange: masterFileSelectedRange!
                                   })
                                 )
+                                highlightRange(masterFileSelectedRange!)
                                 setCurrentMasterFileComment('')
                                 setMasterFileCommentFile(null)
                                 setMasterFileSelectedRange(null)
@@ -1759,9 +1788,9 @@ const SupportingPackageForm = ({
                                     state: ActionItemState.TODO
                                   })
                                 )
+                                highlightRange(masterFileSelectedRange!)
                                 setCurrentActionItem('')
                                 setMasterFileSelectedRange(null)
-                                spreadsheet?.sheets[0].
                               }}
                             >
                               <SendIcon />
