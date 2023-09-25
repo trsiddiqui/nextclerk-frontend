@@ -14,9 +14,12 @@ import {
   DataGrid,
   GridActionsCellItem,
   GridColDef,
+  GridFooter,
+  GridFooterContainer,
   GridRowModel,
   GridRowsProp,
-  GridToolbarContainer
+  GridToolbarContainer,
+  useGridApiRef
 } from '@mui/x-data-grid'
 import { Document, Page, pdfjs } from 'react-pdf'
 // ** MUI Imports
@@ -248,11 +251,11 @@ const SupportingPackageForm = ({
           cellLink: journalEntry.cellLink
         }))
       : [
-          { id: uuid(), badAccount: true },
-          { id: uuid(), badAccount: true },
-          { id: uuid(), badAccount: true },
-          { id: uuid(), badAccount: true },
-          { id: uuid(), badAccount: true }
+          { id: uuid(), badAccount: true, creditAmount: 0, debitAmount: 0 },
+          { id: uuid(), badAccount: true, creditAmount: 0, debitAmount: 0 },
+          { id: uuid(), badAccount: true, creditAmount: 0, debitAmount: 0 },
+          { id: uuid(), badAccount: true, creditAmount: 0, debitAmount: 0 },
+          { id: uuid(), badAccount: true, creditAmount: 0, debitAmount: 0 }
         ]
   )
   const [allCategories] = useState(categories)
@@ -310,6 +313,8 @@ const SupportingPackageForm = ({
   const [journalEntryIDForLinking, setJournalEntryIDForLinking] = React.useState<string | null>(null)
   const [masterPDFFilePageNumber, setMasterPDFFilePageNumber] = React.useState(1)
   const [memoNotesSorting, setMemoNotesSorting] = React.useState(0)
+
+  const gridRef = useGridApiRef()
 
   const supportingPackageNotes: Array<{
     message: string
@@ -520,8 +525,6 @@ const SupportingPackageForm = ({
           attachments.push(resp)
           setAttachments(attachments)
           if (attachments.length === 1) {
-            debugger
-            // selectMasterFile(resp.uploaded.uuid)
             await APICallWrapper(selectMasterFile, [resp.uploaded.uuid])
           }
           params.handleModalClose()
@@ -919,22 +922,124 @@ const SupportingPackageForm = ({
     {
       field: 'debitAmount',
       headerName: 'Debit',
-      type: 'number',
       editable: true,
-      align: 'center',
       cellClassName: 'data-grid-column',
+      align: 'right',
       flex: 0.3,
-      headerAlign: 'center'
+      headerAlign: 'center',
+      renderCell: params => (
+        <TextField
+          fullWidth
+          onChange={e => {
+            if (params.row.creditAmount === '' || parseInt(params.row.creditAmount) === 0) {
+              params.row.debitAmount = parseInt(e.target.value)
+              gridRef.current.setEditCellValue({
+                id: params.id,
+                field: 'debitAmount',
+                value: e.target.value
+              })
+            } else {
+              params.row.debitAmount = 0
+              gridRef.current.setEditCellValue({
+                id: params.id,
+                field: 'debitAmount',
+                value: 0
+              })
+            }
+          }}
+          inputProps={{ min: 0, style: { textAlign: 'right', marginBottom: 15 } }}
+          variant='filled'
+          error={parseInt(params.row.debitAmount) > 0 && parseInt(params.row.creditAmount) > 0}
+          value={params.row.debitAmount}
+        />
+      ),
+      renderEditCell: params => (
+        <TextField
+          fullWidth
+          onChange={e => {
+            if (params.row.creditAmount === '' || parseInt(params.row.creditAmount) === 0) {
+              params.row.debitAmount = parseInt(e.target.value)
+              gridRef.current.setEditCellValue({
+                id: params.id,
+                field: 'debitAmount',
+                value: e.target.value
+              })
+            } else {
+              params.row.debitAmount = 0
+              gridRef.current.setEditCellValue({
+                id: params.id,
+                field: 'debitAmount',
+                value: 0
+              })
+            }
+          }}
+          inputProps={{ min: 0, style: { textAlign: 'right', marginBottom: 15 } }}
+          variant='filled'
+          error={parseInt(params.row.debitAmount) > 0 && parseInt(params.row.creditAmount) > 0}
+          value={params.row.debitAmount}
+        />
+      )
     },
     {
       field: 'creditAmount',
       headerName: 'Credit',
-      type: 'number',
       editable: true,
-      align: 'center',
       cellClassName: 'data-grid-column',
+      align: 'right',
       flex: 0.3,
-      headerAlign: 'center'
+      headerAlign: 'center',
+      renderCell: params => (
+        <TextField
+          fullWidth
+          onChange={e => {
+            if (params.row.debitAmount === '' || parseInt(params.row.debitAmount) === 0) {
+              params.row.creditAmount = parseInt(e.target.value)
+              gridRef.current.setEditCellValue({
+                id: params.id,
+                field: 'creditAmount',
+                value: e.target.value
+              })
+            } else {
+              params.row.creditAmount = 0
+              gridRef.current.setEditCellValue({
+                id: params.id,
+                field: 'creditAmount',
+                value: 0
+              })
+            }
+          }}
+          inputProps={{ min: 0, style: { textAlign: 'right', marginBottom: 15 } }}
+          variant='filled'
+          error={parseInt(params.row.creditAmount) > 0 && parseInt(params.row.creditAmount) > 0}
+          value={params.row.creditAmount}
+        />
+      ),
+      renderEditCell: params => (
+        <TextField
+          fullWidth
+          onChange={e => {
+            if (params.row.debitAmount === '' || parseInt(params.row.debitAmount) === 0) {
+              params.row.creditAmount = parseInt(e.target.value)
+              gridRef.current.setEditCellValue({
+                id: params.id,
+                field: 'creditAmount',
+                value: e.target.value
+              })
+            } else {
+              params.row.creditAmount = 0
+              gridRef.current.setEditCellValue({
+                id: params.id,
+                field: 'creditAmount',
+                value: 0
+              })
+            }
+          }}
+          inputProps={{ min: 0, style: { textAlign: 'right', marginBottom: 15 } }}
+          variant='filled'
+          error={parseInt(params.row.creditAmount) > 0 && parseInt(params.row.creditAmount) > 0}
+          value={params.row.creditAmount}
+        />
+      )
     },
     {
       field: 'memo',
@@ -1288,7 +1393,7 @@ const SupportingPackageForm = ({
                   error={journalNumber == ''}
                 />
               </Grid>
-              <Grid item xs={12} sm={3}>
+              <Grid item xs={12} sm={12} md={2}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePickerWrapper>
                     <DatePicker
@@ -1304,10 +1409,26 @@ const SupportingPackageForm = ({
               <Grid
                 item
                 xs={12}
-                sm={3}
+                md={4}
+                sm={12}
                 justifyContent='end'
                 sx={{ display: 'flex', alignItems: 'center', textAlign: 'right' }}
               >
+                <FormLabel>Creator</FormLabel>
+                <Chip
+                  label={((): string => {
+                    if (supportingPackage?.updatedBy) {
+                      const user = users.find(x => x.uuid === supportingPackage?.updatedBy)
+
+                      return `${user?.firstName} ${user?.lastName}`
+                    } else {
+                      return `${activeUser.details.name}`
+                    }
+                  })()}
+                  avatar={<Avatar>{activeUser.manager.name ? getInitials(activeUser.manager.name) : ''}</Avatar>}
+                  variant='outlined'
+                  sx={{ marginLeft: 3, marginRight: 3 }}
+                />
                 <FormLabel>Approver</FormLabel>
                 <Chip
                   label={activeUser.manager.name}
@@ -1874,7 +1995,7 @@ const SupportingPackageForm = ({
               sx={{
                 pl: 1,
                 pt: 1,
-                height: masterFile && masterFile.mimetype.includes('sheet') ? '100vh' : '300px',
+                height: masterFile && masterFile.mimetype.includes('sheet') ? '100vh' : '600px',
                 position: isSpreadsheetFullScreen ? 'fixed' : 'default',
                 top: isSpreadsheetFullScreen ? '0px' : 'default',
                 bottom: isSpreadsheetFullScreen ? '0px' : 'default',
@@ -1925,7 +2046,7 @@ const SupportingPackageForm = ({
                 ></SpreadsheetComponent>
               ) : (
                 <>
-                  <Grid item xs={6} textAlign='right' paddingRight='30px' style={{ marginTop: 80 }}>
+                  <Grid item xs={6} textAlign='right' paddingRight='30px' style={{ marginTop: 240 }}>
                     <Box>
                       <IconButton
                         size='large'
@@ -1939,7 +2060,7 @@ const SupportingPackageForm = ({
                       <Typography component='div'>Upload File(s) to Start</Typography>
                     </Box>
                   </Grid>
-                  <Grid item xs={6} textAlign='left' paddingLeft='30px' style={{ marginTop: 80 }}>
+                  <Grid item xs={6} textAlign='left' paddingLeft='30px' style={{ marginTop: 240 }}>
                     <Box>
                       <IconButton
                         size='large'
@@ -1970,7 +2091,7 @@ const SupportingPackageForm = ({
           </TabPanel>
           {/* @ts-ignore */}
           <TabPanel style={{ display: tab === 1 ? 'unset' : 'none' }} dir={theme.direction}>
-            <Container sx={{ padding: '10px 0px', maxWidth: '100% !important' }}>
+            <Container sx={{ padding: '10px 0px', maxWidth: '100% !important', height: '600px' }}>
               {/* <Toolbar>Something</Toolbar> */}
               {/* <Paper sx={{ margin: '0px 0 30px 0' }}> */}
               <Grid container>
@@ -2029,7 +2150,7 @@ const SupportingPackageForm = ({
                           id='demo-simple-select-standard'
                           value={memoNotesSorting}
                           onChange={event => {
-                            setMemoNotesSorting(event.target.value)
+                            setMemoNotesSorting(parseInt(event.target.value.toString()))
                           }}
                         >
                           <MenuItem value=''>
@@ -2211,10 +2332,37 @@ const SupportingPackageForm = ({
               <DataGrid
                 editMode='row'
                 rows={journalEntries}
+                apiRef={gridRef}
                 columns={columns}
                 processRowUpdate={processRowUpdate}
                 slots={{
-                  toolbar: JEToolbar
+                  toolbar: JEToolbar,
+                  footer: () => (
+                    <GridFooterContainer>
+                      &nbsp;&nbsp;&nbsp;&nbsp; Debit:{' '}
+                      {journalEntries.reduce((acc, obj) => {
+                        return acc + parseInt(obj.debitAmount)
+                      }, 0)}
+                      ; Credit:{' '}
+                      {journalEntries.reduce((acc, obj) => {
+                        return acc + parseInt(obj.creditAmount)
+                      }, 0)}
+                      ; Difference ={' '}
+                      {Math.abs(
+                        journalEntries.reduce((acc, obj) => {
+                          return acc + parseInt(obj.debitAmount)
+                        }, 0) -
+                          journalEntries.reduce((acc, obj) => {
+                            return acc + parseInt(obj.creditAmount)
+                          }, 0)
+                      )}
+                      <GridFooter
+                        sx={{
+                          border: 'none' // To delete double border.
+                        }}
+                      />
+                    </GridFooterContainer>
+                  )
                 }}
               />
             </Grid>
