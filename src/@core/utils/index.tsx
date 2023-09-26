@@ -119,14 +119,18 @@ export function getDateWithoutTime(date: Date): string {
   return new Date(date).toDateString()
 }
 
-export function getMonthFromDate(date: Date | null): number {
+export function getMonthFromDate(date: Date | undefined | null): number {
   if (date) {
-    return new Date(date).getMonth()
+    return new Date(date).getMonth() + 1
   }
 
-  return new Date().getMonth()
+  return new Date().getMonth() + 1
 }
 
-export function getYearFromDate(date: Date): number {
-  return new Date(date).getFullYear()
+export function getYearFromDate(date: Date | undefined): number {
+  if (date) {
+    return new Date(date).getFullYear()
+  }
+
+  return new Date().getFullYear()
 }

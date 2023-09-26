@@ -4,6 +4,7 @@ import {
   Customer,
   DashboardUser,
   Department,
+  Entity,
   Location,
   MasterFileUploaded,
   Role,
@@ -43,6 +44,12 @@ export const syncfusionWebApiUrls = (): { openUrl: string; saveUrl: string } => 
 // TODO: This should come from the JWT
 // Currently coming from backend seeds
 export const customerXRefID = 'f590257b-a925-45d3-b980-26ff13faf64e'
+
+export const getEntity = async (isBackend = false) => {
+  const entity = await (isBackend ? backendApi : api).get<Entity>(`/entity/${customerXRefID}`)
+
+  return entity.data
+}
 
 export const getAllCategories = async (isBackend = false) => {
   const categories = await (isBackend ? backendApi : api).get<User[]>(`/${customerXRefID}/categories`)
@@ -245,7 +252,6 @@ export const updateTask = async (task: TaskUpdate, isBackend = false): Promise<v
 export const getAuth = async (isBackend = false): Promise<void> => {
   let baseURL = ''
   isBackend ? (baseURL = 'http://localhost:3000/') : (baseURL = `http://${hostname}:3000/`)
-  console.log(baseURL)
   const authURL = axios.create({
     baseURL
   })

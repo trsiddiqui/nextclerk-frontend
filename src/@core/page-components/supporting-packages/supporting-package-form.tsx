@@ -2026,7 +2026,7 @@ const SupportingPackageForm = ({
                           id='demo-simple-select-standard'
                           value={memoNotesSorting}
                           onChange={event => {
-                            setMemoNotesSorting(event.target.value)
+                            setMemoNotesSorting(event.target.value as number)
                           }}
                         >
                           <MenuItem value=''>

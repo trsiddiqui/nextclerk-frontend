@@ -5,6 +5,16 @@ export type User = {
   uuid: string
 }
 
+export interface Entity {
+  id: number
+  uuid: string
+  name: string
+  startOfFinancialYear?: Date
+  endOfFinancialYear?: Date
+  folderId: string
+  isPrimary: boolean
+}
+
 export enum ActionItemState {
   TODO = 'TODO',
   COMPLETED = 'COMPLETED'
@@ -187,6 +197,7 @@ export type TaskResponse = {
   date: Date
   dueDate: Date
   status: string | null
+  taskStatus?: string | null
   assigneeUUID: string | null
   assigneeName: string | null
   assignerUUID: string

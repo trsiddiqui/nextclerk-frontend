@@ -42,7 +42,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DatePicker } from '@mui/lab'
 import SearchIcon from '@mui/icons-material/Search'
 import { AutocompleteRow, DropDownRow, getInitials } from 'src/@core/utils'
-import { TaskResponse, User } from 'src/utils/types'
+import { Status, TaskResponse, User } from 'src/utils/types'
 import { searchUsers } from 'src/utils/apiClient'
 import { StyledTableCell, StyledTableRow } from 'src/views/tables/TableCustomized'
 import { useRouter } from 'next/router'
@@ -107,6 +107,7 @@ const TaskForm = ({
   const [assigner, setAssigner] = useState(task?.assignerUUID ?? null)
   const [personnelSearchQuery, setPersonnelSearchQuery] = useState('')
   const [personnel, setPersonnel] = useState<Array<User>>(users)
+  const [taskStatus, setTaskStatus] = useState<string | null>(task?.taskStatus ?? null)
 
   const [isConfidential, setIsConfidential] = useState<boolean>(task?.isConfidential ?? false)
   const [isRecurring, setIsRecurring] = useState<boolean>(task?.isRecurring ?? false)
@@ -157,7 +158,7 @@ const TaskForm = ({
       showMessage(errorMessage ?? 'An error occurred', SnackBarType.Error)
     }
   }
-  const handleSaveTask = async () => {
+  const handleSaveTask = async (statusOfTask?: string | null) => {
     const taskObject = {
       title,
       isConfidential,
@@ -169,6 +170,7 @@ const TaskForm = ({
       dueDate,
       assigneeUUID: assignee,
       assignerUUID: assigner,
+      taskStatus: statusOfTask ?? null,
       ...(task?.uuid && {
         uuid: task.uuid
       })
@@ -407,7 +409,7 @@ const TaskForm = ({
             <Divider sx={{ margin: 0 }} />
           </Grid>
           <CardActions>
-            <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained' onClick={handleSaveTask}>
+            <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained' onClick={() => handleSaveTask()}>
               Save
             </Button>
             {task?.title ? (
@@ -453,6 +455,21 @@ const TaskForm = ({
             <Button size='large' color='secondary' variant='outlined' onClick={() => router.back()}>
               Cancel
             </Button>
+            {task?.title && !task?.supportingPackageUUID ? (
+              <Button
+                size='large'
+                type='submit'
+                sx={{ mr: 2 }}
+                color='secondary'
+                variant='outlined'
+                onClick={() => {
+                  setTaskStatus(Status.DONE)
+                  handleSaveTask(Status.DONE)
+                }}
+              >
+                Mark Task As DONE!
+              </Button>
+            ) : null}
           </CardActions>
         </form>
       </Card>

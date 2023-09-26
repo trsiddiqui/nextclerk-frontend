@@ -120,17 +120,17 @@ export const Task = ({ task }: { task: TaskResponse }) => {
               {task.title}
             </Typography>
             {/* <Grid item xs={12}>
-              <Box component='small' m={1}>
-                <Typography variant='body2'>{task.uuid}</Typography>
-              </Box>
-            </Grid> */}
+      <Box component='small' m={1}>
+        <Typography variant='body2'>{task.uuid}</Typography>
+      </Box>
+    </Grid> */}
             <Grid item xs={12} style={style.bottomBox}>
               {task.categoryName && <Chip size='small' label={task.categoryName} />}
               {/* <AvatarGroup max={4} style={style.}>
-              {board.members.map(item => {
-                return <Avatar key={item.id} alt={item.name} src={`/${item.avatar}.jpg`} />
-              })}
-            </AvatarGroup> */}
+    {board.members.map(item => {
+      return <Avatar key={item.id} alt={item.name} src={`/${item.avatar}.jpg`} />
+    })}
+  </AvatarGroup> */}
             </Grid>
             <Avatar
               sx={{
