@@ -280,6 +280,7 @@ export const postJEToQB = async (
 
   return result.status
 }
+
 export const getAllRoles = async (isBackend = false): Promise<Role[]> => {
   const response = await (isBackend ? backendApi : api).get(`/user-administration/groups`)
 
@@ -306,4 +307,16 @@ export const createUser = async (user: UserRequest, isBackend = false): Promise<
 
 export const logoutUser = async (userXRefID: string): Promise<void> => {
   return await api.post(`/user-administration/users/${userXRefID}/logout`)
+}
+
+export const getAllRolesWithPermissions = async (isBackend = false): Promise<Role[]> => {
+  const response = await (isBackend ? backendApi : api).get(`/user-administration/groupsWithRoles`)
+
+  return response.data
+}
+
+export const getAllPermissions = async (isBackend = false): Promise<Role[]> => {
+  const response = await (isBackend ? backendApi : api).get(`/user-administration/roles`)
+
+  return response.data
 }
