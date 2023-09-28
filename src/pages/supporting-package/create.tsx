@@ -10,7 +10,9 @@ import {
   searchUsers,
   getActiveUser,
   getAllLabels,
-  createSupportingPackage
+  createSupportingPackage,
+  reserveSupportingPackageNumber,
+  reserveJournalEntryNumber
 } from 'src/utils/apiClient'
 import { AutocompleteRow, DropDownRow } from 'src/@core/utils'
 import { User } from 'src/utils/types'
@@ -18,11 +20,14 @@ import SupportingPackageForm from 'src/@core/page-components/supporting-packages
 import // GetSessionParams,
 // getSession
 'next-auth/react'
+import { GetSessionParams, getSession } from 'next-auth/react'
+import { Session } from 'next-auth'
+import { JWT } from 'next-auth/jwt'
 // import { Account, Profile, Session } from 'next-auth'
 // import { JWT } from 'next-auth/jwt'
 // import { Policies } from 'src/@core/auth'
 
-export async function getServerSideProps() {
+export async function getServerSideProps(ctx: unknown) {
   // context: GetSessionParams | undefined
   // const session = (await getSession(context)) as unknown as {
   //   token: Session & JWT & Account & Profile & { groups: Array<string> }
@@ -53,9 +58,15 @@ export async function getServerSideProps() {
   const customers = await getAllCustomers(true)
   const labels = await getAllLabels(true)
   const users = await searchUsers(undefined, true)
-  const activeUser = await getActiveUser(true)
-
+  // const activeUser = await getActiveUser(true)
+  const data = await getSession(ctx as GetSessionParams)
+  const session = data as unknown as Session & { token: JWT; user: User }
+  const activeUser = await getActiveUser(session!.token!.sub!, true)
+  const supportingPackageNumber = await reserveSupportingPackageNumber(true)
+  const journalEntryNumber = await reserveJournalEntryNumber(true)
+  console.log('ACTIVE USER', activeUser)
   // Pass data to the page via props
+
   return {
     props: {
       categories,
@@ -65,7 +76,9 @@ export async function getServerSideProps() {
       customers,
       activeUser,
       users,
-      labels
+      labels,
+      supportingPackageNumber,
+      journalEntryNumber
       // session
     }
   }
@@ -79,7 +92,9 @@ const CreateSupportPackage = ({
   customers,
   activeUser,
   users,
-  labels
+  labels,
+  supportingPackageNumber,
+  journalEntryNumber
 }: {
   categories: Array<AutocompleteRow>
   accounts: Array<DropDownRow>
@@ -89,6 +104,8 @@ const CreateSupportPackage = ({
   labels: Array<DropDownRow>
   users: User[]
   activeUser: { details: { id: string; name: string }; manager: { id: string; name: string } }
+  supportingPackageNumber: number
+  journalEntryNumber: number
 }) => {
   return (
     <SupportingPackageForm
@@ -101,6 +118,8 @@ const CreateSupportPackage = ({
       locations={locations}
       users={users}
       saveSupportingPackageMethod={createSupportingPackage}
+      supportingPackageNumber={supportingPackageNumber}
+      journalEntryNumber={journalEntryNumber}
     ></SupportingPackageForm>
   )
 }

@@ -87,7 +87,8 @@ import {
   Snackbar,
   Tooltip,
   Select,
-  InputLabel
+  InputLabel,
+  TableCell
 } from '@mui/material'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
@@ -187,7 +188,9 @@ const SupportingPackageForm = ({
   users,
   labels,
   saveSupportingPackageMethod,
-  supportingPackage
+  supportingPackage,
+  supportingPackageNumber,
+  journalEntryNumber
 }: {
   categories: Array<AutocompleteRow>
   accounts: Array<DropDownRow>
@@ -199,8 +202,14 @@ const SupportingPackageForm = ({
   activeUser: { details: { id: string; name: string }; manager: { id: string; name: string } }
   saveSupportingPackageMethod: (...args: any) => Promise<any>
   supportingPackage?: SupportingPackageResponse
+  supportingPackageNumber?: number
+  journalEntryNumber?: number
 }) => {
-  console.log(supportingPackage)
+  if (!activeUser.manager) {
+    return (
+      <div>No Manager configured for the user, please configure a manager before creating a supporting package</div>
+    )
+  }
   const router = useRouter()
   const {
     taskID,
@@ -211,11 +220,21 @@ const SupportingPackageForm = ({
     // taskDescription
   } = router.query
   const theme = useTheme()
+  const [typedOnceState, setTypedOnceState] = useState({
+    name: false,
+    number: false,
+    category: false,
+    journalNumber: false
+  })
   const [name, setName] = useState(
     supportingPackage?.title ? supportingPackage?.title : taskTitle !== undefined ? taskTitle : ''
   )
-  const [number, setNumber] = useState(supportingPackage?.number ?? '')
-  const [journalNumber, setJournalNumber] = useState(supportingPackage?.journalNumber ?? '')
+  const [number, setNumber] = useState(
+    supportingPackage?.number ?? (supportingPackageNumber ? `SP${supportingPackageNumber}` : null) ?? ''
+  )
+  const [journalNumber, setJournalNumber] = useState(
+    supportingPackage?.journalNumber ?? (journalEntryNumber ? `JE${journalEntryNumber}` : null) ?? ''
+  )
   const [isConfidential, setIsConfidential] = useState<boolean>(
     supportingPackage?.isConfidential
       ? supportingPackage?.isConfidential
@@ -251,11 +270,11 @@ const SupportingPackageForm = ({
           cellLink: journalEntry.cellLink
         }))
       : [
-          { id: uuid(), badAccount: true, creditAmount: 0, debitAmount: 0 },
-          { id: uuid(), badAccount: true, creditAmount: 0, debitAmount: 0 },
-          { id: uuid(), badAccount: true, creditAmount: 0, debitAmount: 0 },
-          { id: uuid(), badAccount: true, creditAmount: 0, debitAmount: 0 },
-          { id: uuid(), badAccount: true, creditAmount: 0, debitAmount: 0 }
+          { id: uuid(), badAccount: true },
+          { id: uuid(), badAccount: true },
+          { id: uuid(), badAccount: true },
+          { id: uuid(), badAccount: true },
+          { id: uuid(), badAccount: true }
         ]
   )
   const [allCategories] = useState(categories)
@@ -930,8 +949,13 @@ const SupportingPackageForm = ({
       renderCell: params => (
         <TextField
           fullWidth
+          type='number'
           onChange={e => {
-            if (params.row.creditAmount === '' || parseInt(params.row.creditAmount) === 0) {
+            if (
+              params.row.creditAmount == null ||
+              params.row.creditAmount === '' ||
+              parseInt(params.row.creditAmount) === 0
+            ) {
               params.row.debitAmount = parseInt(e.target.value)
               gridRef.current.setEditCellValue({
                 id: params.id,
@@ -956,8 +980,13 @@ const SupportingPackageForm = ({
       renderEditCell: params => (
         <TextField
           fullWidth
+          type='number'
           onChange={e => {
-            if (params.row.creditAmount === '' || parseInt(params.row.creditAmount) === 0) {
+            if (
+              params.row.creditAmount == null ||
+              params.row.creditAmount === '' ||
+              parseInt(params.row.creditAmount) === 0
+            ) {
               params.row.debitAmount = parseInt(e.target.value)
               gridRef.current.setEditCellValue({
                 id: params.id,
@@ -991,8 +1020,13 @@ const SupportingPackageForm = ({
       renderCell: params => (
         <TextField
           fullWidth
+          type='number'
           onChange={e => {
-            if (params.row.debitAmount === '' || parseInt(params.row.debitAmount) === 0) {
+            if (
+              params.row.debitAmount == null ||
+              params.row.debitAmount === '' ||
+              parseInt(params.row.debitAmount) === 0
+            ) {
               params.row.creditAmount = parseInt(e.target.value)
               gridRef.current.setEditCellValue({
                 id: params.id,
@@ -1017,8 +1051,13 @@ const SupportingPackageForm = ({
       renderEditCell: params => (
         <TextField
           fullWidth
+          type='number'
           onChange={e => {
-            if (params.row.debitAmount === '' || parseInt(params.row.debitAmount) === 0) {
+            if (
+              params.row.debitAmount == null ||
+              params.row.debitAmount === '' ||
+              parseInt(params.row.debitAmount) === 0
+            ) {
               params.row.creditAmount = parseInt(e.target.value)
               gridRef.current.setEditCellValue({
                 id: params.id,
@@ -1338,10 +1377,16 @@ const SupportingPackageForm = ({
                   fullWidth
                   label='Support Title'
                   placeholder='Title of Support Package'
-                  onChange={e => setName(e.target.value)}
+                  onChange={e => {
+                    setName(e.target.value)
+                    setTypedOnceState({
+                      ...typedOnceState,
+                      name: true
+                    })
+                  }}
                   variant='filled'
                   value={name}
-                  error={name == ''}
+                  error={typedOnceState.name && name == ''}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -1351,9 +1396,15 @@ const SupportingPackageForm = ({
                   label='Support Number'
                   placeholder='R32938'
                   variant='filled'
-                  onChange={e => setNumber(e.target.value)}
+                  onChange={e => {
+                    setNumber(e.target.value)
+                    setTypedOnceState({
+                      ...typedOnceState,
+                      number: true
+                    })
+                  }}
                   value={number}
-                  error={number == ''}
+                  error={typedOnceState.number && number == ''}
                 />
               </Grid>
               {/* <Grid item xs={12} sm={4}>
@@ -1367,11 +1418,15 @@ const SupportingPackageForm = ({
                     value={category}
                     onChange={(event: any, newValue: { label: string; uuid: string } | null) => {
                       setCategory(newValue)
+                      setTypedOnceState({
+                        ...typedOnceState,
+                        category: true
+                      })
                     }}
                     filterSelectedOptions
                     renderInput={params => (
                       <TextField
-                        error={category == null}
+                        error={typedOnceState.category && category == null}
                         variant='filled'
                         {...params}
                         label='Support Category'
@@ -1388,9 +1443,15 @@ const SupportingPackageForm = ({
                   label='Journal Number'
                   placeholder='JE Number'
                   variant='filled'
-                  onChange={e => setJournalNumber(e.target.value)}
+                  onChange={e => {
+                    setJournalNumber(e.target.value)
+                    setTypedOnceState({
+                      ...typedOnceState,
+                      journalNumber: true
+                    })
+                  }}
                   value={journalNumber}
-                  error={journalNumber == ''}
+                  error={typedOnceState.journalNumber && journalNumber == ''}
                 />
               </Grid>
               <Grid item xs={12} sm={12} md={2}>
@@ -1414,7 +1475,7 @@ const SupportingPackageForm = ({
                 justifyContent='end'
                 sx={{ display: 'flex', alignItems: 'center', textAlign: 'right' }}
               >
-                <FormLabel>Creator</FormLabel>
+                <FormLabel>Owner</FormLabel>
                 <Chip
                   label={((): string => {
                     if (supportingPackage?.updatedBy) {
@@ -1940,7 +2001,6 @@ const SupportingPackageForm = ({
                             }
                           }}
                         >
-                          {JSON.stringify(actionItem)}
                           <Card
                             sx={{
                               minWidth: '100%',
@@ -2339,23 +2399,24 @@ const SupportingPackageForm = ({
                   toolbar: JEToolbar,
                   footer: () => (
                     <GridFooterContainer>
-                      &nbsp;&nbsp;&nbsp;&nbsp; Debit:{' '}
-                      {journalEntries.reduce((acc, obj) => {
-                        return acc + parseInt(obj.debitAmount)
-                      }, 0)}
-                      ; Credit:{' '}
-                      {journalEntries.reduce((acc, obj) => {
-                        return acc + parseInt(obj.creditAmount)
-                      }, 0)}
-                      ; Difference ={' '}
-                      {Math.abs(
-                        journalEntries.reduce((acc, obj) => {
-                          return acc + parseInt(obj.debitAmount)
-                        }, 0) -
-                          journalEntries.reduce((acc, obj) => {
-                            return acc + parseInt(obj.creditAmount)
-                          }, 0)
-                      )}
+                      <div>
+                        <TableRow>
+                          <TableCell width={140}>
+                            {' '}
+                            <b style={{ marginLeft: 10 }}>Total</b>
+                          </TableCell>
+                          <TableCell width={80} align='right'>
+                            {journalEntries.reduce((acc, obj) => {
+                              return acc + parseInt(obj.debitAmount ?? 0)
+                            }, 0)}
+                          </TableCell>
+                          <TableCell width={80} align='right'>
+                            {journalEntries.reduce((acc, obj) => {
+                              return acc + parseInt(obj.creditAmount ?? 0)
+                            }, 0)}
+                          </TableCell>
+                        </TableRow>
+                      </div>
                       <GridFooter
                         sx={{
                           border: 'none' // To delete double border.

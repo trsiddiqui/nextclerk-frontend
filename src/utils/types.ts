@@ -3,6 +3,16 @@ export type User = {
   lastName: string
   email: string
   uuid: string
+  manager?: {
+    firstName: string
+    lastName: string
+    uuid: string
+    email: string
+  }
+  department?: {
+    label: string
+    uuid: string
+  }
 }
 
 export interface Entity {

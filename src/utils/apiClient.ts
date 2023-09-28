@@ -116,18 +116,21 @@ export const searchUsers = async (str?: string, isBackend = false): Promise<User
   return users.data
 }
 
-export const getActiveUser = async (isBackend = false) => {
+export const getActiveUser = async (uuid: string, isBackend = false) => {
   const users = (await (isBackend ? backendApi : api).get<User[]>(`/${customerXRefID}/users`)).data
+  const user = users.find(x => x.uuid === uuid)
 
   return {
     details: {
-      id: users[0].uuid,
-      name: `${users[0].firstName} ${users[0].lastName}`
+      id: user!.uuid,
+      name: `${user!.firstName} ${user!.lastName}`
     },
-    manager: {
-      id: users[1].uuid,
-      name: `${users[1].firstName} ${users[1].lastName}`
-    }
+    ...(user!.manager && {
+      manager: {
+        id: user!.manager!.uuid,
+        name: `${user!.manager!.firstName} ${user!.manager!.lastName}`
+      }
+    })
   }
 }
 
@@ -212,6 +215,22 @@ export const getSupportingPackage = async (
   return response.data
 }
 
+export const reserveSupportingPackageNumber = async (isBackend = false) => {
+  const response = await (isBackend ? backendApi : api).get<number>(
+    `/${customerXRefID}/supporting-packages/action/reserve-supporting-package-number`
+  )
+
+  return response.data
+}
+
+export const reserveJournalEntryNumber = async (isBackend = false) => {
+  const response = await (isBackend ? backendApi : api).get<number>(
+    `/${customerXRefID}/supporting-packages/action/reserve-journal-entry-number`
+  )
+
+  return response.data
+}
+
 export const getOnlineViewLink = async (fileUuid: string, isBackend = false): Promise<string> => {
   const response = await (isBackend ? backendApi : api).get<string>(
     `/global/${customerXRefID}/files/${fileUuid}/online-link`,
@@ -263,7 +282,7 @@ export const getAuth = async (isBackend = false): Promise<void> => {
     })
     .catch(error => {
       if (error.response) {
-        console.log(error.response.data) // => the response payload
+        console.error(error.response.data) // => the response payload
       }
     })
 }

@@ -8,10 +8,8 @@ import KeycloakProvider from 'next-auth/providers/keycloak'
 const clientId = 'nextclerk'
 const clientSecret = 'uvmAPUcHKYG9ZZXsymO9QP3rFAPPmLhF'
 const host = 'https://auth.nextclerk.com'
-console.log('using', host)
 async function refreshAccessToken(token: JWT & Account) {
   try {
-    // console.log('REFRESHING', token)
     const url = `${host}/realms/${clientId}/protocol/openid-connect/token`
 
     const response = await fetch(url, {
@@ -29,7 +27,7 @@ async function refreshAccessToken(token: JWT & Account) {
 
     const refreshedTokens = await response.json()
 
-    console.log('REFRESHED', refreshedTokens)
+    // console.log('REFRESHED', refreshedTokens)
     if (!response.ok) {
       throw refreshedTokens
     }
@@ -40,7 +38,8 @@ async function refreshAccessToken(token: JWT & Account) {
       expires_at: Math.trunc(new Date().getTime() / 1000) + refreshedTokens.expires_in,
       refresh_token: refreshedTokens.refresh_token ?? token.refreshToken // Fall back to old refresh token
     }
-    console.log('RETURN', returnObject)
+
+    // console.log('RETURN', returnObject)
 
     return returnObject
   } catch (error) {
@@ -115,5 +114,4 @@ export const authOptions: AuthOptions = {
 }
 
 const nextAuth = NextAuth(authOptions)
-console.log(JSON.stringify(nextAuth))
 export default nextAuth
