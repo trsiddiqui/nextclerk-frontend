@@ -1454,7 +1454,7 @@ const SupportingPackageForm = ({
                   error={typedOnceState.journalNumber && journalNumber == ''}
                 />
               </Grid>
-              <Grid item xs={12} sm={12} md={2}>
+              <Grid item xs={12} sm={12} md={12} lg={2}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePickerWrapper>
                     <DatePicker
@@ -1462,7 +1462,9 @@ const SupportingPackageForm = ({
                       inputFormat='MM/DD/YYYY'
                       value={date}
                       onChange={e => setDate(e)}
-                      renderInput={params => <TextField error={date == null} variant='filled' fullWidth {...params} />}
+                      renderInput={params => (
+                        <TextField sx={{ width: 160 }} error={date == null} variant='filled' {...params} />
+                      )}
                     />
                   </DatePickerWrapper>
                 </LocalizationProvider>
@@ -1470,7 +1472,8 @@ const SupportingPackageForm = ({
               <Grid
                 item
                 xs={12}
-                md={4}
+                md={12}
+                lg={4}
                 sm={12}
                 justifyContent='end'
                 sx={{ display: 'flex', alignItems: 'center', textAlign: 'right' }}
@@ -1498,7 +1501,7 @@ const SupportingPackageForm = ({
                   sx={{ marginLeft: 3 }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center' }}>
+              <Grid item xs={12} md={12} lg={6} sm={6} sx={{ display: 'flex', alignItems: 'center' }}>
                 {/* <Link component='button' variant='body2' onClick={handleMultiPersonnelModalOpen}>
                   <FormLabel sx={{ cursor: 'pointer', color: 'blue' }}>Participants</FormLabel>
                 </Link> */}

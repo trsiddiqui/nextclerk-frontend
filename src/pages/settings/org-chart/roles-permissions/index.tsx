@@ -1,16 +1,21 @@
 import {
   Box,
-  Button,
+
+  // Button,
   Card,
   CardContent,
-  CardHeader,
-  Checkbox,
+
+  // CardHeader,
+  // Checkbox,
+  Chip,
   Grid,
-  ListItemText,
-  MenuItem,
-  OutlinedInput,
+
+  // ListItemText,
+  // MenuItem,
+  // OutlinedInput,
   Paper,
-  Select,
+
+  // Select,
   Tab,
   Table,
   TableBody,
@@ -23,7 +28,8 @@ import {
 import { useRouter } from 'next/router'
 import { getAllPermissions, getAllRolesWithPermissions } from 'src/utils/apiClient'
 import { useState } from 'react'
-import AddIcon from '@mui/icons-material/Add'
+
+// import AddIcon from '@mui/icons-material/Add'
 
 type Role = {
   id: string
@@ -61,7 +67,7 @@ const RolesPermissionsPage = ({
   roles: Role[]
 }) => {
   const router = useRouter()
-  const [groupsWithRolesState, setGroupsWithRolesState] = useState(groupsWithRoles)
+  const [groupsWithRolesState] = useState(groupsWithRoles)
 
   return (
     <>
@@ -85,13 +91,13 @@ const RolesPermissionsPage = ({
             </Tabs>
           </Box>
 
-          <CardHeader
+          {/* <CardHeader
             action={
               <Button variant='contained' endIcon={<AddIcon />} color='primary'>
                 Create a Role
               </Button>
             }
-          />
+          /> */}
           <CardContent>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} aria-label='simple table'>
@@ -108,7 +114,7 @@ const RolesPermissionsPage = ({
                         {row.name}
                       </TableCell>
                       <TableCell>
-                        <Select
+                        {/* <Select
                           labelId='demo-multiple-checkbox-label'
                           id='demo-multiple-checkbox'
                           multiple
@@ -131,11 +137,16 @@ const RolesPermissionsPage = ({
                         >
                           {roles.map(role => (
                             <MenuItem key={role.id} value={role.name}>
-                              <Checkbox checked={row.roles.map(x => x.id).includes(role.id)} />
+                              <Checkbox disabled checked={row.roles.map(x => x.id).includes(role.id)} />
                               <ListItemText primary={role.name} />
                             </MenuItem>
                           ))}
-                        </Select>
+                        </Select> */}
+                        {roles
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map(role => (
+                            <Chip key={role.id} label={role.name} sx={{ ml: 1, mt: 1 }}></Chip>
+                          ))}
                       </TableCell>
                       {/*
                        */}

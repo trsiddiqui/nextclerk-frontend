@@ -320,6 +320,16 @@ export const deleteUser = async (userId: string, isBackend = false): Promise<voi
   return await (isBackend ? backendApi : api).delete(`/user-administration/${customerXRefID}/users/${userId}`)
 }
 
+export const disableUser = async (uuid: string, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).put(
+    `/user-administration/${customerXRefID}/users/${uuid}/actions/disable`
+  )
+}
+
+export const enableUser = async (uuid: string, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).put(`/user-administration/${customerXRefID}/users/${uuid}/actions/enable`)
+}
+
 export const createUser = async (user: UserRequest, isBackend = false): Promise<void> => {
   return await (isBackend ? backendApi : api).post(`/user-administration/${customerXRefID}/users`, user)
 }

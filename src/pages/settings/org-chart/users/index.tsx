@@ -12,9 +12,12 @@ import {
   OutlinedInput,
   Select,
   Tab,
-  Tabs
+  Tabs,
+  Tooltip
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
+import HowToRegIcon from '@mui/icons-material/HowToReg'
+import NoAccountsIcon from '@mui/icons-material/NoAccounts'
 import { v4 as uuid } from 'uuid'
 import {
   DataGrid,
@@ -35,6 +38,8 @@ import {
   createUser,
   customerXRefID,
   deleteUser,
+  disableUser,
+  enableUser,
   getAllDepartments,
   getAllRoles,
   getAllUsersForDashboard,
@@ -61,7 +66,7 @@ export async function getServerSideProps() {
         firstName: u.firstName,
         lastName: u.lastName,
         isAccountingManager: u.isAccountingManager,
-        archived: u.archived,
+        enabled: u.enabled,
         groups: u.groups,
         ...(u.manager && u.manager.firstName
           ? { managerName: `${u.manager.firstName} ${u.manager.lastName}`, managerUuid: u.manager.uuid }
@@ -94,6 +99,16 @@ const UserPage = ({
 
   const handleEditClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
+  }
+
+  const handleDisableClick = (id: GridRowId) => async () => {
+    await disableUser(id as string)
+    location.reload()
+  }
+
+  const handleEnableClick = (id: GridRowId) => async () => {
+    await enableUser(id as string)
+    location.reload()
   }
 
   const handleSaveClick = (id: GridRowId) => async () => {
@@ -219,7 +234,7 @@ const UserPage = ({
       editable: true,
       align: 'center',
       cellClassName: 'data-grid-column',
-      flex: 0.3,
+      flex: 0.2,
       headerAlign: 'center',
       type: 'singleSelect',
       valueOptions: departments.map(d => d.label)
@@ -231,7 +246,7 @@ const UserPage = ({
       editable: true,
       align: 'center',
       cellClassName: 'data-grid-column',
-      flex: 0.3,
+      flex: 0.2,
       headerAlign: 'center'
     },
     {
@@ -241,7 +256,7 @@ const UserPage = ({
       editable: true,
       align: 'center',
       cellClassName: 'data-grid-column',
-      flex: 0.3,
+      flex: 0.4,
       headerAlign: 'center',
       renderCell: params =>
         params.row.groups?.length > 0
@@ -293,19 +308,33 @@ const UserPage = ({
       headerAlign: 'center'
     },
     {
+      field: 'enabled',
+      headerName: 'Enabled',
+      type: 'boolean',
+      editable: true,
+      align: 'center',
+      cellClassName: 'data-grid-column',
+      flex: 0.1,
+      headerAlign: 'center'
+    },
+    {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
       cellClassName: 'data-grid-column',
-      width: 90,
-      getActions: ({ id }) => {
+      width: 120,
+      getActions: ({ id, row }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
 
         if (isInEditMode) {
           return [
             <GridActionsCellItem
               key={1}
-              icon={<SaveIcon />}
+              icon={
+                <Tooltip title='Save'>
+                  <SaveIcon />
+                </Tooltip>
+              }
               label='Save'
               sx={{
                 color: 'primary.main'
@@ -314,7 +343,11 @@ const UserPage = ({
             />,
             <GridActionsCellItem
               key={2}
-              icon={<CancelIcon />}
+              icon={
+                <Tooltip title='Cancel'>
+                  <CancelIcon />
+                </Tooltip>
+              }
               label='Cancel'
               className='textPrimary'
               onClick={handleCancelClick(id)}
@@ -324,9 +357,44 @@ const UserPage = ({
         }
 
         return [
+          ...(row.enabled
+            ? [
+                <GridActionsCellItem
+                  key={1}
+                  icon={
+                    <Tooltip title='Disable User'>
+                      <NoAccountsIcon />
+                    </Tooltip>
+                  }
+                  placeholder='Disable User'
+                  label='Disable User'
+                  className='textPrimary'
+                  onClick={handleDisableClick(id)}
+                  color='inherit'
+                />
+              ]
+            : [
+                <GridActionsCellItem
+                  key={1}
+                  icon={
+                    <Tooltip title='Enable User'>
+                      <HowToRegIcon />
+                    </Tooltip>
+                  }
+                  placeholder='Enable User'
+                  label='Enable User'
+                  className='textPrimary'
+                  onClick={handleEnableClick(id)}
+                  color='inherit'
+                />
+              ]),
           <GridActionsCellItem
             key={1}
-            icon={<EditIcon />}
+            icon={
+              <Tooltip title='Edit'>
+                <EditIcon />
+              </Tooltip>
+            }
             label='Edit'
             className='textPrimary'
             onClick={handleEditClick(id)}
@@ -334,7 +402,11 @@ const UserPage = ({
           />,
           <GridActionsCellItem
             key={2}
-            icon={<DeleteIcon />}
+            icon={
+              <Tooltip title='Delete'>
+                <DeleteIcon />
+              </Tooltip>
+            }
             label='Delete'
             onClick={async () => {
               setUserData(userData.filter(row => row.uuid !== id))
@@ -363,7 +435,7 @@ const UserPage = ({
         lastName: '',
         uuid: id,
         id,
-        archived: false,
+        enabled: false,
         isNew: true,
         groups: []
       }
