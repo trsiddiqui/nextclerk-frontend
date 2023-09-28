@@ -16,12 +16,11 @@ import {
 import { AutocompleteRow, DropDownRow } from 'src/@core/utils'
 import { SupportingPackageResponse, User } from 'src/utils/types'
 import SupportingPackageForm from 'src/@core/page-components/supporting-packages/supporting-package-form'
+import { GetSessionParams, getSession } from 'next-auth/react'
+import { Session } from 'next-auth'
+import { JWT } from 'next-auth/jwt'
 
-export async function getServerSideProps({
-  params: { supportingPackageXRefID }
-}: {
-  params: { supportingPackageXRefID: string }
-}) {
+export async function getServerSideProps(ctx: any) {
   // Fetch data from external API
   const categories = await getAllCategories(true)
   const accounts = await getAllAccounts(true)
@@ -30,9 +29,11 @@ export async function getServerSideProps({
   const customers = await getAllCustomers(true)
   const labels = await getAllLabels(true)
   const users = await searchUsers(undefined, true)
-  const activeUser = await getActiveUser(true)
+  const supportingPackage = await getSupportingPackage(ctx.params.supportingPackageXRefID, true)
 
-  const supportingPackage = await getSupportingPackage(supportingPackageXRefID, true)
+  const data = await getSession(ctx as GetSessionParams)
+  const session = data as unknown as Session & { token: JWT; user: User }
+  const activeUser = await getActiveUser(session!.token!.sub!, true)
 
   // Pass data to the page via props
   return {

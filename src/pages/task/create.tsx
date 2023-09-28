@@ -6,13 +6,19 @@ import { AutocompleteRow, DropDownRow } from 'src/@core/utils'
 // import { User } from 'src/utils/types'
 import TaskForm from 'src/@core/page-components/Tasks/task-form'
 import { User } from 'src/utils/types'
+import { GetSessionParams, getSession } from 'next-auth/react'
+import { Session } from 'next-auth'
+import { JWT } from 'next-auth/jwt'
 
-export async function getServerSideProps() {
+export async function getServerSideProps(ctx: any) {
   // Fetch data from external API
   const categories = await getAllCategories(true)
   const labels = await getAllLabels(true)
   const users = await searchUsers(undefined, true)
-  const activeUser = await getActiveUser(true)
+
+  const data = await getSession(ctx as GetSessionParams)
+  const session = data as unknown as Session & { token: JWT; user: User }
+  const activeUser = await getActiveUser(session!.token!.sub!, true)
 
   // Pass data to the page via props
   return { props: { categories, activeUser, users, labels } }

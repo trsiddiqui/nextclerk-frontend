@@ -58,13 +58,12 @@ export async function getServerSideProps(ctx: unknown) {
   const customers = await getAllCustomers(true)
   const labels = await getAllLabels(true)
   const users = await searchUsers(undefined, true)
-  // const activeUser = await getActiveUser(true)
+  const supportingPackageNumber = await reserveSupportingPackageNumber(true)
+  const journalEntryNumber = await reserveJournalEntryNumber(true)
+
   const data = await getSession(ctx as GetSessionParams)
   const session = data as unknown as Session & { token: JWT; user: User }
   const activeUser = await getActiveUser(session!.token!.sub!, true)
-  const supportingPackageNumber = await reserveSupportingPackageNumber(true)
-  const journalEntryNumber = await reserveJournalEntryNumber(true)
-  console.log('ACTIVE USER', activeUser)
   // Pass data to the page via props
 
   return {
