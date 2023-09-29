@@ -66,7 +66,6 @@ const Upload = ({
   const [isConfidential, setIsConfidential] = useState(false)
   const [category, setCategory] = useState<{ label: string; uuid: string } | null>(null)
   const [note, setNote] = useState('')
-  const [setParticipants] = useState<User[]>([])
   const [label, setLabel] = useState<{ label: string; uuid: string } | null>(null)
   const [loading, setLoading] = useState(false)
   const [snackBarMessage, setSnackBarMessage] = useState('')
@@ -234,9 +233,6 @@ const Upload = ({
                     fullWidth
                     options={users}
                     getOptionLabel={option => `${option.firstName} ${option.lastName}`}
-                    onChange={(event, updatedList) => {
-                      setParticipants(updatedList)
-                    }}
                     renderTags={(tagValue, getTagProps) => {
                       return tagValue.map((option, index) => (
                         <Chip
