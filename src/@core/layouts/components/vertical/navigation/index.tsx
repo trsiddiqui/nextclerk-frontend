@@ -175,7 +175,13 @@ const Navigation = (props: Props) => {
             >
               New Supporting Package
             </MenuItem>
-            <MenuItem onClick={handleClose}>Upload File</MenuItem>
+            <MenuItem
+              onClick={() => {
+                router.push('/upload')
+              }}
+            >
+              Upload File
+            </MenuItem>
           </Menu>
         </>
       ) : (

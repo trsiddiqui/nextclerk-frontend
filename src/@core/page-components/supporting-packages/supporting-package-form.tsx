@@ -1531,13 +1531,7 @@ const SupportingPackageForm = ({
                     ))
                   }}
                   renderInput={params => (
-                    <TextField
-                      {...params}
-                      variant='standard'
-                      fullWidth
-                      label='Participants'
-                      placeholder='Participants'
-                    />
+                    <TextField {...params} variant='filled' fullWidth label='Participants' placeholder='Participants' />
                   )}
                 />
                 {/* {participants.length > 0 ? (

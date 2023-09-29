@@ -57,6 +57,8 @@ export const authOptions: AuthOptions = {
   providers: [
     KeycloakProvider({
       clientId: clientId,
+
+      // deepcode ignore HardcodedNonCryptoSecret: <please specify a reason of ignoring this>
       clientSecret: clientSecret,
       issuer: `${host}/realms/${clientId}`,
       authorization: `${host}/realms/${clientId}/protocol/openid-connect/auth`,
