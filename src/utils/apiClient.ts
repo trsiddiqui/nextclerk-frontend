@@ -134,12 +134,19 @@ export const getActiveUser = async (uuid: string, isBackend = false) => {
   }
 }
 
-export const uploadFile = async (file: File, isBackend = false): Promise<UploadedFileProps> => {
+export const uploadFile = async (
+  file: File,
+  isBackend = false,
+  category?: string,
+  label?: string
+): Promise<UploadedFileProps> => {
   const formData = new FormData()
   formData.append('file', file)
 
   const response = await (isBackend ? backendApi : api).post<UploadedFileProps>(
-    `/global/${customerXRefID}/actions/upload-file`,
+    `/global/${customerXRefID}/actions/upload-file?${category ? `category=${category}&` : ''}${
+      label ? `label=${label}` : ''
+    }`,
     formData,
     {
       headers: {
