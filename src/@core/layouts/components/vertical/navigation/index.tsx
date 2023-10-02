@@ -369,7 +369,7 @@ const Navigation = (props: Props) => {
                   />
                 </FormControl>
               </Grid>
-              <Grid item md={6}>
+              <Grid item md={6} sx={{ pl: 1 }}>
                 <FormControl fullWidth>
                   <Autocomplete
                     id='tags-outlined'
@@ -385,11 +385,7 @@ const Navigation = (props: Props) => {
               </Grid>
             </Grid>
             <Box sx={{ mt: 10 }}>
-              <FileUpload
-                {...fileUploadProp()}
-
-                // height='70vh' width='55vw'
-              />
+              <FileUpload {...fileUploadProp()} />
             </Box>
           </CardContent>
           <CardActions>
