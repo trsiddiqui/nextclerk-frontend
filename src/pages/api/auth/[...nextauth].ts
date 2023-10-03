@@ -46,7 +46,7 @@ async function refreshAccessToken(token: JWT & Account) {
   } catch (error) {
     console.error('TOKEN REFRESH ERROR', error)
 
-    signOut()
+    await signOut()
 
     return {
       ...token,
