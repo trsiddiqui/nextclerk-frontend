@@ -2,6 +2,7 @@
 import Table from 'mdi-material-ui/Table'
 import HomeOutline from 'mdi-material-ui/HomeOutline'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
@@ -34,6 +35,11 @@ const navigation = (): VerticalNavItemsType => {
       icon: FormatIndentIncrease,
       title: 'Integrations',
       path: '/integration'
+    },
+    {
+      icon: LibraryBooksIcon,
+      title: 'Library',
+      path: '/library'
     }
   ]
 }
