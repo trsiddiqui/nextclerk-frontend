@@ -150,7 +150,9 @@ const UserDropdown = ({
             //   }
             // })
 
-            await signOut()
+            try {
+              await signOut()
+            } catch (_err) {}
             window.location.href =
               'https://auth.nextclerk.com/realms/nextclerk/protocol/openid-connect/logout?redirect_uri=http://test.nextclerk.com'
 

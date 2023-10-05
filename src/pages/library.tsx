@@ -1,14 +1,22 @@
 import { TreeItem, TreeView } from '@mui/lab'
-import { Card, CardContent, Grid, Paper } from '@mui/material'
+import { Avatar, Card, CardContent, Grid, Paper, Switch, Typography } from '@mui/material'
 import { useState } from 'react'
 import MonthsStepper from 'src/@core/components/custom/months-stepper'
-import { AutocompleteRow, getMonthFromDate, getYearFromDate } from 'src/@core/utils'
+import {
+  AutocompleteRow,
+  getMonthFromDate,
+  getYearFromDate,
+  isSupportedMimeType,
+  mimetypeToIconImage
+} from 'src/@core/utils'
 import { getAllCategories, getEntity } from 'src/utils/apiClient'
 import { Entity } from 'src/utils/types'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import FolderIcon from '@mui/icons-material/Folder'
 import FolderOpen from '@mui/icons-material/FolderOpen'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { DateTime } from 'luxon'
 
 export async function getServerSideProps() {
   const entity = await getEntity(true)
@@ -24,6 +32,83 @@ const Library = ({ entity, categories }: { entity: Entity; categories: Array<Aut
     setSelectedMonthStep(index)
   }
   console.log(selectedMonthStep)
+
+  const files = [
+    {
+      id: 1,
+      originalname: 'Bank Reconciliation Package',
+      mimetype: 'pdf',
+      labelName: 'Kick Off 2023',
+      createdAt: DateTime.now().toISO(),
+      visible: true
+    },
+    {
+      id: 2,
+      originalname: 'Bank Reconciliation Package # 2',
+      mimetype: 'spreadsheet',
+      labelName: '',
+      createdAt: DateTime.now().minus({ days: 5 }).toISO(),
+      visible: false
+    }
+  ]
+
+  const columns: GridColDef[] = [
+    {
+      field: 'originalname',
+      headerName: 'File Name',
+      type: 'string',
+      align: 'left',
+      cellClassName: 'data-grid-column',
+      flex: 0.4,
+      headerAlign: 'left',
+      renderCell: params => (
+        <>
+          {isSupportedMimeType(params.row.mimetype) ? (
+            <Avatar
+              alt='Flora'
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}${mimetypeToIconImage(params.row.mimetype)}`}
+              sx={{ ml: 2 }}
+            />
+          ) : undefined}
+          <Typography sx={{ ml: 5 }}>{params.row.originalname}</Typography>
+        </>
+      )
+    },
+    {
+      field: 'labelName',
+      headerName: 'Label',
+      type: 'string',
+      align: 'left',
+      cellClassName: 'data-grid-column',
+      flex: 0.2,
+      headerAlign: 'left',
+      renderCell: params => <Typography sx={{ ml: 3 }}>{params.row.labelName}</Typography>
+    },
+    {
+      field: 'createdAt',
+      headerName: 'Date Uploaded',
+      type: 'string',
+      align: 'left',
+      cellClassName: 'data-grid-column',
+      flex: 0.2,
+      headerAlign: 'left',
+      renderCell: params => (
+        <Typography sx={{ ml: 3 }}>
+          {DateTime.fromISO(params.row.createdAt).toLocaleString(DateTime.DATETIME_MED)}
+        </Typography>
+      )
+    },
+    {
+      field: 'visible',
+      headerName: 'Visible',
+      type: 'boolean',
+      align: 'left',
+      cellClassName: 'data-grid-column',
+      flex: 0.1,
+      headerAlign: 'left',
+      renderCell: params => <Switch checked={params.row.visible} />
+    }
+  ]
 
   return (
     <>
@@ -66,7 +151,7 @@ const Library = ({ entity, categories }: { entity: Entity; categories: Array<Aut
                 </TreeView>
               </Grid>
               <Grid item xs={12} sm={6} md={9} lg={9} xl={9} sx={{ borderLeft: '1px solid lightgray', pl: 4 }}>
-                ABC
+                <DataGrid rows={files} columns={columns} />
               </Grid>
             </Grid>
           </CardContent>
