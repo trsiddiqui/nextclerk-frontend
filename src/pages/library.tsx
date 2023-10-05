@@ -97,7 +97,10 @@ const Library = ({
               sx={{ ml: 2 }}
             />
           ) : undefined}
-          <Typography sx={{ ml: 5 }}>{params.row.name}</Typography>
+          <Typography sx={{ ml: 5 }}>{`${params.row.name}`}</Typography>
+          <Typography sx={{ ml: 1 }} fontSize={13} fontStyle='italic'>
+            (${(params.row.size / 1024).toFixed(2)} KB)`
+          </Typography>
         </>
       )
     },
@@ -107,7 +110,7 @@ const Library = ({
       type: 'string',
       align: 'left',
       cellClassName: 'data-grid-column',
-      flex: 0.2,
+      flex: 0.1,
       headerAlign: 'left',
       renderCell: params => <Typography sx={{ ml: 3 }}>{params.row.labelName}</Typography>
     },
@@ -129,10 +132,10 @@ const Library = ({
       field: 'isVisible',
       headerName: 'Visible',
       type: 'boolean',
-      align: 'left',
+      align: 'right',
       cellClassName: 'data-grid-column',
       flex: 0.1,
-      headerAlign: 'left',
+      headerAlign: 'right',
       renderCell: params => (
         <Switch
           checked={params.row.isVisible}
@@ -163,7 +166,7 @@ const Library = ({
               ></MonthsStepper>
             </Paper>
             <Grid container>
-              <Grid item xs={12} sm={6} md={3} lg={3} xl={3} sx={{ pr: 2 }}>
+              <Grid item xs={12} sm={4} md={2} lg={2} xl={2} sx={{ pr: 2 }}>
                 <TreeView
                   aria-label='file system navigator'
                   defaultCollapseIcon={<ExpandMoreIcon />}
@@ -202,7 +205,7 @@ const Library = ({
                   ))}
                 </TreeView>
               </Grid>
-              <Grid item xs={12} sm={6} md={9} lg={9} xl={9} sx={{ borderLeft: '1px solid lightgray', pl: 4 }}>
+              <Grid item xs={12} sm={8} md={10} lg={10} xl={10} sx={{ borderLeft: '1px solid lightgray', pl: 4 }}>
                 <DataGrid
                   rows={filesState}
                   columns={columns}
