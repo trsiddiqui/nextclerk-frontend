@@ -1,5 +1,5 @@
 import { TreeItem, TreeView } from '@mui/lab'
-import { Avatar, Card, CardContent, Grid, Paper, Switch, Typography } from '@mui/material'
+import { Avatar, Backdrop, Card, CardContent, CircularProgress, Grid, Paper, Switch, Typography } from '@mui/material'
 import { useState } from 'react'
 import MonthsStepper from 'src/@core/components/custom/months-stepper'
 import {
@@ -9,52 +9,79 @@ import {
   isSupportedMimeType,
   mimetypeToIconImage
 } from 'src/@core/utils'
-import { getAllCategories, getEntity } from 'src/utils/apiClient'
+import { getAllCategories, getEntity, getFiles, updateFileVisibility } from 'src/utils/apiClient'
 import { Entity } from 'src/utils/types'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import FolderIcon from '@mui/icons-material/Folder'
-import FolderOpen from '@mui/icons-material/FolderOpen'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { DateTime } from 'luxon'
+import { File } from '../utils/types'
 
 export async function getServerSideProps() {
   const entity = await getEntity(true)
   const categories = await getAllCategories(true)
+  const files = await getFiles([], [], undefined, undefined, true)
 
   // Pass data to the page via props
-  return { props: { entity, categories } }
+  return { props: { entity, categories: categories.sort((a, b) => a.uuid.localeCompare(b.uuid)), files } }
 }
 
-const Library = ({ entity, categories }: { entity: Entity; categories: Array<AutocompleteRow> }) => {
-  const [selectedMonthStep, setSelectedMonthStep] = useState<number>(getMonthFromDate(new Date()))
-  const selectedMonthStepper = (index: number) => {
-    setSelectedMonthStep(index)
-  }
-  console.log(selectedMonthStep)
+const Library = ({
+  entity,
+  categories,
+  files
+}: {
+  entity: Entity
+  categories: Array<AutocompleteRow>
+  files: File[]
+}) => {
+  const [selectedMonth, setSelectedMonth] = useState<number>(getMonthFromDate(new Date()))
+  const selectedMonthStepper = async (index: number) => {
+    setSelectedMonth(index)
+    alert(
+      `The month returned from the component is ${selectedMonth} which is obv wrong hence the filter by date is not working right now`
+    )
 
-  const files = [
-    {
-      id: 1,
-      originalname: 'Bank Reconciliation Package',
-      mimetype: 'pdf',
-      labelName: 'Kick Off 2023',
-      createdAt: DateTime.now().toISO(),
-      visible: true
-    },
-    {
-      id: 2,
-      originalname: 'Bank Reconciliation Package # 2',
-      mimetype: 'spreadsheet',
-      labelName: '',
-      createdAt: DateTime.now().minus({ days: 5 }).toISO(),
-      visible: false
+    // await updateLibrary()
+  }
+  const [loading, setLoading] = useState(false)
+
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [filesState, setFilesState] = useState(
+    files.map(f => ({
+      ...f,
+      id: f.uuid
+    }))
+  )
+
+  const updateLibrary = async (category?: string) => {
+    setLoading(true)
+    try {
+      const files = await getFiles(
+        category ? [category] : [],
+        [],
+
+        // The month component is returning incorrect month
+        // It should return a month and year instead of an index
+        // once that is fix, uncomment the code below and the date filter will work
+        undefined, // selectedMonth,
+        undefined // parseInt(getYearFromDate(entity.startOfFinancialYear).toString())
+      )
+      setFilesState(
+        files.map(f => ({
+          ...f,
+          id: f.uuid
+        }))
+      )
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
 
   const columns: GridColDef[] = [
     {
-      field: 'originalname',
+      field: 'name',
       headerName: 'File Name',
       type: 'string',
       align: 'left',
@@ -63,14 +90,14 @@ const Library = ({ entity, categories }: { entity: Entity; categories: Array<Aut
       headerAlign: 'left',
       renderCell: params => (
         <>
-          {isSupportedMimeType(params.row.mimetype) ? (
+          {isSupportedMimeType(params.row.mimeType) ? (
             <Avatar
               alt='Flora'
-              src={`${process.env.NODE_ENV === 'production' ? '' : ''}${mimetypeToIconImage(params.row.mimetype)}`}
+              src={`${process.env.NODE_ENV === 'production' ? '' : ''}${mimetypeToIconImage(params.row.mimeType)}`}
               sx={{ ml: 2 }}
             />
           ) : undefined}
-          <Typography sx={{ ml: 5 }}>{params.row.originalname}</Typography>
+          <Typography sx={{ ml: 5 }}>{params.row.name}</Typography>
         </>
       )
     },
@@ -99,14 +126,27 @@ const Library = ({ entity, categories }: { entity: Entity; categories: Array<Aut
       )
     },
     {
-      field: 'visible',
+      field: 'isVisible',
       headerName: 'Visible',
       type: 'boolean',
       align: 'left',
       cellClassName: 'data-grid-column',
       flex: 0.1,
       headerAlign: 'left',
-      renderCell: params => <Switch checked={params.row.visible} />
+      renderCell: params => (
+        <Switch
+          checked={params.row.isVisible}
+          onChange={async (event, updatedValue) => {
+            setLoading(true)
+            try {
+              await updateFileVisibility(params.row.uuid, updatedValue)
+              await updateLibrary(selectedCategory ?? undefined)
+            } finally {
+              setLoading(false)
+            }
+          }}
+        />
+      )
     }
   ]
 
@@ -129,34 +169,57 @@ const Library = ({ entity, categories }: { entity: Entity; categories: Array<Aut
                   defaultCollapseIcon={<ExpandMoreIcon />}
                   defaultExpandIcon={<ChevronRightIcon />}
                   expanded={[entity.uuid]}
+                  unselectable='on'
+                  onNodeSelect={async (_event: React.SyntheticEvent, nodeId: string) => {
+                    if (nodeId != 'all') {
+                      setSelectedCategory(nodeId)
+                      await updateLibrary(nodeId)
+                    } else {
+                      setSelectedCategory(null)
+                      await updateLibrary(undefined)
+                    }
+                  }}
                 >
                   <TreeItem
-                    nodeId={entity.uuid}
-                    label={entity.name}
+                    key={'all'}
+                    nodeId={'all'}
+                    label={'All'}
+                    icon={<FolderIcon />}
                     expandIcon={<FolderIcon />}
                     collapseIcon={<FolderIcon />}
-                  >
-                    {categories.map(category => (
-                      <TreeItem
-                        key={category.uuid}
-                        nodeId={category.uuid}
-                        label={category.name}
-                        icon={<FolderOpen />}
-                        expandIcon={<FolderOpen />}
-                        collapseIcon={<FolderOpen />}
-                        sx={{ mt: 1 }}
-                      />
-                    ))}
-                  </TreeItem>
+                    sx={{ mt: 1 }}
+                  />
+                  {categories.map(category => (
+                    <TreeItem
+                      key={category.uuid}
+                      nodeId={category.uuid}
+                      label={category.name}
+                      icon={<FolderIcon />}
+                      expandIcon={<FolderIcon />}
+                      collapseIcon={<FolderIcon />}
+                      sx={{ mt: 1 }}
+                    />
+                  ))}
                 </TreeView>
               </Grid>
               <Grid item xs={12} sm={6} md={9} lg={9} xl={9} sx={{ borderLeft: '1px solid lightgray', pl: 4 }}>
-                <DataGrid rows={files} columns={columns} />
+                <DataGrid
+                  rows={filesState}
+                  columns={columns}
+                  initialState={{
+                    sorting: {
+                      sortModel: [{ field: 'createdAt', sort: 'desc' }]
+                    }
+                  }}
+                />
               </Grid>
             </Grid>
           </CardContent>
         </Card>
       </Grid>
+      <Backdrop sx={{ color: '#fff', zIndex: 100000 }} open={loading}>
+        <CircularProgress color='inherit' />
+      </Backdrop>
     </>
   )
 }

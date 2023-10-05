@@ -16,6 +16,7 @@ import {
   UserRequest
 } from './types'
 import { DropDownRow } from 'src/@core/utils'
+import { File as FileResponse } from './types'
 
 const hostname = process.env.NODE_ENV === 'production' ? 'test.nextclerk.com' : 'localhost'
 
@@ -355,4 +356,26 @@ export const getAllPermissions = async (isBackend = false): Promise<Role[]> => {
   const response = await (isBackend ? backendApi : api).get(`/user-administration/roles`)
 
   return response.data
+}
+
+export const getFiles = async (
+  categoryUUIDs?: string[],
+  labelUUIDs?: string[],
+  createdMonth?: number,
+  createdYear?: number,
+  isBackend = false
+) => {
+  const categories = await (isBackend ? backendApi : api).get<FileResponse[]>(
+    `/global/${customerXRefID}/files?${categoryUUIDs?.length ? `categories=${categoryUUIDs.join(',')}` : ''}${
+      labelUUIDs?.length ? `labels=${labelUUIDs.join(',')}` : ''
+    }${createdMonth ? `&createdMonth=${createdMonth}` : ''}${createdMonth ? `&createdYear=${createdYear}` : ''}`
+  )
+
+  return categories.data
+}
+
+export const updateFileVisibility = async (fileUUID: string, isVisible: boolean) => {
+  await api.patch(`/global/${customerXRefID}/files/${fileUUID}`, {
+    isVisible
+  })
 }
