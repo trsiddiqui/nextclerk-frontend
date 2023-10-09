@@ -21,8 +21,13 @@ export interface Entity {
   name: string
   startOfFinancialYear?: Date
   endOfFinancialYear?: Date
-  folderId: string
+  folderId: string | null
+  ein: string | null
   isPrimary: boolean
+  address: string | null
+  city: string | null
+  state: string | null
+  zip: string | null
 }
 
 export enum ActionItemState {
@@ -89,6 +94,12 @@ export interface Customer {
   uuid: string
   label: string
   type: string | null
+}
+
+export interface Label {
+  id: number
+  uuid: string
+  label: string
 }
 
 export interface Location {
@@ -265,6 +276,11 @@ export type DashboardUser = {
   enabled: boolean
 }
 
+export type DashboardLabel = {
+  uuid: string
+  label: string
+}
+
 export type UserRequest = {
   uuid: string
   email: string
@@ -275,6 +291,11 @@ export type UserRequest = {
   entityUuid: string
   managerUuid?: string
   departmentUuid?: string
+}
+
+export type LabelRequest = {
+  uuid: string
+  label: string
 }
 
 export type SessionTokenKeycloak = {

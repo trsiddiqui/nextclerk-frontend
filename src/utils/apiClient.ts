@@ -5,6 +5,8 @@ import {
   DashboardUser,
   Department,
   Entity,
+  Label,
+  LabelRequest,
   Location,
   MasterFileUploaded,
   Role,
@@ -46,10 +48,17 @@ export const syncfusionWebApiUrls = (): { openUrl: string; saveUrl: string } => 
 // Currently coming from backend seeds
 export const customerXRefID = 'f590257b-a925-45d3-b980-26ff13faf64e'
 
-export const getEntity = async (isBackend = false) => {
-  const entity = await (isBackend ? backendApi : api).get<Entity>(`/entity/${customerXRefID}`)
+export const getEntity = async (isBackend = false, entityUuid?: string | null) => {
+  entityUuid = customerXRefID || null
+  const entity = await (isBackend ? backendApi : api).get<Entity>(`/entity/${entityUuid}`)
 
   return entity.data
+}
+
+export const updateEntity = async (entity: Entity, isBackend = false): Promise<void> => {
+  const { uuid: entityUuid, ...updateEntity } = entity
+
+  return await (isBackend ? backendApi : api).put(`/entity/${entityUuid}`, updateEntity)
 }
 
 export const getAllCategories = async (isBackend = false) => {
@@ -100,13 +109,21 @@ export const getAllCustomers = async (isBackend = false) => {
 }
 
 export const getAllLabels = async (isBackend = false) => {
-  const labels = await (isBackend ? backendApi : api).get<Customer[]>(`/${customerXRefID}/labels`)
+  const labels = await (isBackend ? backendApi : api).get<Label[]>(`/${customerXRefID}/labels`)
 
   return labels.data.map(label => ({
     label: label.label,
     id: label.uuid,
     key: label.uuid
   }))
+}
+
+export const archiveLabel = async (uuid: string, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).put(`/${customerXRefID}/labels/${uuid}/actions/archive`)
+}
+
+export const createLabel = async (label: LabelRequest, isBackend = false): Promise<void> => {
+  return await (isBackend ? backendApi : api).post(`/${customerXRefID}/labels`, label)
 }
 
 export const searchUsers = async (str?: string, isBackend = false): Promise<User[]> => {
