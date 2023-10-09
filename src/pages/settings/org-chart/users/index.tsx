@@ -494,16 +494,6 @@ const UserPage = ({
               slots={{
                 toolbar: EditToolbar
               }}
-
-              // processRowUpdate={async updatedData => {
-              //   setLoading(true)
-              //     setRowModesModel({ ...rowModesModel, [updatedData.id]: { mode: GridRowModes.View } })
-              //   } catch (error) {
-              //     setRowModesModel({ ...rowModesModel, [updatedData.id]: { mode: GridRowModes.Edit } })
-              //   } finally {
-              //     setLoading(false)
-              //   }
-              // }}
             />
           </CardContent>
         </Card>

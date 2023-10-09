@@ -2,6 +2,7 @@ import NextAuth from 'next-auth'
 import { Account, AuthOptions } from 'next-auth/core/types'
 import { JWT } from 'next-auth/jwt'
 import KeycloakProvider from 'next-auth/providers/keycloak'
+import { signOut } from 'next-auth/react'
 
 // import GitHubProvider from 'next-auth/providers/github'
 
@@ -43,7 +44,9 @@ async function refreshAccessToken(token: JWT & Account) {
 
     return returnObject
   } catch (error) {
-    console.error(error)
+    console.error('TOKEN REFRESH ERROR', error)
+
+    await signOut()
 
     return {
       ...token,

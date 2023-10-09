@@ -331,3 +331,22 @@ export type SessionTokenKeycloak = {
   auth_time: number
   email_verified: boolean
 }
+
+export interface File {
+  labelID?: number
+  uuid: string
+  name: string
+  mimeType: string
+  size: number
+  entityUUID: string
+  entityName: string
+  categoryUUID?: string
+  categoryName?: string
+  labelUUID?: string
+  labelName?: string
+  createdAt: Date
+  createdBy: string
+  updatedAt: Date
+  updatedBy: string
+  isVisbile: boolean
+}

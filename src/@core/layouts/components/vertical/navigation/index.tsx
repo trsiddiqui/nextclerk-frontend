@@ -1,5 +1,5 @@
 // ** React Import
-import { ReactNode, useRef, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 
 // ** MUI Import
@@ -22,17 +22,44 @@ import VerticalNavHeader from './VerticalNavHeader'
 
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
-import { IconButton, Menu, MenuItem } from '@mui/material'
+import {
+  Alert,
+  Autocomplete,
+  Backdrop,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+  Dialog,
+  FormControl,
+  Grid,
+  IconButton,
+  Menu,
+  MenuItem,
+  Snackbar,
+  TextField,
+  Typography
+} from '@mui/material'
 import React from 'react'
 import { useSession } from 'next-auth/react'
 import { Session, User } from 'next-auth'
 import { JWT } from 'next-auth/jwt'
+import { FileUpload, FileUploadProps } from 'src/@core/components/custom/file-upload'
+import { getAllCategories, getAllLabels, uploadFile } from 'src/utils/apiClient'
+import { AutocompleteRow } from 'src/@core/utils'
 
 // import { useSession } from 'next-auth/react'
 // import { Session } from 'next-auth'
 // import { JWT } from 'next-auth/jwt'
 // import { User } from 'next-auth/core/types'
 
+enum SnackBarType {
+  Success = 'success',
+  Error = 'error',
+  Info = 'info'
+}
 interface Props {
   hidden: boolean
   navWidth: number
@@ -74,9 +101,93 @@ const Navigation = (props: Props) => {
   const { data } = useSession()
   const session = data as unknown as Session & { token: JWT; user: User }
 
+  useEffect(() => {
+    getAllCategories().then(data => {
+      setCategories(data as unknown as Array<AutocompleteRow>)
+    })
+    getAllLabels().then(data => {
+      setLabels(data)
+    })
+  }, [])
+
   // ** States
   const [groupActive, setGroupActive] = useState<string[]>([])
   const [currentActiveGroup, setCurrentActiveGroup] = useState<string[]>([])
+  const [uploadFileOpen, setUploadFileOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [snackBarMessage, setSnackBarMessage] = useState('')
+  const [snackBarType, setSnackBarType] = useState<SnackBarType>(SnackBarType.Success)
+  const [openSnackBar, setOpenSnackBar] = useState(false)
+  const [categories, setCategories] = useState<Array<AutocompleteRow>>([])
+  const [labels, setLabels] = useState<
+    {
+      label: string
+      id: string
+      key: string
+    }[]
+  >([])
+  const [category, setCategory] = useState<{ label: string; uuid: string } | null>(null)
+  const [label, setLabel] = useState<{ label: string; uuid: string } | null>(null)
+
+  const handleUploadFileClose = () => setUploadFileOpen(false)
+
+  // const router = useRouter()
+  const handleSnackBarClose = () => {
+    setSnackBarMessage('')
+    setOpenSnackBar(false)
+  }
+
+  const showMessage = (message: string, type: SnackBarType) => {
+    setSnackBarMessage(message)
+    setSnackBarType(type)
+    setOpenSnackBar(true)
+  }
+
+  const APICallWrapper = async (method: (...args: any[]) => any, args?: any, errorMessage?: string): Promise<any> => {
+    try {
+      const resp = await method(...args)
+
+      return resp
+    } catch (err) {
+      console.error(err)
+      setLoading(false)
+      setUploadFileOpen(true)
+      showMessage(errorMessage ?? 'An error occurred', SnackBarType.Error)
+    }
+  }
+
+  const fileUploadProp = (): FileUploadProps => ({
+    accept: '*/*',
+    onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.files !== null && event.target?.files?.length > 0) {
+        setLoading(true)
+        setUploadFileOpen(false)
+        console.log(label, category)
+        await APICallWrapper(
+          uploadFile,
+          [event.target.files[0], false, category?.uuid, label?.uuid],
+          'An error occurred while attempting to upload the file. Please contact support.'
+        )
+        showMessage('Your document has been uploaded successfully', SnackBarType.Success)
+        setLoading(false)
+        setLabel(null)
+        setCategory(null)
+      }
+    },
+    onDrop: async (event: React.DragEvent<HTMLElement>) => {
+      setLoading(true)
+      setUploadFileOpen(false)
+      await APICallWrapper(
+        uploadFile,
+        [event.dataTransfer.files[0], false, category?.uuid, label?.uuid],
+        'An error occurred while attempting to upload the file. Please contact support.'
+      )
+      showMessage('Your document has been uploaded successfully', SnackBarType.Success)
+      setLoading(false)
+      setLabel(null)
+      setCategory(null)
+    }
+  })
 
   // ** Ref
   const shadowRef = useRef(null)
@@ -177,7 +288,9 @@ const Navigation = (props: Props) => {
             </MenuItem>
             <MenuItem
               onClick={() => {
-                router.push('/upload')
+                // router.push('/upload')
+                setUploadFileOpen(true)
+                handleClose()
               }}
             >
               Upload File
@@ -221,6 +334,90 @@ const Navigation = (props: Props) => {
         </ScrollWrapper>
       </Box>
       {afterVerticalNavMenuContent ? afterVerticalNavMenuContent(props) : null}
+
+      <Dialog
+        open={uploadFileOpen}
+        onClose={handleUploadFileClose}
+        aria-labelledby='modal-modal-journal'
+        aria-describedby='modal-modal-journal'
+        sx={{
+          msOverflowX: 'scroll',
+          paddingTop: 2
+        }}
+      >
+        <Card>
+          <CardHeader title='Upload a Document'></CardHeader>
+          <CardContent>
+            <Typography fontSize={12} align='right'>
+              <label style={{ color: 'red ' }}>*</label>This form is autosave, please select a label and category before
+              uploading the file
+            </Typography>
+            <Grid container>
+              <Grid item md={6}>
+                <FormControl fullWidth>
+                  <Autocomplete
+                    id='tags-outlined'
+                    options={categories.map(category => ({ label: category.name, uuid: category.uuid }))}
+                    value={category}
+                    onChange={(event: any, newValue: { label: string; uuid: string } | null) => {
+                      setCategory(newValue)
+                    }}
+                    filterSelectedOptions
+                    renderInput={params => (
+                      <TextField variant='filled' {...params} label='Support Category' placeholder='Support Category' />
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item md={6} sx={{ pl: 1 }}>
+                <FormControl fullWidth>
+                  <Autocomplete
+                    id='tags-outlined'
+                    options={labels.map(label => ({ label: label.label, uuid: label.id }))}
+                    value={label}
+                    onChange={(event: any, newValue: { label: string; uuid: string } | null) => {
+                      setLabel(newValue)
+                    }}
+                    filterSelectedOptions
+                    renderInput={params => <TextField variant='filled' {...params} label='Label' placeholder='Label' />}
+                  />
+                </FormControl>
+              </Grid>
+            </Grid>
+            <Box sx={{ mt: 10 }}>
+              <FileUpload {...fileUploadProp()} />
+            </Box>
+          </CardContent>
+          <CardActions>
+            <Grid container justifyContent='flex-end' display='flex'>
+              <Button
+                type='reset'
+                variant='contained'
+                color='error'
+                onClick={() => {
+                  setUploadFileOpen(false)
+                }}
+              >
+                Cancel
+              </Button>
+            </Grid>
+          </CardActions>
+        </Card>
+      </Dialog>
+
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        open={openSnackBar}
+        autoHideDuration={10000}
+        onClose={handleSnackBarClose}
+      >
+        <Alert onClose={handleSnackBarClose} severity={snackBarType} sx={{ width: '100%' }}>
+          {snackBarMessage}
+        </Alert>
+      </Snackbar>
+      <Backdrop sx={{ color: '#fff', zIndex: 100000 }} open={loading}>
+        <CircularProgress color='inherit' />
+      </Backdrop>
     </Drawer>
   )
 }
