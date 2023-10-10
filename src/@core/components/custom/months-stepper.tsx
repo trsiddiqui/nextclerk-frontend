@@ -72,14 +72,16 @@ const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
     top: 18
   },
   [`&.${stepConnectorClasses.active}`]: {
-    [`& .${stepConnectorClasses.line}`]: {
-      backgroundImage: 'linear-gradient( 95deg,rgb(242,113,33) 0%,rgb(233,64,87) 50%,rgb(138,35,135) 100%)'
-    }
+    height: 3,
+    border: 0,
+    backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#eaeaf0',
+    borderRadius: 1
   },
   [`&.${stepConnectorClasses.completed}`]: {
-    [`& .${stepConnectorClasses.line}`]: {
-      backgroundImage: 'linear-gradient( 95deg,rgb(242,113,33) 0%,rgb(233,64,87) 50%,rgb(138,35,135) 100%)'
-    }
+    height: 3,
+    border: 0,
+    backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#eaeaf0',
+    borderRadius: 1
   },
   [`& .${stepConnectorClasses.line}`]: {
     height: 3,
